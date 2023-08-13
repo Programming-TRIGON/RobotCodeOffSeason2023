@@ -1,0 +1,25 @@
+{
+  "NTProvider": {
+    "types": {
+      "/AdvantageKit/RealOutputs/Arm/ArmMechanism": "Mechanism2d",
+      "/FMSInfo": "FMSInfo"
+    },
+    "windows": {
+      "/AdvantageKit/RealOutputs/Arm/ArmMechanism": {
+        "window": {
+          "visible": true
+        }
+      }
+    }
+  },
+  "NetworkTables": {
+    "transitory": {
+      "AdvantageKit": {
+        "Arm": {
+          "open": true
+        },
+        "open": true
+      }
+    }
+  }
+}
