@@ -4,7 +4,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
-import frc.trigon.robot.constants.OperatorConstants;
+import frc.trigon.robot.constants.RobotConstants;
 import frc.trigon.robot.subsystems.swerve.SwerveModuleIO;
 import frc.trigon.robot.subsystems.swerve.SwerveModuleInputsAutoLogged;
 import frc.trigon.robot.utilities.Conversions;
@@ -24,8 +24,8 @@ public class SimulationSwerveModuleIO extends SwerveModuleIO {
 
     @Override
     protected void updateInputs(SwerveModuleInputsAutoLogged inputs) {
-        steerMotor.update(OperatorConstants.PERIODIC_TIME_SECONDS);
-        driveMotor.update(OperatorConstants.PERIODIC_TIME_SECONDS);
+        steerMotor.update(RobotConstants.PERIODIC_TIME_SECONDS);
+        driveMotor.update(RobotConstants.PERIODIC_TIME_SECONDS);
 
         inputs.steerAngleDegrees = Conversions.revolutionsToDegrees(steerMotor.getAngularPositionRotations());
         inputs.steerAppliedVoltage = steerAppliedVoltage;

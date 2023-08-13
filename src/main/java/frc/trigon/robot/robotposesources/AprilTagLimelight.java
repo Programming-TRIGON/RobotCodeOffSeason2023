@@ -1,6 +1,6 @@
 package frc.trigon.robot.robotposesources;
 
-import frc.trigon.robot.components.cameras.FiducialLimelight;
+import frc.trigon.robot.components.FiducialLimelight;
 
 public class AprilTagLimelight extends RobotPoseSourceIO {
     private final FiducialLimelight fiducialLimelight;

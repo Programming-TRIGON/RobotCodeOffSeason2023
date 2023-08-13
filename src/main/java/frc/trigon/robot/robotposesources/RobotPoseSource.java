@@ -11,7 +11,7 @@ import org.littletonrobotics.junction.Logger;
 public class RobotPoseSource extends SubsystemBase {
     protected final String name;
     private final RobotPoseSourceInputsAutoLogged robotPoseSourceInputs = new RobotPoseSourceInputsAutoLogged();
-    private final Transform3d cameraToRobotCenter;
+    private Transform3d cameraToRobotCenter;
     private RobotPoseSourceIO robotPoseSourceIO;
     private double lastUpdatedTimestamp;
     private Pose2d lastRobotPose = new Pose2d();
@@ -111,6 +111,7 @@ public class RobotPoseSource extends SubsystemBase {
             case LIMELIGHT:
                 return new AprilTagLimelight(name);
             case PHOTON_CAMERA:
+                this.cameraToRobotCenter = new Transform3d();
                 return new AprilTagPhotonCamera(name, cameraToRobotCenter);
             default:
                 return new RobotPoseSourceIO();

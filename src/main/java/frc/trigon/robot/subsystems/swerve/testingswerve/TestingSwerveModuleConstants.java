@@ -9,7 +9,7 @@ import com.revrobotics.CANSparkMaxLowLevel;
 import com.revrobotics.SparkMaxAbsoluteEncoder;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Translation2d;
-import frc.trigon.robot.constants.ConfigurationConstants;
+import frc.trigon.robot.constants.RobotConstants;
 import frc.trigon.robot.utilities.Conversions;
 
 public class TestingSwerveModuleConstants {
@@ -120,7 +120,7 @@ public class TestingSwerveModuleConstants {
         this.driveMotor = driveMotor;
         this.steerMotor = steerMotor;
 
-        if (!ConfigurationConstants.IS_REPLAY) {
+        if (!RobotConstants.IS_REPLAY) {
             configureDriveMotor();
             configureSteerMotor();
         }
@@ -158,6 +158,7 @@ public class TestingSwerveModuleConstants {
         motorConfig.OpenLoopRamps.DutyCycleOpenLoopRampPeriod = DRIVE_OPEN_LOOP_RAMP_RATE;
         motorConfig.MotorOutput.Inverted = DRIVE_MOTOR_INVERTED_VALUE;
         motorConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
+        motorConfig.Audio.BeepOnBoot = false;
 
         driveMotor.getConfigurator().apply(motorConfig);
     }

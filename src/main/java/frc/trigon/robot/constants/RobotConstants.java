@@ -1,15 +1,16 @@
 package frc.trigon.robot.constants;
 
-import edu.wpi.first.wpilibj.Filesystem;
+import frc.trigon.robot.utilities.FilesHandler;
 
 public class RobotConstants {
-    public static final RobotType ROBOT_TYPE = RobotType.STATIC;
+    public static final RobotType ROBOT_TYPE = RobotType.SIMULATION;
     public static final boolean IS_REPLAY = false;
+    public static final double PERIODIC_TIME_SECONDS = 0.02;
 
     public enum RobotType {
-        STATIC(Filesystem.getDeployDirectory().getPath() + "/logs/"),
-        TESTING(Filesystem.getDeployDirectory().getPath() + "/logs/"),
-        SIMULATION(Filesystem.getDeployDirectory().getPath() + "/logs/");
+        STATIC(FilesHandler.DEPLOY_PATH + "logs/"),
+        TESTING(FilesHandler.DEPLOY_PATH + "logs/"),
+        SIMULATION(FilesHandler.DEPLOY_PATH + "logs/");
 
         public final String loggingPath;
 

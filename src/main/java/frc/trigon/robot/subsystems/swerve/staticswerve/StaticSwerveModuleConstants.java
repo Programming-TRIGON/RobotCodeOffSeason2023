@@ -149,6 +149,7 @@ public class StaticSwerveModuleConstants {
         steerMotorConfig.Slot0.kP = STEER_MOTOR_P;
         steerMotorConfig.Slot0.kI = STEER_MOTOR_I;
         steerMotorConfig.Slot0.kD = STEER_MOTOR_D;
+        steerMotorConfig.Audio.BeepOnBoot = false;
 
         steerMotor.getConfigurator().apply(steerMotorConfig);
         new Notifier(this::setSteerMotorPositionToAbsolute).startSingle(ENCODER_UPDATE_TIME_SECONDS);
@@ -160,6 +161,7 @@ public class StaticSwerveModuleConstants {
         driveMotorConfig.OpenLoopRamps.DutyCycleOpenLoopRampPeriod = DRIVE_OPEN_LOOP_RAMP_RATE;
         driveMotorConfig.ClosedLoopRamps.DutyCycleClosedLoopRampPeriod = DRIVE_CLOSED_LOOP_RAMP_RATE;
         driveMotorConfig.MotorOutput.Inverted = DRIVE_MOTOR_INVERTED_VALUE;
+        driveMotorConfig.Audio.BeepOnBoot = false;
 
         driveMotor.getConfigurator().apply(driveMotorConfig);
     }

@@ -8,7 +8,7 @@ import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import frc.trigon.robot.constants.ConfigurationConstants;
+import frc.trigon.robot.constants.RobotConstants;
 import frc.trigon.robot.subsystems.swerve.SwerveConstants;
 import frc.trigon.robot.subsystems.swerve.SwerveModuleIO;
 
@@ -64,7 +64,7 @@ public class TestingSwerveConstants extends SwerveConstants {
 
     static {
         ROTATION_CONTROLLER.enableContinuousInput(-180, 180);
-        if (!ConfigurationConstants.IS_REPLAY) {
+        if (!RobotConstants.IS_REPLAY) {
             GYRO.getConfigurator().apply(new Pigeon2Configuration());
 
             // TODO: Status signals
