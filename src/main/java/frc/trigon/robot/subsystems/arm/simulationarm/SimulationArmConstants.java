@@ -13,7 +13,7 @@ public class SimulationArmConstants extends ArmConstants {
     static final double VOLTAGE_COMPENSATION_SATURATION = 12;
 
     private static final DCMotor ELEVATOR_MOTORS = DCMotor.getNEO(2);
-    private static final double ELEVATOR_GEAR_RATIO = 13.3;
+    private static final double ELEVATOR_GEAR_RATIO = 13.29;
     private static final double ELEVATOR_CARTRIDGE_MASS = 8.1;
     private static final double ELEVATOR_DRUM_RADIUS = 0.06;
     private static final boolean ELEVATOR_SIMULATE_GRAVITY = true;

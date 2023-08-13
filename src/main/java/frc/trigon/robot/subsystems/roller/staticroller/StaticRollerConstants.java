@@ -13,8 +13,8 @@ public class StaticRollerConstants {
             ANGLE_MOTOR_ID = 1,
             COLLECTION_MOTOR_ID = 1;
     private static final CANSparkMax.IdleMode
-            DEFAULT_ANGLE_MOTOR_IDLE_MODE = CANSparkMax.IdleMode.kCoast,
-            DEFAULT_COLLECTION_MOTOR_IDLE_MODE = CANSparkMax.IdleMode.kBrake;
+            DEFAULT_ANGLE_MOTOR_IDLE_MODE = CANSparkMax.IdleMode.kBrake,
+            DEFAULT_COLLECTION_MOTOR_IDLE_MODE = CANSparkMax.IdleMode.kCoast;
     private static final int
             ANGLE_MOTOR_CURRENT_LIMIT = 30,
             COLLECTION_MOTOR_CURRENT_LIMIT = 30;

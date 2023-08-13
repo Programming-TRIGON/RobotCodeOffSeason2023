@@ -24,7 +24,9 @@ public class StaticSideShooterConstants extends SideShooterConstants {
             ANGLE_MOTOR_I = 0,
             ANGLE_MOTOR_D = 0;
     private static final double ANGLE_ENCODER_OFFSET = 0;
-    private static final int ANGLE_MOTOR_CURRENT_LIMIT = 30;
+    private static final int
+            ANGLE_MOTOR_CURRENT_LIMIT = 30,
+            SHOOTING_MOTOR_CURRENT_LIMIT = 30;
 
     static final WPI_TalonSRX SHOOTING_MOTOR = new WPI_TalonSRX(SHOOTING_MOTOR_ID);
     static final CANSparkMax ANGLE_MOTOR = new CANSparkMax(ANGLE_MOTOR_ID, CANSparkMaxLowLevel.MotorType.kBrushless);
@@ -57,6 +59,9 @@ public class StaticSideShooterConstants extends SideShooterConstants {
 
         SHOOTING_MOTOR.setInverted(SHOOTING_MOTOR_INVERTED);
         SHOOTING_MOTOR.setNeutralMode(DEFAULT_SHOOTING_MOTOR_NEUTRAL_MODE);
+
+        SHOOTING_MOTOR.configPeakCurrentLimit(SHOOTING_MOTOR_CURRENT_LIMIT);
+        SHOOTING_MOTOR.enableCurrentLimit(true);
     }
 
     private static void configureAngleMotor() {

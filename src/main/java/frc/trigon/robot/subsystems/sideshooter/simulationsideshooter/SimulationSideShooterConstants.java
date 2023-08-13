@@ -17,7 +17,7 @@ public class SimulationSideShooterConstants extends SideShooterConstants {
     private static final double
             ANGLE_MOTOR_GEAR_RATIO = 123.79,
             SHOOTING_MOTOR_GEAR_RATIO = 6.66;
-    private static final double SHOOTING_MOTOR_MOMENT_OF_INERTIA = 0.03;
+    private static final double SHOOTING_MOTOR_MOMENT_OF_INERTIA = 0.0032;
     private static final double SIDE_SHOOTER_MASS = 6;
     private static final Rotation2d
             MINIMUM_ARM_ANGLE = Rotation2d.fromDegrees(-90),

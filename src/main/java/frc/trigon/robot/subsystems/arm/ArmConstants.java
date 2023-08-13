@@ -11,7 +11,7 @@ import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 
 public abstract class ArmConstants {
-    public static final Rotation2d DEFAULT_ARM_ANGLE = Rotation2d.fromDegrees(30);
+    public static final Rotation2d DEFAULT_ARM_ANGLE = Rotation2d.fromDegrees(50);
     public static final double RETRACTED_ARM_LENGTH = 0.65;
     public static final double MAX_ARM_LENGTH = 1.7;
 

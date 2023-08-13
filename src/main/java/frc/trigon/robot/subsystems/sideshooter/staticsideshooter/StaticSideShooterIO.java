@@ -22,7 +22,7 @@ public class StaticSideShooterIO extends SideShooterIO {
 
         inputs.shootingMotorCurrent = shootingMotor.getStatorCurrent();
         inputs.shootingMotorAppliedVoltage = shootingMotor.getMotorOutputVoltage();
-        inputs.shootingMotorPower = inputs.shootingMotorAppliedVoltage / StaticSideShooterConstants.VOLTAGE_COMPENSATION_SATURATION;
+        inputs.shootingMotorPower = shootingMotor.getMotorOutputPercent() / 100;
     }
 
     @Override

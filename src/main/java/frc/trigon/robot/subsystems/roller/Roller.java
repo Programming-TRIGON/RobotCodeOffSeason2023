@@ -2,6 +2,9 @@ package frc.trigon.robot.subsystems.roller;
 
 
 import edu.wpi.first.wpilibj2.command.*;
+import frc.trigon.robot.constants.RobotConstants;
+import frc.trigon.robot.subsystems.roller.simulationroller.SimulationRollerIO;
+import frc.trigon.robot.subsystems.roller.staticroller.StaticRollerIO;
 
 public class Roller extends SubsystemBase {
     private final static Roller INSTANCE = new Roller();
@@ -16,6 +19,7 @@ public class Roller extends SubsystemBase {
         rollerIO = generateIO();
     }
 
+    // TODO: javadocs
     public ParallelCommandGroup getFullCloseCommand() {
         return getStopCollectingCommand().alongWith(getCloseCommand());
     }
@@ -27,7 +31,7 @@ public class Roller extends SubsystemBase {
     public StartEndCommand getStartCollectingCommand() {
         return new StartEndCommand(
                 this::startCollecting,
-                rollerIO::stopCollectionMotor,
+                () -> {},
                 this
         );
     }
@@ -76,8 +80,12 @@ public class Roller extends SubsystemBase {
     }
 
     private RollerIO generateIO() {
-        // TODO: Make this work.
-        return new RollerIO();
+        if (RobotConstants.IS_REPLAY)
+            return new RollerIO();
+        if (RobotConstants.ROBOT_TYPE == RobotConstants.RobotType.STATIC)
+            return new StaticRollerIO();
+
+        return new SimulationRollerIO();
     }
 }
 

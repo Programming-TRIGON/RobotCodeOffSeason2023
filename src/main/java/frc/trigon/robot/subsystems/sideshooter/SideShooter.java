@@ -43,7 +43,7 @@ public class SideShooter extends SubsystemBase {
         final Rotation2d targetAngle = sideShooterState.angle;
         final double targetVelocity = sideShooterState.power;
 
-        return new SequentialCommandGroup(
+        return new ParallelCommandGroup(
                 getSetTargetShooterAngle(targetAngle).until(() -> angleAtTarget(targetAngle)),
                 getSetTargetShooterPower(targetVelocity)
         );
@@ -53,7 +53,7 @@ public class SideShooter extends SubsystemBase {
         return new FunctionalCommand(
                 () -> generateAngleMotorProfile(angle),
                 this::setTargetAngleFromProfile,
-                (interrupted) -> sideShooterIO.stopAngleMotor(),
+                (interrupted) -> {},
                 () -> false,
                 this
         );
@@ -62,8 +62,7 @@ public class SideShooter extends SubsystemBase {
     public CommandBase getSetTargetShooterPower(double power) {
         return new StartEndCommand(
                 () -> sideShooterIO.setTargetShootingPower(power),
-                () -> {
-                },
+                () -> {},
                 this
         );
     }

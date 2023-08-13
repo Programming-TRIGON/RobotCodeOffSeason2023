@@ -13,9 +13,9 @@ public class SimulationRollerConstants {
             ANGLE_MOTOR_GEARBOX = DCMotor.getNEO(1),
             COLLECTION_MOTOR_GEARBOX = DCMotor.getBag(1);
     private static final double
-            ANGLE_MOTOR_GEAR_RATIO = 123.79,
-            COLLECTION_MOTOR_GEAR_RATIO = 6.66;
-    private static final double COLLECTION_MOTOR_MOMENT_OF_INERTIA = 0.03;
+            ANGLE_MOTOR_GEAR_RATIO = 45,
+            COLLECTION_MOTOR_GEAR_RATIO = 13.5;
+    private static final double COLLECTION_MOTOR_MOMENT_OF_INERTIA = 0.0032;
     private static final double ROLLER_MASS = 1.5;
     private static final Rotation2d
             MINIMUM_ARM_ANGLE = Rotation2d.fromDegrees(-90),
