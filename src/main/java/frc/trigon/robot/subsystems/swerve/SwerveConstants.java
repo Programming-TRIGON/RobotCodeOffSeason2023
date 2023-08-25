@@ -8,14 +8,19 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 
 public abstract class SwerveConstants {
     /**
-     * @return the swerve's profiled pid controller for rotation
+     * @return the swerve's x-axis profiled pid controller
      */
-    public abstract ProfiledPIDController getRotationController();
+    protected abstract ProfiledPIDController getProfiledYAxisController();
 
     /**
-     * @return the swerve's robot side length in meters
+     * @return the swerve's profiled pid controller for rotation
      */
-    public abstract double getRobotSideLength();
+    protected abstract ProfiledPIDController getRotationController();
+
+    /**
+     * @return the swerve's robot side length in meters, (not including the bumpers)
+     */
+    protected abstract double getRobotSideLength();
 
     /**
      * @return the swerve's module location
@@ -45,7 +50,7 @@ public abstract class SwerveConstants {
     /**
      * @return the swerve's translation PID constants
      */
-    public abstract PIDConstants getTranslationPIDConstants();
+    protected abstract PIDConstants getTranslationPIDConstants();
 
     /**
      * @return the swerve's rotation PID constants

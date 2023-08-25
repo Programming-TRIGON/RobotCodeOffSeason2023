@@ -2,19 +2,22 @@ package frc.trigon.robot.subsystems.swerve;
 
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.trigon.robot.RobotContainer;
+import frc.trigon.robot.constants.FieldConstants;
 import frc.trigon.robot.constants.RobotConstants;
+import frc.trigon.robot.subsystems.swerve.kablamaswerve.KablamaSwerveConstants;
+import frc.trigon.robot.subsystems.swerve.kablamaswerve.KablamaSwerveIO;
 import frc.trigon.robot.subsystems.swerve.simulationswerve.SimulationSwerveConstants;
 import frc.trigon.robot.subsystems.swerve.simulationswerve.SimulationSwerveIO;
-import frc.trigon.robot.subsystems.swerve.staticswerve.StaticSwerveConstants;
-import frc.trigon.robot.subsystems.swerve.staticswerve.StaticSwerveIO;
-import frc.trigon.robot.subsystems.swerve.testingswerve.TestingSwerveConstants;
-import frc.trigon.robot.subsystems.swerve.testingswerve.TestingSwerveIO;
+import frc.trigon.robot.subsystems.swerve.trihardswerve.TrihardSwerveConstants;
+import frc.trigon.robot.subsystems.swerve.trihardswerve.TrihardSwerveIO;
 import frc.trigon.robot.utilities.AllianceUtilities;
 import org.littletonrobotics.junction.Logger;
 
@@ -25,6 +28,7 @@ public class Swerve extends SubsystemBase {
     private final SwerveIO swerveIO;
     private final SwerveModuleIO[] modulesIO;
     private final SwerveConstants constants;
+    Pose2d profiledTargetPose = null;
 
     public static Swerve getInstance() {
         return INSTANCE;
@@ -120,6 +124,31 @@ public class Swerve extends SubsystemBase {
         return swerveModulePositions;
     }
 
+    public boolean atPose(Pose2d pose2d) {
+        return atXAxisPosition(pose2d.getX()) && atYAxisPosition(pose2d.getY()) && atAngle(pose2d.getRotation());
+    }
+
+    public boolean atXAxisPosition(double xAxisPosition) {
+        final double currentXAxisVelocity = ChassisSpeeds.fromFieldRelativeSpeeds(getCurrentVelocity(), RobotContainer.POSE_ESTIMATOR.getCurrentPose().getRotation()).vxMetersPerSecond;
+        return atTranslationPosition(RobotContainer.POSE_ESTIMATOR.getCurrentPose().getX(), xAxisPosition, currentXAxisVelocity);
+    }
+
+    public boolean atYAxisPosition(double yAxisPosition) {
+        final double currentYAxisVelocity = ChassisSpeeds.fromFieldRelativeSpeeds(getCurrentVelocity(), RobotContainer.POSE_ESTIMATOR.getCurrentPose().getRotation()).vyMetersPerSecond;
+        return atTranslationPosition(RobotContainer.POSE_ESTIMATOR.getCurrentPose().getY(), yAxisPosition, currentYAxisVelocity);
+    }
+
+    /**
+     * Checks if the swerve is at an angle, within the rotation tolerance.
+     *
+     * @param angle the angle to check
+     * @return whether the swerve is at the angle
+     */
+    public boolean atAngle(Rotation2d angle) {
+        return Math.abs(angle.getDegrees() - RobotContainer.POSE_ESTIMATOR.getCurrentPose().getRotation().getDegrees()) < constants.getRotationTolerance() &&
+                Math.abs(getCurrentVelocity().omegaRadiansPerSecond) < constants.getRotationVelocityTolerance();
+    }
+
     /**
      * Locks the swerve, so it'll be hard to move it.
      */
@@ -136,12 +165,72 @@ public class Swerve extends SubsystemBase {
     }
 
     /**
+     * Drives the x-axis of the swerve with the given power, relative to the field's frame of reference.
+     * This command will lock the y-axis and angle.
+     *
+     * @param xPower    the target x power
+     * @param yAxisLock the y position axis lock
+     * @param angleLock the target angle lock
+     * @param rateLimitX whether the a-axis should be rate limited
+     */
+    void fieldRelativeXAxisDrive(double xPower, double yAxisLock, Rotation2d angleLock, boolean rateLimitX) {
+        yAxisLock = AllianceUtilities.isBlueAlliance() ? yAxisLock : FieldConstants.FIELD_WIDTH_METERS - yAxisLock;
+        angleLock = AllianceUtilities.isBlueAlliance() ? angleLock : angleLock.unaryMinus();
+
+        constants.getRotationController().setGoal(angleLock.getDegrees());
+        constants.getProfiledYAxisController().setGoal(yAxisLock);
+
+        final Pose2d currentPose = RobotContainer.POSE_ESTIMATOR.getCurrentPose();
+        final double currentYPosition = currentPose.getY();
+        final Rotation2d currentAngle = currentPose.getRotation();
+        final double yOutput = constants.getProfiledYAxisController().calculate(currentYPosition);
+        final double thetaOutput = constants.getRotationController().calculate(currentAngle.getDegrees());
+        profiledTargetPose = new Pose2d(
+                currentPose.getX(),
+                constants.getProfiledYAxisController().getSetpoint().position,
+                Rotation2d.fromDegrees(constants.getRotationController().getSetpoint().position)
+        );
+
+        fieldRelativeDrive(
+                new Translation2d(
+                        xPower * constants.getMaxSpeedMetersPerSecond(),
+                        yOutput
+                ),
+                Rotation2d.fromDegrees(thetaOutput),
+                rateLimitX,
+                false
+        );
+    }
+
+    /**
+     * Drives the swerve with the given powers, relative to the robot's frame of reference.
+     *
+     * @param xPower     the target x power
+     * @param yPower     the target y power
+     * @param thetaPower the target theta power
+     * @param rateLimit  whether the swerve should be rate limited
+     */
+    void selfRelativeDrive(double xPower, double yPower, double thetaPower, boolean rateLimit) {
+        selfRelativeDrive(
+                getDriveTranslation(xPower, yPower),
+                getDriveRotation(thetaPower),
+                rateLimit,
+                rateLimit
+        );
+    }
+
+    /**
      * Drives the swerve with the given velocities, relative to the robot's frame of reference.
      *
      * @param translation the target x and y velocities in m/s
      * @param rotation    the target theta velocity in radians per second
+     * @param rateLimitX  whether the swerve's x-axis should be rate limited
+     * @param rateLimitY  whether the swerve's y-axis should be rate limited
      */
-    void selfRelativeDrive(Translation2d translation, Rotation2d rotation) {
+    void selfRelativeDrive(Translation2d translation, Rotation2d rotation, boolean rateLimitX, boolean rateLimitY) {
+        if (rateLimitX)
+            translation = rateLimit(translation, rateLimitX, rateLimitY);
+
         ChassisSpeeds chassisSpeeds = new ChassisSpeeds(
                 translation.getX(),
                 translation.getY(),
@@ -151,21 +240,75 @@ public class Swerve extends SubsystemBase {
     }
 
     /**
+     * Drives the swerve with the given powers, relative to the field's frame of reference.
+     *
+     * @param xPower     the target x power
+     * @param yPower     the target y power
+     * @param thetaPower the target theta power
+     * @param rateLimit  whether the swerve should be rate limited
+     */
+    void fieldRelativeDrive(double xPower, double yPower, double thetaPower, boolean rateLimit) {
+        fieldRelativeDrive(
+                getDriveTranslation(xPower, yPower),
+                getDriveRotation(thetaPower),
+                rateLimit,
+                rateLimit
+        );
+    }
+
+    /**
+     * Drives the swerve with the given powers and a target angle, relative to the field's frame of reference.
+     *
+     * @param xPower    the target x power
+     * @param yPower    the target y power
+     * @param angle     the target angle
+     * @param rateLimit whether the swerve should be rate limited
+     */
+    void fieldRelativeDrive(double xPower, double yPower, Rotation2d angle, boolean rateLimit) {
+        constants.getRotationController().setGoal(angle.getDegrees());
+        final Rotation2d currentAngle = RobotContainer.POSE_ESTIMATOR.getCurrentPose().getRotation();
+        fieldRelativeDrive(
+                getDriveTranslation(xPower, yPower),
+                Rotation2d.fromDegrees(
+                        constants.getRotationController().calculate(currentAngle.getDegrees())
+                ),
+                rateLimit,
+                rateLimit
+        );
+    }
+
+    /**
      * Drives the swerve with the given velocities, relative to the field's frame of reference.
      *
      * @param translation the target x and y velocities in m/s
      * @param rotation    the target theta velocity in radians per second
+     * @param rateLimitX  whether the swerve's x-axis should be rate limited
+     * @param rateLimitY  whether the swerve's y-axis should be rate limited
      */
-    void fieldRelativeDrive(Translation2d translation, Rotation2d rotation) {
-        final Rotation2d heading = AllianceUtilities.isBlueAlliance() ? getHeading() : getHeading().plus(Rotation2d.fromRotations(0.5));
+    void fieldRelativeDrive(Translation2d translation, Rotation2d rotation, boolean rateLimitX, boolean rateLimitY) {
+        translation = rateLimit(translation, rateLimitX, rateLimitY);
 
         ChassisSpeeds chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
                 translation.getX(),
                 translation.getY(),
                 rotation.getRadians(),
-                heading
+                RobotContainer.POSE_ESTIMATOR.getCurrentPose().getRotation()
         );
         selfRelativeDrive(chassisSpeeds);
+    }
+
+    /**
+     * Resets the rotation controller of the swerve.
+     */
+    void resetRotationController() {
+        constants.getRotationController().reset(RobotContainer.POSE_ESTIMATOR.getCurrentPose().getRotation().getDegrees());
+    }
+
+    /**
+     * Resets the y-axis controller of the swerve.
+     */
+    void resetYAxisController() {
+        constants.getProfiledYAxisController().reset(RobotContainer.POSE_ESTIMATOR.getCurrentPose().getY());
     }
 
     /**
@@ -206,10 +349,43 @@ public class Swerve extends SubsystemBase {
             modulesIO[i].setTargetState(swerveModuleStates[i]);
     }
 
+    private boolean atTranslationPosition(double currentTranslationPosition, double targetTranslationPosition, double currentTranslationVelocity) {
+        return Math.abs(currentTranslationPosition - targetTranslationPosition) < constants.getTranslationTolerance() &&
+                Math.abs(currentTranslationVelocity) < constants.getTranslationVelocityTolerance();
+    }
+
+    private Rotation2d getDriveRotation(double rotPower) {
+        return new Rotation2d(rotPower * constants.getMaxRotationalSpeedRadiansPerSecond());
+    }
+
+    private Translation2d getDriveTranslation(double x, double y) {
+        return new Translation2d(
+                x * constants.getMaxSpeedMetersPerSecond(),
+                y * constants.getMaxSpeedMetersPerSecond()
+        );
+    }
+
+    private Translation2d rateLimit(Translation2d toLimit, boolean rateLimitX, boolean rateLimitY) {
+        return new Translation2d(
+                rateLimitX ? constants.getXSlewRateLimiter().calculate(toLimit.getX()) : toLimit.getX(),
+                rateLimitY ? constants.getYSlewRateLimiter().calculate(toLimit.getY()) : toLimit.getY()
+        );
+    }
+
     private void updateNetworkTables() {
         Logger.getInstance().recordOutput("Swerve/Velocity/rot", getCurrentVelocity().omegaRadiansPerSecond);
         Logger.getInstance().recordOutput("Swerve/Velocity/x", getCurrentVelocity().vxMetersPerSecond);
         Logger.getInstance().recordOutput("Swerve/Velocity/y", getCurrentVelocity().vyMetersPerSecond);
+        Logger.getInstance().recordOutput("Swerve/currentCommand", getCurrentCommand() == null ? "null" : getCurrentCommand().getName());
+
+        if (RobotContainer.POSE_ESTIMATOR == null)
+            return;
+        if (profiledTargetPose == null) {
+            Logger.getInstance().recordOutput("targetPose", RobotContainer.POSE_ESTIMATOR.getCurrentPose());
+        } else {
+            Logger.getInstance().recordOutput("targetPose", profiledTargetPose);
+            profiledTargetPose = null;
+        }
     }
 
     private void selfRelativeDrive(ChassisSpeeds chassisSpeeds) {
@@ -246,10 +422,10 @@ public class Swerve extends SubsystemBase {
 
     private SwerveConstants generateConstants() {
         switch (RobotConstants.ROBOT_TYPE) {
-            case STATIC:
-                return new StaticSwerveConstants();
-            case TESTING:
-                return new TestingSwerveConstants();
+            case KABLAMA:
+                return new TrihardSwerveConstants();
+            case TRIHARD:
+                return new KablamaSwerveConstants();
             default:
                 return new SimulationSwerveConstants();
         }
@@ -273,10 +449,10 @@ public class Swerve extends SubsystemBase {
             return new SwerveIO();
 
         switch (RobotConstants.ROBOT_TYPE) {
-            case STATIC:
-                return new StaticSwerveIO();
-            case TESTING:
-                return new TestingSwerveIO();
+            case KABLAMA:
+                return new KablamaSwerveIO();
+            case TRIHARD:
+                return new TrihardSwerveIO();
             default:
                 return new SimulationSwerveIO();
         }

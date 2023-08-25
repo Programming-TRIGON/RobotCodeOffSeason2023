@@ -18,11 +18,11 @@ public class SimulationSideShooterConstants extends SideShooterConstants {
             ANGLE_MOTOR_GEAR_RATIO = 123.79,
             SHOOTING_MOTOR_GEAR_RATIO = 6.66;
     private static final double SHOOTING_MOTOR_MOMENT_OF_INERTIA = 0.0032;
-    private static final double SIDE_SHOOTER_MASS = 6;
+    private static final double SIDE_SHOOTER_MASS = 4;
     private static final Rotation2d
-            MINIMUM_ARM_ANGLE = Rotation2d.fromDegrees(-90),
-            MAXIMUM_ARM_ANGLE = Rotation2d.fromDegrees(0);
-    private static final boolean ANGLE_MOTOR_SIMULATE_GRAVITY = true;
+            MINIMUM_ARM_ANGLE = Rotation2d.fromDegrees(0),
+            MAXIMUM_ARM_ANGLE = Rotation2d.fromDegrees(90);
+    private static final boolean ANGLE_MOTOR_SIMULATE_GRAVITY = false;
     static final SingleJointedArmSim ANGLE_MOTOR_SIMULATION = new SingleJointedArmSim(
             ANGLE_MOTOR_GEARBOX,
             ANGLE_MOTOR_GEAR_RATIO,
@@ -37,7 +37,7 @@ public class SimulationSideShooterConstants extends SideShooterConstants {
     );
 
     static final PIDController ANGLE_MOTOR_PID_CONTROLLER = new PIDController(
-            1,
+            25,
             0,
             0
     );

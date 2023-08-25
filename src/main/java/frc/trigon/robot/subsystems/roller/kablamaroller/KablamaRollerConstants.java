@@ -1,9 +1,10 @@
-package frc.trigon.robot.subsystems.roller.staticroller;
+package frc.trigon.robot.subsystems.roller.kablamaroller;
 
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel;
+import edu.wpi.first.wpilibj.DigitalInput;
 
-public class StaticRollerConstants {
+public class KablamaRollerConstants {
     static final double VOLTAGE_COMPENSATION_SATURATION = 12;
     
     private static final boolean
@@ -22,6 +23,9 @@ public class StaticRollerConstants {
     static final CANSparkMax
             ANGLE_MOTOR = new CANSparkMax(ANGLE_MOTOR_ID, CANSparkMaxLowLevel.MotorType.kBrushless),
             COLLECTION_MOTOR = new CANSparkMax(COLLECTION_MOTOR_ID, CANSparkMaxLowLevel.MotorType.kBrushless);
+
+    private static final int LIMIT_SWITCH_CHANNEL = 0;
+    static final DigitalInput ANGLE_MOTOR_LIMIT_SWITCH = new DigitalInput(LIMIT_SWITCH_CHANNEL);
 
     static {
         configureAngleMotor();

@@ -8,8 +8,8 @@ public class RobotConstants {
     public static final double PERIODIC_TIME_SECONDS = 0.02;
 
     public enum RobotType {
-        STATIC(FilesHandler.DEPLOY_PATH + "logs/"),
-        TESTING(FilesHandler.DEPLOY_PATH + "logs/"),
+        KABLAMA(FilesHandler.DEPLOY_PATH + "logs/"),
+        TRIHARD(FilesHandler.DEPLOY_PATH + "logs/"),
         SIMULATION(FilesHandler.DEPLOY_PATH + "logs/");
 
         public final String loggingPath;

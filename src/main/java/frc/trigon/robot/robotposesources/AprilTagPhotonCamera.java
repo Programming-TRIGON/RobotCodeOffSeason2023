@@ -2,6 +2,7 @@ package frc.trigon.robot.robotposesources;
 
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Transform3d;
+import frc.trigon.robot.RobotContainer;
 import frc.trigon.robot.subsystems.poseestimator.PoseEstimator;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
@@ -38,7 +39,7 @@ public class AprilTagPhotonCamera extends RobotPoseSourceIO {
 
     private Pose3d getCameraPose() {
         if (PoseSourceConstants.SECONDARY_POSE_STRATEGY == PhotonPoseEstimator.PoseStrategy.CLOSEST_TO_REFERENCE_POSE)
-            photonPoseEstimator.setReferencePose(PoseEstimator.getInstance().getCurrentPose());
+            photonPoseEstimator.setReferencePose(RobotContainer.POSE_ESTIMATOR.getCurrentPose());
 
         final Optional<EstimatedRobotPose> estimatedRobotPose = photonPoseEstimator.update();
         if (estimatedRobotPose.isEmpty())

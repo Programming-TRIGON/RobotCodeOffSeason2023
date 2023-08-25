@@ -1,4 +1,4 @@
-package frc.trigon.robot.subsystems.swerve.staticswerve;
+package frc.trigon.robot.subsystems.swerve.trihardswerve;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -10,7 +10,7 @@ import edu.wpi.first.wpilibj.Notifier;
 import frc.trigon.robot.constants.RobotConstants;
 import frc.trigon.robot.utilities.Conversions;
 
-public class StaticSwerveModuleConstants {
+public class TrihardSwerveModuleConstants {
     static final double VOLTAGE_COMPENSATION_SATURATION = 16;
     static final double
             DRIVE_GEAR_RATIO = 8.14,
@@ -75,26 +75,26 @@ public class StaticSwerveModuleConstants {
             REAR_LEFT_ENCODER = new DutyCycleEncoder(REAR_LEFT_ENCODER_CHANNEL),
             REAR_RIGHT_ENCODER = new DutyCycleEncoder(REAR_RIGHT_ENCODER_CHANNEL);
 
-    private static final StaticSwerveModuleConstants
-            FRONT_LEFT_SWERVE_MODULE_CONSTANTS = new StaticSwerveModuleConstants(
+    private static final TrihardSwerveModuleConstants
+            FRONT_LEFT_SWERVE_MODULE_CONSTANTS = new TrihardSwerveModuleConstants(
                     FRONT_LEFT_DRIVE_MOTOR,
                     FRONT_LEFT_STEER_MOTOR,
                     FRONT_LEFT_ENCODER,
                     FRONT_LEFT_ENCODER_OFFSET
             ),
-            FRONT_RIGHT_SWERVE_MODULE_CONSTANTS = new StaticSwerveModuleConstants(
+            FRONT_RIGHT_SWERVE_MODULE_CONSTANTS = new TrihardSwerveModuleConstants(
                     FRONT_RIGHT_DRIVE_MOTOR,
                     FRONT_RIGHT_STEER_MOTOR,
                     FRONT_RIGHT_ENCODER,
                     FRONT_RIGHT_ENCODER_OFFSET
             ),
-            REAR_LEFT_SWERVE_MODULE_CONSTANTS = new StaticSwerveModuleConstants(
+            REAR_LEFT_SWERVE_MODULE_CONSTANTS = new TrihardSwerveModuleConstants(
                     REAR_LEFT_DRIVE_MOTOR,
                     REAR_LEFT_STEER_MOTOR,
                     REAR_LEFT_ENCODER,
                     REAR_LEFT_ENCODER_OFFSET
             ),
-            REAR_RIGHT_SWERVE_MODULE_CONSTANTS = new StaticSwerveModuleConstants(
+            REAR_RIGHT_SWERVE_MODULE_CONSTANTS = new TrihardSwerveModuleConstants(
                     REAR_RIGHT_DRIVE_MOTOR,
                     REAR_RIGHT_STEER_MOTOR,
                     REAR_RIGHT_ENCODER,
@@ -103,27 +103,27 @@ public class StaticSwerveModuleConstants {
 
     private static final Translation2d
             FRONT_LEFT_MODULE_LOCATION = new Translation2d(
-                    StaticSwerveConstants.DISTANCE_FROM_CENTER_OF_BASE,
-                    StaticSwerveConstants.DISTANCE_FROM_CENTER_OF_BASE
+                    TrihardSwerveConstants.DISTANCE_FROM_CENTER_OF_BASE,
+                    TrihardSwerveConstants.DISTANCE_FROM_CENTER_OF_BASE
             ),
             FRONT_RIGHT_MODULE_LOCATION = new Translation2d(
-                    StaticSwerveConstants.DISTANCE_FROM_CENTER_OF_BASE,
-                    -StaticSwerveConstants.DISTANCE_FROM_CENTER_OF_BASE
+                    TrihardSwerveConstants.DISTANCE_FROM_CENTER_OF_BASE,
+                    -TrihardSwerveConstants.DISTANCE_FROM_CENTER_OF_BASE
             ),
             REAR_LEFT_MODULE_LOCATION = new Translation2d(
-                    -StaticSwerveConstants.DISTANCE_FROM_CENTER_OF_BASE,
-                    StaticSwerveConstants.DISTANCE_FROM_CENTER_OF_BASE
+                    -TrihardSwerveConstants.DISTANCE_FROM_CENTER_OF_BASE,
+                    TrihardSwerveConstants.DISTANCE_FROM_CENTER_OF_BASE
             ),
             REAR_RIGHT_MODULE_LOCATION = new Translation2d(
-                    -StaticSwerveConstants.DISTANCE_FROM_CENTER_OF_BASE,
-                    -StaticSwerveConstants.DISTANCE_FROM_CENTER_OF_BASE
+                    -TrihardSwerveConstants.DISTANCE_FROM_CENTER_OF_BASE,
+                    -TrihardSwerveConstants.DISTANCE_FROM_CENTER_OF_BASE
             );
 
     final TalonFX driveMotor, steerMotor;
     final DutyCycleEncoder steerEncoder;
     final double encoderOffset;
 
-    public StaticSwerveModuleConstants(TalonFX driveMotor, TalonFX steerMotor, DutyCycleEncoder steerEncoder, double encoderOffset) {
+    public TrihardSwerveModuleConstants(TalonFX driveMotor, TalonFX steerMotor, DutyCycleEncoder steerEncoder, double encoderOffset) {
         this.driveMotor = driveMotor;
         this.steerMotor = steerMotor;
         this.steerEncoder = steerEncoder;
@@ -172,24 +172,24 @@ public class StaticSwerveModuleConstants {
         steerMotor.setRotorPosition(motorPosition);
     }
 
-    enum StaticSwerveModules {
+    enum TrihardSwerveModules {
         FRONT_LEFT(FRONT_LEFT_ID, FRONT_LEFT_SWERVE_MODULE_CONSTANTS, FRONT_LEFT_MODULE_LOCATION),
         FRONT_RIGHT(FRONT_RIGHT_ID, FRONT_RIGHT_SWERVE_MODULE_CONSTANTS, FRONT_RIGHT_MODULE_LOCATION),
         REAR_LEFT(REAR_LEFT_ID, REAR_LEFT_SWERVE_MODULE_CONSTANTS, REAR_LEFT_MODULE_LOCATION),
         REAR_RIGHT(REAR_RIGHT_ID, REAR_RIGHT_SWERVE_MODULE_CONSTANTS, REAR_RIGHT_MODULE_LOCATION);
 
         final int id;
-        final StaticSwerveModuleConstants swerveModuleConstants;
+        final TrihardSwerveModuleConstants swerveModuleConstants;
         final Translation2d location;
 
-        StaticSwerveModules(int id, StaticSwerveModuleConstants swerveModuleConstants, Translation2d location) {
+        TrihardSwerveModules(int id, TrihardSwerveModuleConstants swerveModuleConstants, Translation2d location) {
             this.id = id;
             this.swerveModuleConstants = swerveModuleConstants;
             this.location = location;
         }
 
-        static StaticSwerveModules fromId(int id) {
-            for (StaticSwerveModules module : values()) {
+        static TrihardSwerveModules fromId(int id) {
+            for (TrihardSwerveModules module : values()) {
                 if (module.id == id) {
                     return module;
                 }

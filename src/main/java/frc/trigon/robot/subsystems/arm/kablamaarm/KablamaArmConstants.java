@@ -1,4 +1,4 @@
-package frc.trigon.robot.subsystems.arm.staticarm;
+package frc.trigon.robot.subsystems.arm.kablamaarm;
 
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel;
@@ -8,7 +8,9 @@ import edu.wpi.first.math.controller.ElevatorFeedforward;
 import frc.trigon.robot.constants.RobotConstants;
 import frc.trigon.robot.subsystems.arm.ArmConstants;
 
-public class StaticArmConstants extends ArmConstants {
+import java.util.HashMap;
+
+public class KablamaArmConstants extends ArmConstants {
     private static final double VOLTAGE_COMPENSATION_SATURATION = 12;
 
     private static final int
@@ -35,7 +37,6 @@ public class StaticArmConstants extends ArmConstants {
     private static final int
             MASTER_ELEVATOR_MOTOR_ID = 0,
             FOLLOWER_ELEVATOR_MOTOR_ID = 0;
-    static final double ELEVATOR_METERS_PER_REVOLUTIONS = 1;
     private static final boolean
             MASTER_ELEVATOR_MOTOR_INVERTED = false,
             FOLLOWER_ELEVATOR_MOTOR_INVERTED = false;
@@ -51,22 +52,37 @@ public class StaticArmConstants extends ArmConstants {
     private static final CANSparkMax FOLLOWER_ELEVATOR_MOTOR = new CANSparkMax(FOLLOWER_ELEVATOR_MOTOR_ID, CANSparkMaxLowLevel.MotorType.kBrushless);
 
     private static final double
-            ANGLE_MOTOR_KS = 0,
-            ANGLE_MOTOR_KV = 0,
-            ANGLE_MOTOR_KA = 0,
-            ANGLE_MOTOR_KG = 0,
             ELEVATOR_MOTOR_KS = 0,
             ELEVATOR_MOTOR_KV = 0,
             ELEVATOR_MOTOR_KA = 0,
             ELEVATOR_MOTOR_KG = 0;
-    private static final ArmFeedforward ANGLE_MOTOR_FEEDFORWARD = new ArmFeedforward(
-            ANGLE_MOTOR_KS, ANGLE_MOTOR_KG, ANGLE_MOTOR_KV, ANGLE_MOTOR_KA
-    );
     private static final ElevatorFeedforward ELEVATOR_MOTOR_FEEDFORWARD = new ElevatorFeedforward(
             ELEVATOR_MOTOR_KS, ELEVATOR_MOTOR_KG, ELEVATOR_MOTOR_KV, ELEVATOR_MOTOR_KA
     );
+    private static final double
+            HEIGHT_0_ANGLE_MOTOR_KS = 0,
+            HEIGHT_0_ANGLE_MOTOR_KV = 0,
+            HEIGHT_0_ANGLE_MOTOR_KA = 0,
+            HEIGHT_0_ANGLE_MOTOR_KG = 0,
+            HEIGHT_20_ANGLE_MOTOR_KS = 0,
+            HEIGHT_20_ANGLE_MOTOR_KV = 0,
+            HEIGHT_20_ANGLE_MOTOR_KA = 0,
+            HEIGHT_20_ANGLE_MOTOR_KG = 0;
+    private static final ArmFeedforward
+            HEIGHT_0_ANGLE_MOTOR_FEEDFORWARD = new ArmFeedforward(
+                    HEIGHT_0_ANGLE_MOTOR_KS, HEIGHT_0_ANGLE_MOTOR_KG,
+                    HEIGHT_0_ANGLE_MOTOR_KV, HEIGHT_0_ANGLE_MOTOR_KA
+            ),
+            HEIGHT_20_ANGLE_MOTOR_FEEDFORWARD = new ArmFeedforward(
+                    HEIGHT_20_ANGLE_MOTOR_KS, HEIGHT_20_ANGLE_MOTOR_KG,
+                    HEIGHT_20_ANGLE_MOTOR_KV, HEIGHT_20_ANGLE_MOTOR_KA
+            );
+    private static final HashMap<Double, ArmFeedforward> HEIGHT_TO_ANGLE_MOTOR_FEEDFORWARD_MAP = new HashMap<>();
 
     static {
+        HEIGHT_TO_ANGLE_MOTOR_FEEDFORWARD_MAP.put(0.0, HEIGHT_0_ANGLE_MOTOR_FEEDFORWARD);
+        HEIGHT_TO_ANGLE_MOTOR_FEEDFORWARD_MAP.put(20.0, HEIGHT_20_ANGLE_MOTOR_FEEDFORWARD);
+
         if (!RobotConstants.IS_REPLAY) {
             configureElevatorMotor();
             configureAngleMotor();
@@ -74,8 +90,8 @@ public class StaticArmConstants extends ArmConstants {
     }
 
     @Override
-    protected ArmFeedforward getAngleMotorFeedforward() {
-        return ANGLE_MOTOR_FEEDFORWARD;
+    protected HashMap<Double, ArmFeedforward> getHeightToAngleMotorFeedforwardMap() {
+        return HEIGHT_TO_ANGLE_MOTOR_FEEDFORWARD_MAP;
     }
 
     @Override

@@ -1,7 +1,8 @@
-package frc.trigon.robot.subsystems.swerve.testingswerve;
+package frc.trigon.robot.subsystems.swerve.kablamaswerve;
 
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.controls.VelocityVoltage;
+import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.revrobotics.CANSparkMax;
@@ -11,14 +12,14 @@ import frc.trigon.robot.subsystems.swerve.SwerveModuleIO;
 import frc.trigon.robot.subsystems.swerve.SwerveModuleInputsAutoLogged;
 import frc.trigon.robot.utilities.Conversions;
 
-public class TestingSwerveModuleIO extends SwerveModuleIO {
+public class KablamaSwerveModuleIO extends SwerveModuleIO {
     private final TalonFX driveMotor;
     private final CANSparkMax steerMotor;
     private final SparkMaxAbsoluteEncoder steerEncoder;
 
-    public TestingSwerveModuleIO(TestingSwerveModuleConstants.TestingSwerveModules module) {
+    public KablamaSwerveModuleIO(KablamaSwerveModuleConstants.KablamaSwerveModules module) {
         super(module.name());
-        final TestingSwerveModuleConstants moduleConstants = module.swerveModuleConstants;
+        final KablamaSwerveModuleConstants moduleConstants = module.swerveModuleConstants;
 
         this.steerMotor = moduleConstants.steerMotor;
         this.driveMotor = moduleConstants.driveMotor;
@@ -30,25 +31,30 @@ public class TestingSwerveModuleIO extends SwerveModuleIO {
         inputs.steerAngleDegrees = steerEncoder.getPosition();
         inputs.steerAppliedVoltage = steerMotor.getBusVoltage();
         inputs.drivePositionRevolutions = driveMotor.getPosition().getValue();
-        inputs.driveDistanceMeters = Conversions.revolutionsToDistance(inputs.drivePositionRevolutions, TestingSwerveModuleConstants.WHEEL_DIAMETER_METERS);
-        inputs.driveVelocityMetersPerSecond = Conversions.revolutionsToDistance(inputs.driveVelocityRevolutionsPerSecond, TestingSwerveModuleConstants.WHEEL_DIAMETER_METERS);
+        inputs.driveDistanceMeters = Conversions.revolutionsToDistance(inputs.drivePositionRevolutions, KablamaSwerveModuleConstants.WHEEL_DIAMETER_METERS);
+        inputs.driveVelocityMetersPerSecond = Conversions.revolutionsToDistance(inputs.driveVelocityRevolutionsPerSecond, KablamaSwerveModuleConstants.WHEEL_DIAMETER_METERS);
         inputs.driveVelocityRevolutionsPerSecond = driveMotor.getVelocity().getValue();
         inputs.driveAppliedVoltage = driveMotor.getSupplyVoltage().getValue();
     }
 
     @Override
     protected void setTargetOpenLoopVelocity(double velocity) {
-        double power = velocity / TestingSwerveModuleConstants.MAX_THEORETICAL_SPEED_METERS_PER_SECOND;
-        driveMotor.set(power);
+        double power = velocity / KablamaSwerveModuleConstants.MAX_THEORETICAL_SPEED_METERS_PER_SECOND;
+        double voltage = power * KablamaSwerveModuleConstants.VOLTAGE_COMPENSATION_SATURATION;
+        final VoltageOut request = new VoltageOut(
+                voltage, KablamaSwerveModuleConstants.DRIVE_MOTOR_FOC, false
+        );
+
+        driveMotor.setControl(request);
     }
 
     @Override
     protected void setTargetClosedLoopVelocity(double velocity) {
-        final double driveMotorVelocityMeters = Conversions.systemToMotor(velocity, TestingSwerveModuleConstants.DRIVE_GEAR_RATIO);
-        final double driverMotorVelocityRevolutions = Conversions.distanceToRevolutions(driveMotorVelocityMeters, TestingSwerveModuleConstants.WHEEL_DIAMETER_METERS);
-        final double feedforward = TestingSwerveModuleConstants.DRIVE_FEEDFORWARD.calculate(velocity);
+        final double driveMotorVelocityMeters = Conversions.systemToMotor(velocity, KablamaSwerveModuleConstants.DRIVE_GEAR_RATIO);
+        final double driverMotorVelocityRevolutions = Conversions.distanceToRevolutions(driveMotorVelocityMeters, KablamaSwerveModuleConstants.WHEEL_DIAMETER_METERS);
+        final double feedforward = KablamaSwerveModuleConstants.DRIVE_FEEDFORWARD.calculate(velocity);
         final VelocityVoltage velocityVoltage = new VelocityVoltage(
-                driverMotorVelocityRevolutions, TestingSwerveModuleConstants.DRIVE_MOTOR_FOC,
+                driverMotorVelocityRevolutions, KablamaSwerveModuleConstants.DRIVE_MOTOR_FOC,
                 feedforward, 0, false
         );
 

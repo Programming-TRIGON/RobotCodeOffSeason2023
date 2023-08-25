@@ -1,13 +1,13 @@
-package frc.trigon.robot.subsystems.collector.staticcollector;
+package frc.trigon.robot.subsystems.collector.kablamacollector;
 
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
-public class StaticCollectorConstants {
+public class KablamaCollectorConstants {
     static final double VOLTAGE_COMPENSATION_SATURATION = 12;
 
     private static final boolean INVERTED = false;
-    private static final int MOTOR_ID = 1;
+    private static final int MOTOR_ID = 0;
     private static final NeutralMode DEFAULT_MOTOR_NEUTRAL_MODE = NeutralMode.Brake;
     private static final int CURRENT_LIMIT = 30;
 

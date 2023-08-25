@@ -39,7 +39,7 @@ public class PoseEstimator extends SubsystemBase {
                 swerve.getConstants().getKinematics(),
                 swerve.getHeading(),
                 swerve.getModulePositions(),
-                new Pose2d(0, 0, getSwerveAllianceHeading()),
+                new Pose2d(5, 5, new Rotation2d()),
                 PoseEstimatorConstants.STATES_AMBIGUITY,
                 PoseEstimatorConstants.VISION_CALCULATIONS_AMBIGUITY
         );
@@ -58,7 +58,7 @@ public class PoseEstimator extends SubsystemBase {
             updateFieldWidget();
 
         SmartDashboard.putData("field", field);
-        Logger.getInstance().recordOutput("RobotPosition", getCurrentPose());
+        Logger.getInstance().recordOutput("robotPosition", getCurrentPose());
     }
 
     /**
@@ -85,7 +85,9 @@ public class PoseEstimator extends SubsystemBase {
      * @return the estimated pose of the robot, relative to the current driver station
      */
     public Pose2d getCurrentPose() {
-        final Pose2d estimatedPose = swerveDrivePoseEstimator.getEstimatedPosition();
+        Pose2d estimatedPose = swerveDrivePoseEstimator.getEstimatedPosition();
+        if (PoseEstimatorConstants.LIMIT_POSITION)
+            estimatedPose = limitPosition(estimatedPose);
 
         return AllianceUtilities.toAlliancePose(estimatedPose);
     }
@@ -97,6 +99,15 @@ public class PoseEstimator extends SubsystemBase {
      */
     public void addRobotPoseSources(RobotPoseSource... robotPoseSources) {
         this.robotPoseSources.addAll(List.of(robotPoseSources));
+    }
+
+    private Pose2d limitPosition(Pose2d pose2d) {
+        final Pose2d newPose = PoseEstimatorConstants.POSE_LIMITER.limitPose(pose2d);
+        if (newPose.equals(pose2d))
+            return pose2d;
+
+        resetPose(AllianceUtilities.toAlliancePose(newPose));
+        return newPose;
     }
 
     private void updateFieldWidget() {

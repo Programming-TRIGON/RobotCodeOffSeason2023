@@ -25,4 +25,10 @@ public class CollectorIO {
      */
     protected void setTargetPower(double power) {
     }
+
+    /**
+     * Stops the collector motor.
+     */
+    protected void stop() {
+    }
 }

@@ -1,15 +1,19 @@
 package frc.trigon.robot.subsystems.sideshooter;
 
 
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.*;
+import frc.trigon.robot.commands.Commands;
 import frc.trigon.robot.constants.RobotConstants;
 import frc.trigon.robot.subsystems.sideshooter.simulationsideshooter.SimulationSideShooterConstants;
 import frc.trigon.robot.subsystems.sideshooter.simulationsideshooter.SimulationSideShooterIO;
-import frc.trigon.robot.subsystems.sideshooter.staticsideshooter.StaticSideShooterConstants;
-import frc.trigon.robot.subsystems.sideshooter.staticsideshooter.StaticSideShooterIO;
+import frc.trigon.robot.subsystems.sideshooter.kablamasideshooter.KablamaSideShooterConstants;
+import frc.trigon.robot.subsystems.sideshooter.kablamasideshooter.KablamaSideShooterIO;
 import org.littletonrobotics.junction.Logger;
 
 public class SideShooter extends SubsystemBase {
@@ -38,18 +42,33 @@ public class SideShooter extends SubsystemBase {
         updateMechanism();
     }
 
-    // TODO: javadocs
+    /**
+     * Constructs a command that goes to the target state's angle, and then starts applying the state's power.
+     *
+     * @param sideShooterState the target side shooter state
+     * @return the command
+     */
     public CommandBase getSetTargetShooterState(SideShooterConstants.SideShooterState sideShooterState) {
         final Rotation2d targetAngle = sideShooterState.angle;
-        final double targetVelocity = sideShooterState.power;
+        final double targetPower = sideShooterState.power;
 
-        return new ParallelCommandGroup(
-                getSetTargetShooterAngle(targetAngle).until(() -> angleAtTarget(targetAngle)),
-                getSetTargetShooterPower(targetVelocity)
+        final SequentialCommandGroup setTargetShooterStateCommand = new SequentialCommandGroup(
+                getSetTargetShooterAngleCommand(targetAngle).until(() -> angleAtTarget(targetAngle)),
+                Commands.withoutRequirements(getSetTargetShooterPowerCommand(targetPower))
+                        .alongWith(Commands.withoutRequirements(getSetTargetShooterAngleCommand(targetAngle)))
         );
+        setTargetShooterStateCommand.addRequirements(this);
+
+        return setTargetShooterStateCommand;
     }
 
-    public CommandBase getSetTargetShooterAngle(Rotation2d angle) {
+    /**
+     * Sets the target angle of the side collector.
+     *
+     * @param angle the target angle
+     * @return the command
+     */
+    public CommandBase getSetTargetShooterAngleCommand(Rotation2d angle) {
         return new FunctionalCommand(
                 () -> generateAngleMotorProfile(angle),
                 this::setTargetAngleFromProfile,
@@ -59,7 +78,13 @@ public class SideShooter extends SubsystemBase {
         );
     }
 
-    public CommandBase getSetTargetShooterPower(double power) {
+    /**
+     * Sets the target power to apply to the shooting motor.
+     *
+     * @param power the target shooter power
+     * @return the command
+     */
+    public CommandBase getSetTargetShooterPowerCommand(double power) {
         return new StartEndCommand(
                 () -> sideShooterIO.setTargetShootingPower(power),
                 () -> {},
@@ -104,11 +129,27 @@ public class SideShooter extends SubsystemBase {
         SideShooterConstants.SIDE_SHOOTER_LIGAMENT.setAngle(sideShooterInputs.angleMotorPositionDegrees);
 
         Logger.getInstance().recordOutput("SideShooter/SideShooterMechanism", SideShooterConstants.SIDE_SHOOTER_MECHANISM);
+        Logger.getInstance().recordOutput("SideShooter/SideShooterPoses/sideShooterPose", getSideShooterPose());
+        Logger.getInstance().recordOutput("SideShooter/SideShooterPoses/targetSideShooterPose", getTargetSideShooterPose());
+    }
+
+    private Pose3d getSideShooterPose() {
+        return new Pose3d(
+                SideShooterConstants.SIDE_SHOOTER_TRANSLATION,
+                new Rotation3d(0, -Units.degreesToRadians(sideShooterInputs.angleMotorPositionDegrees), SideShooterConstants.SIDE_SHOOTER_YAW)
+        );
+    }
+
+    private Pose3d getTargetSideShooterPose() {
+        return new Pose3d(
+                SideShooterConstants.SIDE_SHOOTER_TRANSLATION,
+                new Rotation3d(0, generatedAngle.unaryMinus().getRadians(), SideShooterConstants.SIDE_SHOOTER_YAW)
+        );
     }
 
     private SideShooterConstants getConstants() {
-        if (RobotConstants.ROBOT_TYPE == RobotConstants.RobotType.STATIC)
-            return new StaticSideShooterConstants();
+        if (RobotConstants.ROBOT_TYPE == RobotConstants.RobotType.KABLAMA)
+            return new KablamaSideShooterConstants();
 
         return new SimulationSideShooterConstants();
     }
@@ -116,8 +157,8 @@ public class SideShooter extends SubsystemBase {
     private SideShooterIO generateIO() {
         if (RobotConstants.IS_REPLAY)
             return new SideShooterIO();
-        if (RobotConstants.ROBOT_TYPE == RobotConstants.RobotType.STATIC)
-            return new StaticSideShooterIO();
+        if (RobotConstants.ROBOT_TYPE == RobotConstants.RobotType.KABLAMA)
+            return new KablamaSideShooterIO();
 
         return new SimulationSideShooterIO();
     }

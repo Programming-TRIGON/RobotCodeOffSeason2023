@@ -10,16 +10,16 @@ public class SimulationRollerConstants {
     static final double VOLTAGE_COMPENSATION_SATURATION = 12;
 
     private static final DCMotor
-            ANGLE_MOTOR_GEARBOX = DCMotor.getNEO(1),
-            COLLECTION_MOTOR_GEARBOX = DCMotor.getBag(1);
+            ANGLE_MOTOR_GEARBOX = DCMotor.getNeo550(1),
+            COLLECTION_MOTOR_GEARBOX = DCMotor.getNeo550(1);
     private static final double
-            ANGLE_MOTOR_GEAR_RATIO = 45,
+            ANGLE_MOTOR_GEAR_RATIO = 81,
             COLLECTION_MOTOR_GEAR_RATIO = 13.5;
     private static final double COLLECTION_MOTOR_MOMENT_OF_INERTIA = 0.0032;
-    private static final double ROLLER_MASS = 1.5;
+    private static final double ROLLER_MASS = 4;
     private static final Rotation2d
-            MINIMUM_ARM_ANGLE = Rotation2d.fromDegrees(-90),
-            MAXIMUM_ARM_ANGLE = Rotation2d.fromDegrees(0);
+            MINIMUM_ARM_ANGLE = Rotation2d.fromDegrees(0),
+            MAXIMUM_ARM_ANGLE = Rotation2d.fromDegrees(90);
     private static final boolean ANGLE_MOTOR_SIMULATE_GRAVITY = true;
     static final SingleJointedArmSim ANGLE_MOTOR_SIMULATION = new SingleJointedArmSim(
             ANGLE_MOTOR_GEARBOX,

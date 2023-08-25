@@ -1,12 +1,12 @@
-package frc.trigon.robot.subsystems.swerve.testingswerve;
+package frc.trigon.robot.subsystems.swerve.trihardswerve;
 
 import com.ctre.phoenix6.hardware.Pigeon2;
 import edu.wpi.first.math.geometry.Rotation2d;
 import frc.trigon.robot.subsystems.swerve.SwerveIO;
 import frc.trigon.robot.subsystems.swerve.SwerveInputsAutoLogged;
 
-public class TestingSwerveIO extends SwerveIO {
-    private final Pigeon2 gyro = TestingSwerveConstants.GYRO;
+public class TrihardSwerveIO extends SwerveIO {
+    private final Pigeon2 gyro = TrihardSwerveConstants.GYRO;
 
     @Override
     protected void updateInputs(SwerveInputsAutoLogged inputs) {

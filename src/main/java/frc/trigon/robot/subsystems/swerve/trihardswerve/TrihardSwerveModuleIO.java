@@ -1,4 +1,4 @@
-package frc.trigon.robot.subsystems.swerve.staticswerve;
+package frc.trigon.robot.subsystems.swerve.trihardswerve;
 
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.controls.PositionVoltage;
@@ -11,12 +11,12 @@ import frc.trigon.robot.subsystems.swerve.SwerveModuleIO;
 import frc.trigon.robot.subsystems.swerve.SwerveModuleInputsAutoLogged;
 import frc.trigon.robot.utilities.Conversions;
 
-public class StaticSwerveModuleIO extends SwerveModuleIO {
+public class TrihardSwerveModuleIO extends SwerveModuleIO {
     private final TalonFX steerMotor, driveMotor;
 
-    public StaticSwerveModuleIO(StaticSwerveModuleConstants.StaticSwerveModules module) {
+    public TrihardSwerveModuleIO(TrihardSwerveModuleConstants.TrihardSwerveModules module) {
         super(module.name());
-        final StaticSwerveModuleConstants moduleConstants = module.swerveModuleConstants;
+        final TrihardSwerveModuleConstants moduleConstants = module.swerveModuleConstants;
 
         this.steerMotor = moduleConstants.steerMotor;
         this.driveMotor = moduleConstants.driveMotor;
@@ -35,9 +35,9 @@ public class StaticSwerveModuleIO extends SwerveModuleIO {
 
     @Override
     protected void setTargetOpenLoopVelocity(double velocity) {
-        final double power = velocity / StaticSwerveModuleConstants.MAX_THEORETICAL_SPEED_METERS_PER_SECOND;
+        final double power = velocity / TrihardSwerveModuleConstants.MAX_THEORETICAL_SPEED_METERS_PER_SECOND;
         final VoltageOut request = new VoltageOut(
-                power * StaticSwerveModuleConstants.VOLTAGE_COMPENSATION_SATURATION,
+                power * TrihardSwerveModuleConstants.VOLTAGE_COMPENSATION_SATURATION,
                 driveMotor.getDeviceID() == 1 || driveMotor.getDeviceID() == 2,
                 false
         );
@@ -46,11 +46,11 @@ public class StaticSwerveModuleIO extends SwerveModuleIO {
 
     @Override
     protected void setTargetClosedLoopVelocity(double velocity) {
-        final double driveMotorVelocityMeters = Conversions.systemToMotor(velocity, StaticSwerveModuleConstants.DRIVE_GEAR_RATIO);
-        final double driverMotorVelocityRevolutions = Conversions.distanceToRevolutions(driveMotorVelocityMeters, StaticSwerveModuleConstants.WHEEL_DIAMETER_METERS);
-        final double feedforward = StaticSwerveModuleConstants.DRIVE_FEEDFORWARD.calculate(velocity);
+        final double driveMotorVelocityMeters = Conversions.systemToMotor(velocity, TrihardSwerveModuleConstants.DRIVE_GEAR_RATIO);
+        final double driverMotorVelocityRevolutions = Conversions.distanceToRevolutions(driveMotorVelocityMeters, TrihardSwerveModuleConstants.WHEEL_DIAMETER_METERS);
+        final double feedforward = TrihardSwerveModuleConstants.DRIVE_FEEDFORWARD.calculate(velocity);
         final VelocityVoltage velocityVoltage = new VelocityVoltage(
-                driverMotorVelocityRevolutions, StaticSwerveModuleConstants.DRIVE_MOTOR_FOC,
+                driverMotorVelocityRevolutions, TrihardSwerveModuleConstants.DRIVE_MOTOR_FOC,
                 feedforward, 0, false
         );
 
@@ -60,7 +60,7 @@ public class StaticSwerveModuleIO extends SwerveModuleIO {
     @Override
     protected void setTargetAngle(Rotation2d angle) {
         final double scopedAngle = scope(angle);
-        final double motorAngle = Conversions.systemToMotor(scopedAngle, StaticSwerveModuleConstants.STEER_GEAR_RATIO);
+        final double motorAngle = Conversions.systemToMotor(scopedAngle, TrihardSwerveModuleConstants.STEER_GEAR_RATIO);
         final double motorRevolutions = Conversions.degreesToRevolutions(motorAngle);
         final PositionVoltage positionVoltage = new PositionVoltage(motorRevolutions);
         steerMotor.setControl(positionVoltage);
@@ -85,12 +85,12 @@ public class StaticSwerveModuleIO extends SwerveModuleIO {
         final double motorRevolutions = steerMotor.getPosition().getValue();
         final double motorDegrees = Conversions.revolutionsToDegrees(motorRevolutions);
 
-        return Conversions.motorToSystem(motorDegrees, StaticSwerveModuleConstants.STEER_GEAR_RATIO);
+        return Conversions.motorToSystem(motorDegrees, TrihardSwerveModuleConstants.STEER_GEAR_RATIO);
     }
 
     private double driveMotorValueToDistance(double value) {
-        final double systemRevolutions = Conversions.motorToSystem(value, StaticSwerveModuleConstants.DRIVE_GEAR_RATIO);
-        return Conversions.revolutionsToDistance(systemRevolutions, StaticSwerveModuleConstants.WHEEL_DIAMETER_METERS);
+        final double systemRevolutions = Conversions.motorToSystem(value, TrihardSwerveModuleConstants.DRIVE_GEAR_RATIO);
+        return Conversions.revolutionsToDistance(systemRevolutions, TrihardSwerveModuleConstants.WHEEL_DIAMETER_METERS);
     }
 
     private double scope(Rotation2d targetRotation2d) {

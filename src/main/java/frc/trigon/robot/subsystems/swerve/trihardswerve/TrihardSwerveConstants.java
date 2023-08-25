@@ -1,4 +1,4 @@
-package frc.trigon.robot.subsystems.swerve.staticswerve;
+package frc.trigon.robot.subsystems.swerve.trihardswerve;
 
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.hardware.Pigeon2;
@@ -14,7 +14,7 @@ import frc.trigon.robot.constants.RobotConstants;
 import frc.trigon.robot.subsystems.swerve.SwerveConstants;
 import frc.trigon.robot.subsystems.swerve.SwerveModuleIO;
 
-public class StaticSwerveConstants extends SwerveConstants {
+public class TrihardSwerveConstants extends SwerveConstants {
     private static final double BRAKE_TIME_SECONDS = 4;
     private static final double
             MAX_SPEED_METERS_PER_SECOND = 4.25,
@@ -30,16 +30,16 @@ public class StaticSwerveConstants extends SwerveConstants {
             X_SLEW_RATE_LIMITER = new SlewRateLimiter(RATE_LIMIT),
             Y_SLEW_RATE_LIMITER = new SlewRateLimiter(RATE_LIMIT);
     private static final Translation2d[] LOCATIONS = {
-            StaticSwerveModuleConstants.StaticSwerveModules.fromId(0).location,
-            StaticSwerveModuleConstants.StaticSwerveModules.fromId(1).location,
-            StaticSwerveModuleConstants.StaticSwerveModules.fromId(2).location,
-            StaticSwerveModuleConstants.StaticSwerveModules.fromId(3).location
+            TrihardSwerveModuleConstants.TrihardSwerveModules.fromId(0).location,
+            TrihardSwerveModuleConstants.TrihardSwerveModules.fromId(1).location,
+            TrihardSwerveModuleConstants.TrihardSwerveModules.fromId(2).location,
+            TrihardSwerveModuleConstants.TrihardSwerveModules.fromId(3).location
     };
-    private static final StaticSwerveModuleIO[] MODULES_IO = {
-            new StaticSwerveModuleIO(StaticSwerveModuleConstants.StaticSwerveModules.fromId(0)),
-            new StaticSwerveModuleIO(StaticSwerveModuleConstants.StaticSwerveModules.fromId(1)),
-            new StaticSwerveModuleIO(StaticSwerveModuleConstants.StaticSwerveModules.fromId(2)),
-            new StaticSwerveModuleIO(StaticSwerveModuleConstants.StaticSwerveModules.fromId(3))
+    private static final TrihardSwerveModuleIO[] MODULES_IO = {
+            new TrihardSwerveModuleIO(TrihardSwerveModuleConstants.TrihardSwerveModules.fromId(0)),
+            new TrihardSwerveModuleIO(TrihardSwerveModuleConstants.TrihardSwerveModules.fromId(1)),
+            new TrihardSwerveModuleIO(TrihardSwerveModuleConstants.TrihardSwerveModules.fromId(2)),
+            new TrihardSwerveModuleIO(TrihardSwerveModuleConstants.TrihardSwerveModules.fromId(3))
     };
     private static final SwerveDriveKinematics KINEMATICS = new SwerveDriveKinematics(LOCATIONS);
     private static final PIDConstants
@@ -53,16 +53,29 @@ public class StaticSwerveConstants extends SwerveConstants {
             Units.degreesToRadians(-0.95211),
             Units.degreesToRadians(90.0146)
     );
-    private static final TrapezoidProfile.Constraints ROTATION_CONSTRAINTS = new TrapezoidProfile.Constraints(
-            720,
-            1200
-    );
-    private static final ProfiledPIDController ROTATION_CONTROLLER = new ProfiledPIDController(
-            ROTATION_PID_CONSTANTS.kP,
-            ROTATION_PID_CONSTANTS.kI,
-            ROTATION_PID_CONSTANTS.kD,
-            ROTATION_CONSTRAINTS
-    );
+    private static final TrapezoidProfile.Constraints
+            ROTATION_CONSTRAINTS = new TrapezoidProfile.Constraints(
+                    720 / 4.0,
+                    720 / 4.0
+            ),
+            TRANSLATION_CONSTRAINTS = new TrapezoidProfile.Constraints(
+                    1.5,
+                    2
+            );
+
+    private static final ProfiledPIDController
+            ROTATION_CONTROLLER = new ProfiledPIDController(
+                    ROTATION_PID_CONSTANTS.kP,
+                    ROTATION_PID_CONSTANTS.kI,
+                    ROTATION_PID_CONSTANTS.kD,
+                    ROTATION_CONSTRAINTS
+            ),
+            PROFILED_Y_AXIS_CONTROLLER = new ProfiledPIDController(
+                    TRANSLATION_PID_CONSTANTS.kP,
+                    TRANSLATION_PID_CONSTANTS.kI,
+                    TRANSLATION_PID_CONSTANTS.kD,
+                    TRANSLATION_CONSTRAINTS
+            );
     private static final double
             TRANSLATION_TOLERANCE = 0.03,
             ROTATION_TOLERANCE = 2,
@@ -141,6 +154,11 @@ public class StaticSwerveConstants extends SwerveConstants {
     @Override
     protected double getBrakeTimeSeconds() {
         return BRAKE_TIME_SECONDS;
+    }
+
+    @Override
+    protected ProfiledPIDController getProfiledYAxisController() {
+        return PROFILED_Y_AXIS_CONTROLLER;
     }
 
     @Override

@@ -10,7 +10,7 @@ import frc.trigon.robot.subsystems.swerve.SwerveConstants;
 import frc.trigon.robot.subsystems.swerve.SwerveModuleIO;
 
 public class SimulationSwerveConstants extends SwerveConstants {
-    private static final double RATE_LIMIT = 5.5;
+    private static final double RATE_LIMIT = 10;
     static final SlewRateLimiter
             X_SLEW_RATE_LIMITER = new SlewRateLimiter(RATE_LIMIT),
             Y_SLEW_RATE_LIMITER = new SlewRateLimiter(RATE_LIMIT);
@@ -39,18 +39,31 @@ public class SimulationSwerveConstants extends SwerveConstants {
     private static final SwerveDriveKinematics KINEMATICS = new SwerveDriveKinematics(LOCATIONS);
     private static final PIDConstants
             TRANSLATION_PID_CONSTANTS = new PIDConstants(12, 0, 0),
-            ROTATION_PID_CONSTANTS = new PIDConstants(4, 0, 0),
+            ROTATION_PID_CONSTANTS = new PIDConstants(7, 0, 0),
             AUTO_ROTATION_PID_CONSTANTS = new PIDConstants(6, 3, 1);
-    private static final TrapezoidProfile.Constraints ROTATION_CONSTRAINTS = new TrapezoidProfile.Constraints(
-            720,
-            1200
-    );
-    private static final ProfiledPIDController ROTATION_CONTROLLER = new ProfiledPIDController(
-            ROTATION_PID_CONSTANTS.kP,
-            ROTATION_PID_CONSTANTS.kI,
-            ROTATION_PID_CONSTANTS.kD,
-            ROTATION_CONSTRAINTS
-    );
+    private static final TrapezoidProfile.Constraints
+            ROTATION_CONSTRAINTS = new TrapezoidProfile.Constraints(
+                    720,
+                    720
+            ),
+            TRANSLATION_CONSTRAINTS = new TrapezoidProfile.Constraints(
+                    3,
+                    3
+            );
+
+    private static final ProfiledPIDController
+            ROTATION_CONTROLLER = new ProfiledPIDController(
+                    ROTATION_PID_CONSTANTS.kP,
+                    ROTATION_PID_CONSTANTS.kI,
+                    ROTATION_PID_CONSTANTS.kD,
+                    ROTATION_CONSTRAINTS
+            ),
+            PROFILED_Y_AXIS_CONTROLLER = new ProfiledPIDController(
+                    TRANSLATION_PID_CONSTANTS.kP,
+                    TRANSLATION_PID_CONSTANTS.kI,
+                    TRANSLATION_PID_CONSTANTS.kD,
+                    TRANSLATION_CONSTRAINTS
+            );
     private static final double
             TRANSLATION_TOLERANCE = 0.03,
             ROTATION_TOLERANCE = 2,
@@ -110,6 +123,11 @@ public class SimulationSwerveConstants extends SwerveConstants {
     @Override
     protected double getBrakeTimeSeconds() {
         return BRAKE_TIME_SECONDS;
+    }
+
+    @Override
+    protected ProfiledPIDController getProfiledYAxisController() {
+        return PROFILED_Y_AXIS_CONTROLLER;
     }
 
     @Override

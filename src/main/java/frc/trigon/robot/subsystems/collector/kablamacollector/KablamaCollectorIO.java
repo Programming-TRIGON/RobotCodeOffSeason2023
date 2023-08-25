@@ -1,11 +1,11 @@
-package frc.trigon.robot.subsystems.collector.staticcollector;
+package frc.trigon.robot.subsystems.collector.kablamacollector;
 
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import frc.trigon.robot.subsystems.collector.CollectorIO;
 import frc.trigon.robot.subsystems.collector.CollectorInputsAutoLogged;
 
-public class StaticCollectorIO extends CollectorIO {
-    private final WPI_TalonSRX motor = StaticCollectorConstants.MOTOR;
+public class KablamaCollectorIO extends CollectorIO {
+    private final WPI_TalonSRX motor = KablamaCollectorConstants.MOTOR;
 
     @Override
     protected void updateInputs(CollectorInputsAutoLogged inputs) {
@@ -17,5 +17,10 @@ public class StaticCollectorIO extends CollectorIO {
     @Override
     protected void setTargetPower(double power) {
         motor.set(power);
+    }
+
+    @Override
+    protected void stop() {
+        motor.stopMotor();
     }
 }

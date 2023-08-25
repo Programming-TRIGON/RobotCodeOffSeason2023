@@ -1,20 +1,21 @@
-package frc.trigon.robot.subsystems.arm.staticarm;
+package frc.trigon.robot.subsystems.arm.kablamaarm;
 
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.SparkMaxAbsoluteEncoder;
 import com.revrobotics.SparkMaxPIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
+import frc.trigon.robot.subsystems.arm.ArmConstants;
 import frc.trigon.robot.subsystems.arm.ArmIO;
 import frc.trigon.robot.subsystems.arm.ArmInputsAutoLogged;
 import frc.trigon.robot.utilities.Conversions;
 
-public class StaticArmIO extends ArmIO {
+public class KablamaArmIO extends ArmIO {
     private final CANSparkMax
-            angleMotor = StaticArmConstants.MASTER_ANGLE_MOTOR,
-            elevatorMotor = StaticArmConstants.MASTER_ELEVATOR_MOTOR;
+            angleMotor = KablamaArmConstants.MASTER_ANGLE_MOTOR,
+            elevatorMotor = KablamaArmConstants.MASTER_ELEVATOR_MOTOR;
     private final SparkMaxAbsoluteEncoder
-            angleEncoder = StaticArmConstants.ANGLE_ENCODER,
-            elevatorEncoder = StaticArmConstants.ELEVATOR_ENCODER;
+            angleEncoder = KablamaArmConstants.ANGLE_ENCODER,
+            elevatorEncoder = KablamaArmConstants.ELEVATOR_ENCODER;
 
     @Override
     protected void updateInputs(ArmInputsAutoLogged inputs) {
@@ -24,9 +25,9 @@ public class StaticArmIO extends ArmIO {
         inputs.angleMotorAppliedVoltage = angleMotor.getBusVoltage();
 
         inputs.elevatorMotorPositionRevolutions = elevatorEncoder.getPosition();
-        inputs.elevatorMotorPositionMeters = Conversions.revolutionsToDistance(inputs.elevatorMotorPositionRevolutions, StaticArmConstants.ELEVATOR_METERS_PER_REVOLUTIONS);
+        inputs.elevatorMotorPositionMeters = Conversions.revolutionsToDistance(inputs.elevatorMotorPositionRevolutions, ArmConstants.ELEVATOR_METERS_PER_REVOLUTION);
         inputs.elevatorMotorVelocityRevolutionsPerSecond = elevatorEncoder.getVelocity();
-        inputs.elevatorMotorVelocityMetersPerSecond = Conversions.revolutionsToDistance(inputs.elevatorMotorVelocityRevolutionsPerSecond, StaticArmConstants.ELEVATOR_METERS_PER_REVOLUTIONS);
+        inputs.elevatorMotorVelocityMetersPerSecond = Conversions.revolutionsToDistance(inputs.elevatorMotorVelocityRevolutionsPerSecond, ArmConstants.ELEVATOR_METERS_PER_REVOLUTION);
         inputs.elevatorMotorCurrent = elevatorMotor.getOutputCurrent();
         inputs.elevatorMotorAppliedVoltage = elevatorMotor.getBusVoltage();
     }
@@ -52,7 +53,7 @@ public class StaticArmIO extends ArmIO {
 
     @Override
     protected void setTargetElevatorPosition(double position, double feedforward) {
-        final double motorRevolutions = Conversions.distanceToRevolutions(position, StaticArmConstants.ELEVATOR_METERS_PER_REVOLUTIONS);
+        final double motorRevolutions = Conversions.distanceToRevolutions(position, ArmConstants.ELEVATOR_METERS_PER_REVOLUTION);
         elevatorMotor.getPIDController().setReference(
                 motorRevolutions,
                 CANSparkMax.ControlType.kPosition,

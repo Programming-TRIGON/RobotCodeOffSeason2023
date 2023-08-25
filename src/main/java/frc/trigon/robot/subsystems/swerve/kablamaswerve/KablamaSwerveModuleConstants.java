@@ -1,4 +1,4 @@
-package frc.trigon.robot.subsystems.swerve.testingswerve;
+package frc.trigon.robot.subsystems.swerve.kablamaswerve;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -12,9 +12,10 @@ import edu.wpi.first.math.geometry.Translation2d;
 import frc.trigon.robot.constants.RobotConstants;
 import frc.trigon.robot.utilities.Conversions;
 
-public class TestingSwerveModuleConstants {
-    static final double DRIVE_GEAR_RATIO = 10.8577633008;
-    static final double WHEEL_DIAMETER_METERS = 0.1;
+public class KablamaSwerveModuleConstants {
+    static final double VOLTAGE_COMPENSATION_SATURATION = 12;
+    static final double DRIVE_GEAR_RATIO = 6.12;
+    static final double WHEEL_DIAMETER_METERS = 0.1016;
     static final double MAX_THEORETICAL_SPEED_METERS_PER_SECOND = 4;
     private static final double VOLTAGE_COMP_SATURATION = 12;
 
@@ -34,12 +35,13 @@ public class TestingSwerveModuleConstants {
     private static final double
             DRIVE_OPEN_LOOP_RAMP_RATE = 0.2,
             DRIVE_CLOSED_LOOP_RAMP_RATE = 0.4;
+    private static final int DRIVE_MOTOR_CURRENT_LIMIT = 30;
     static final SimpleMotorFeedforward DRIVE_FEEDFORWARD = new SimpleMotorFeedforward(0.0001, 0.0001, 0.0001);
     static final boolean DRIVE_MOTOR_FOC = false;
     private static final TalonFX
             FRONT_LEFT_DRIVE_MOTOR = new TalonFX(
-            FRONT_LEFT_DRIVE_MOTOR_ID
-    ),
+                    FRONT_LEFT_DRIVE_MOTOR_ID
+            ),
             FRONT_RIGHT_DRIVE_MOTOR = new TalonFX(
                     FRONT_RIGHT_DRIVE_MOTOR_ID
             ),
@@ -56,6 +58,7 @@ public class TestingSwerveModuleConstants {
             REAR_LEFT_STEER_MOTOR_ID = REAR_LEFT_ID + 1,
             REAR_RIGHT_STEER_MOTOR_ID = REAR_RIGHT_ID + 1;
     private static final boolean STEER_MOTOR_INVERTED = false;
+    private static final int STEER_MOTOR_CURRENT_LIMIT = 10;
     private static final double
             STEER_MOTOR_P = 0.01,
             STEER_MOTOR_I = 0,
@@ -77,46 +80,46 @@ public class TestingSwerveModuleConstants {
                     REAR_RIGHT_STEER_MOTOR_ID,
                     CANSparkMaxLowLevel.MotorType.kBrushless
             );
-    private static final TestingSwerveModuleConstants
-            FRONT_LEFT_SWERVE_MODULE_CONSTANTS = new TestingSwerveModuleConstants(
+    private static final KablamaSwerveModuleConstants
+            FRONT_LEFT_SWERVE_MODULE_CONSTANTS = new KablamaSwerveModuleConstants(
                     FRONT_LEFT_DRIVE_MOTOR,
                     FRONT_LEFT_STEER_MOTOR
             ),
-            FRONT_RIGHT_SWERVE_MODULE_CONSTANTS = new TestingSwerveModuleConstants(
+            FRONT_RIGHT_SWERVE_MODULE_CONSTANTS = new KablamaSwerveModuleConstants(
                     FRONT_RIGHT_DRIVE_MOTOR,
                     FRONT_RIGHT_STEER_MOTOR
             ),
-            REAR_LEFT_SWERVE_MODULE_CONSTANTS = new TestingSwerveModuleConstants(
+            REAR_LEFT_SWERVE_MODULE_CONSTANTS = new KablamaSwerveModuleConstants(
                     REAR_LEFT_DRIVE_MOTOR,
                     REAR_LEFT_STEER_MOTOR
             ),
-            REAR_RIGHT_SWERVE_MODULE_CONSTANTS = new TestingSwerveModuleConstants(
+            REAR_RIGHT_SWERVE_MODULE_CONSTANTS = new KablamaSwerveModuleConstants(
                     REAR_RIGHT_DRIVE_MOTOR,
                     REAR_RIGHT_STEER_MOTOR
             );
 
     private static final Translation2d
             FRONT_LEFT_MODULE_LOCATION = new Translation2d(
-                    TestingSwerveConstants.DISTANCE_FROM_CENTER_OF_BASE,
-                    TestingSwerveConstants.DISTANCE_FROM_CENTER_OF_BASE
+                    KablamaSwerveConstants.DISTANCE_FROM_CENTER_OF_BASE,
+                    KablamaSwerveConstants.DISTANCE_FROM_CENTER_OF_BASE
             ),
             FRONT_RIGHT_MODULE_LOCATION = new Translation2d(
-                    TestingSwerveConstants.DISTANCE_FROM_CENTER_OF_BASE,
-                    -TestingSwerveConstants.DISTANCE_FROM_CENTER_OF_BASE
+                    KablamaSwerveConstants.DISTANCE_FROM_CENTER_OF_BASE,
+                    -KablamaSwerveConstants.DISTANCE_FROM_CENTER_OF_BASE
             ),
             REAR_LEFT_MODULE_LOCATION = new Translation2d(
-                    -TestingSwerveConstants.DISTANCE_FROM_CENTER_OF_BASE,
-                    TestingSwerveConstants.DISTANCE_FROM_CENTER_OF_BASE
+                    -KablamaSwerveConstants.DISTANCE_FROM_CENTER_OF_BASE,
+                    KablamaSwerveConstants.DISTANCE_FROM_CENTER_OF_BASE
             ),
             REAR_RIGHT_MODULE_LOCATION = new Translation2d(
-                    -TestingSwerveConstants.DISTANCE_FROM_CENTER_OF_BASE,
-                    -TestingSwerveConstants.DISTANCE_FROM_CENTER_OF_BASE
+                    -KablamaSwerveConstants.DISTANCE_FROM_CENTER_OF_BASE,
+                    -KablamaSwerveConstants.DISTANCE_FROM_CENTER_OF_BASE
             );
 
     final TalonFX driveMotor;
     final CANSparkMax steerMotor;
 
-    public TestingSwerveModuleConstants(TalonFX driveMotor, CANSparkMax steerMotor) {
+    public KablamaSwerveModuleConstants(TalonFX driveMotor, CANSparkMax steerMotor) {
         this.driveMotor = driveMotor;
         this.steerMotor = steerMotor;
 
@@ -138,7 +141,6 @@ public class TestingSwerveModuleConstants {
         steerMotor.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus4, 1000); // Alternate encoder
         steerMotor.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus5, 100); // Duty cycle position
 
-        steerMotor.setSmartCurrentLimit(10);
         steerMotor.getPIDController().setP(STEER_MOTOR_P);
         steerMotor.getPIDController().setI(STEER_MOTOR_I);
         steerMotor.getPIDController().setD(STEER_MOTOR_D);
@@ -147,6 +149,7 @@ public class TestingSwerveModuleConstants {
         steerMotor.getPIDController().setPositionPIDWrappingMaxInput(Conversions.DEGREES_PER_REVOLUTIONS);
         steerMotor.getPIDController().setFeedbackDevice(steerMotor.getAbsoluteEncoder(SparkMaxAbsoluteEncoder.Type.kDutyCycle));
         steerMotor.getAbsoluteEncoder(SparkMaxAbsoluteEncoder.Type.kDutyCycle).setPositionConversionFactor(Conversions.DEGREES_PER_REVOLUTIONS);
+        steerMotor.setSmartCurrentLimit(STEER_MOTOR_CURRENT_LIMIT);
 
         steerMotor.burnFlash();
     }
@@ -158,29 +161,31 @@ public class TestingSwerveModuleConstants {
         motorConfig.OpenLoopRamps.DutyCycleOpenLoopRampPeriod = DRIVE_OPEN_LOOP_RAMP_RATE;
         motorConfig.MotorOutput.Inverted = DRIVE_MOTOR_INVERTED_VALUE;
         motorConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
+        motorConfig.CurrentLimits.StatorCurrentLimit = DRIVE_MOTOR_CURRENT_LIMIT;
+        motorConfig.CurrentLimits.StatorCurrentLimitEnable = true;
         motorConfig.Audio.BeepOnBoot = false;
 
         driveMotor.getConfigurator().apply(motorConfig);
     }
 
-    enum TestingSwerveModules {
+    enum KablamaSwerveModules {
         FRONT_LEFT(FRONT_LEFT_ID, FRONT_LEFT_SWERVE_MODULE_CONSTANTS, FRONT_LEFT_MODULE_LOCATION),
         FRONT_RIGHT(FRONT_RIGHT_ID, FRONT_RIGHT_SWERVE_MODULE_CONSTANTS, FRONT_RIGHT_MODULE_LOCATION),
         REAR_LEFT(REAR_LEFT_ID, REAR_LEFT_SWERVE_MODULE_CONSTANTS, REAR_LEFT_MODULE_LOCATION),
         REAR_RIGHT(REAR_RIGHT_ID, REAR_RIGHT_SWERVE_MODULE_CONSTANTS, REAR_RIGHT_MODULE_LOCATION);
 
         final int id;
-        final TestingSwerveModuleConstants swerveModuleConstants;
+        final KablamaSwerveModuleConstants swerveModuleConstants;
         final Translation2d location;
 
-        TestingSwerveModules(int id, TestingSwerveModuleConstants swerveModuleConstants, Translation2d location) {
+        KablamaSwerveModules(int id, KablamaSwerveModuleConstants swerveModuleConstants, Translation2d location) {
             this.id = id;
             this.swerveModuleConstants = swerveModuleConstants;
             this.location = location;
         }
 
-        static TestingSwerveModules fromId(int id) {
-            for (TestingSwerveModules module : values()) {
+        static KablamaSwerveModules fromId(int id) {
+            for (KablamaSwerveModules module : values()) {
                 if (module.id == id) {
                     return module;
                 }

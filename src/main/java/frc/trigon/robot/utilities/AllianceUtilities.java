@@ -1,9 +1,13 @@
 package frc.trigon.robot.utilities;
 
+import com.pathplanner.lib.PathPlannerTrajectory;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.trigon.robot.constants.FieldConstants;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class AllianceUtilities {
     /**
@@ -28,5 +32,15 @@ public class AllianceUtilities {
                 FieldConstants.FIELD_WIDTH_METERS - pose.getY(),
                 pose.getRotation().minus(Rotation2d.fromRotations(0.5))
         );
+    }
+
+    //TODO: docs
+    public static List<PathPlannerTrajectory> transformPathGroupForAlliance(List<PathPlannerTrajectory> pathGroup) {
+        final List<PathPlannerTrajectory> toReturn = new ArrayList<>();
+        final DriverStation.Alliance alliance = DriverStation.getAlliance();
+        for (PathPlannerTrajectory pathPlannerTrajectory : pathGroup)
+            toReturn.add(PathPlannerTrajectory.transformTrajectoryForAlliance(pathPlannerTrajectory, alliance));
+
+        return toReturn;
     }
 }

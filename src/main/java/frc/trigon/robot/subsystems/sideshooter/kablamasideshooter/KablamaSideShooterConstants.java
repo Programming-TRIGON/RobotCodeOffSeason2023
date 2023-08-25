@@ -1,4 +1,4 @@
-package frc.trigon.robot.subsystems.sideshooter.staticsideshooter;
+package frc.trigon.robot.subsystems.sideshooter.kablamasideshooter;
 
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
@@ -6,9 +6,10 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel;
 import com.revrobotics.SparkMaxAbsoluteEncoder;
 import edu.wpi.first.math.controller.ArmFeedforward;
+import frc.trigon.robot.constants.RobotConstants;
 import frc.trigon.robot.subsystems.sideshooter.SideShooterConstants;
 
-public class StaticSideShooterConstants extends SideShooterConstants {
+public class KablamaSideShooterConstants extends SideShooterConstants {
     static final double VOLTAGE_COMPENSATION_SATURATION = 12;
 
     private static final boolean
@@ -42,8 +43,10 @@ public class StaticSideShooterConstants extends SideShooterConstants {
     );
 
     static {
-        configureShootingMotor();
-        configureAngleMotor();
+        if (!RobotConstants.IS_REPLAY) {
+            configureShootingMotor();
+            configureAngleMotor();
+        }
     }
 
     @Override
