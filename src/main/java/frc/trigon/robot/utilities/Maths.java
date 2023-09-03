@@ -49,4 +49,20 @@ public class Maths {
 
         return Rotation2d.fromDegrees(-90);
     }
+
+    /**
+     * Checks what's the closest number to the given number.
+     *
+     * @param toCheck the number to check which number is closer to it.
+     * @param num1    the first number
+     * @param num2    the second number
+     * @return the closest number to the given number
+     */
+    public static double getClosestNumber(double toCheck, double num1, double num2) {
+        final double num1Difference = Math.abs(toCheck - num1);
+        final double num2Difference = Math.abs(toCheck - num2);
+        if (num1Difference < num2Difference)
+            return num1;
+        return num2;
+    }
 }

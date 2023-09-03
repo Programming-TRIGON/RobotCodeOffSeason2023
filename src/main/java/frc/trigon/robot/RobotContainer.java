@@ -5,6 +5,7 @@
 
 package frc.trigon.robot;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.trigon.robot.commands.Commands;
 import frc.trigon.robot.constants.AutonomousConstants;
@@ -21,7 +22,7 @@ import frc.trigon.robot.subsystems.swerve.Swerve;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 public class RobotContainer {
-    public static final LoggedDashboardChooser<String> MATCH_START_PATH_NAME_CHOOSER = new LoggedDashboardChooser<>("autoChooser");
+    public static final LoggedDashboardChooser<String> MATCH_START_AUTO_NAME_CHOOSER = new LoggedDashboardChooser<>("autoChooser");
     public static final PoseEstimator POSE_ESTIMATOR = PoseEstimator.getInstance();
     private final Arm arm = Arm.getInstance();
     private final SideShooter sideShooter = SideShooter.getInstance();
@@ -38,10 +39,10 @@ public class RobotContainer {
      * @return the autonomous command
      */
     public CommandBase getAutonomousCommand() {
-        if (MATCH_START_PATH_NAME_CHOOSER.get() == null)
+        if (MATCH_START_AUTO_NAME_CHOOSER.get() == null)
             return null;
 
-        return Commands.getMatchStartAuto(MATCH_START_PATH_NAME_CHOOSER.get());
+        return Commands.getMatchStartAuto(MATCH_START_AUTO_NAME_CHOOSER.get());
     }
 
     private void bindCommands() {
@@ -89,9 +90,12 @@ public class RobotContainer {
     }
 
     private void configureMatchStartAutoChooser() {
-        MATCH_START_PATH_NAME_CHOOSER.addDefaultOption("None", null);
+        MATCH_START_AUTO_NAME_CHOOSER.addDefaultOption("None", null);
 
-        for (String currentPathName : AutonomousConstants.AUTONOMOUS_PATHS_NAMES)
-            MATCH_START_PATH_NAME_CHOOSER.addOption(currentPathName, currentPathName);
+        for (String currentPathName : AutonomousConstants.AUTONOMOUS_PATHS_NAMES) {
+            if (currentPathName.contains("Red") || currentPathName.contains("Blue"))
+                currentPathName = currentPathName.replace("Red", "ALLIANCE").replace("Blue", "ALLIANCE");
+            MATCH_START_AUTO_NAME_CHOOSER.addOption(currentPathName, currentPathName);
+        }
     }
 }

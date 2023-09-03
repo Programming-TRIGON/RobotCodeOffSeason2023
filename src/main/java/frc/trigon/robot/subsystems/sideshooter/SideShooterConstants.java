@@ -46,6 +46,7 @@ public abstract class SideShooterConstants {
         HIGH(Rotation2d.fromDegrees(60), 1),
         MIDDLE(Rotation2d.fromDegrees(50), 1),
         LOW(Rotation2d.fromDegrees(0), 1),
+        LOW_FROM_AFAR(Rotation2d.fromDegrees(30), 1),
         COLLECTION(Rotation2d.fromDegrees(0), -1),
         SHOOT_OVER_RAMP(Rotation2d.fromDegrees(30), 1);
 

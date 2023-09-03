@@ -267,6 +267,10 @@ public class Swerve extends SubsystemBase {
     void fieldRelativeDrive(double xPower, double yPower, Rotation2d angle, boolean rateLimit) {
         constants.getRotationController().setGoal(angle.getDegrees());
         final Rotation2d currentAngle = RobotContainer.POSE_ESTIMATOR.getCurrentPose().getRotation();
+        profiledTargetPose = new Pose2d(
+                RobotContainer.POSE_ESTIMATOR.getCurrentPose().getTranslation(),
+                Rotation2d.fromDegrees(constants.getRotationController().getSetpoint().position)
+        );
         fieldRelativeDrive(
                 getDriveTranslation(xPower, yPower),
                 Rotation2d.fromDegrees(
@@ -377,6 +381,8 @@ public class Swerve extends SubsystemBase {
         Logger.getInstance().recordOutput("Swerve/Velocity/x", getCurrentVelocity().vxMetersPerSecond);
         Logger.getInstance().recordOutput("Swerve/Velocity/y", getCurrentVelocity().vyMetersPerSecond);
         Logger.getInstance().recordOutput("Swerve/currentCommand", getCurrentCommand() == null ? "null" : getCurrentCommand().getName());
+        Logger.getInstance().recordOutput("Swerve/currentStates", getModuleStates());
+        Logger.getInstance().recordOutput("Swerve/targetStates", getTargetStates());
 
         if (RobotContainer.POSE_ESTIMATOR == null)
             return;
@@ -403,6 +409,15 @@ public class Swerve extends SubsystemBase {
 
         for (int i = 0; i < modulesIO.length; i++)
             states[i] = modulesIO[i].getCurrentState();
+
+        return states;
+    }
+
+    private SwerveModuleState[] getTargetStates() {
+        final SwerveModuleState[] states = new SwerveModuleState[modulesIO.length];
+
+        for (int i = 0; i < modulesIO.length; i++)
+            states[i] = modulesIO[i].getTargetState();
 
         return states;
     }

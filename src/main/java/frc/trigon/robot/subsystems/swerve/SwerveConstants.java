@@ -1,12 +1,22 @@
 package frc.trigon.robot.subsystems.swerve;
 
 import com.pathplanner.lib.auto.PIDConstants;
+import com.pathplanner.lib.commands.PPSwerveControllerCommand;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 
 public abstract class SwerveConstants {
+    static {
+        PPSwerveControllerCommand.setLoggingCallbacks(
+                null,
+                (pose) -> Swerve.getInstance().profiledTargetPose = pose,
+                null,
+                null
+        );
+    }
+
     /**
      * @return the swerve's x-axis profiled pid controller
      */

@@ -38,9 +38,9 @@ public class SimulationSwerveConstants extends SwerveConstants {
     };
     private static final SwerveDriveKinematics KINEMATICS = new SwerveDriveKinematics(LOCATIONS);
     private static final PIDConstants
-            TRANSLATION_PID_CONSTANTS = new PIDConstants(12, 0, 0),
-            ROTATION_PID_CONSTANTS = new PIDConstants(7, 0, 0),
-            AUTO_ROTATION_PID_CONSTANTS = new PIDConstants(6, 3, 1);
+            TRANSLATION_PID_CONSTANTS = new PIDConstants(20, 0, 0),
+            ROTATION_PID_CONSTANTS = new PIDConstants(12, 0, 0),
+            AUTO_ROTATION_PID_CONSTANTS = new PIDConstants(6, 0, 0);
     private static final TrapezoidProfile.Constraints
             ROTATION_CONSTRAINTS = new TrapezoidProfile.Constraints(
                     720,

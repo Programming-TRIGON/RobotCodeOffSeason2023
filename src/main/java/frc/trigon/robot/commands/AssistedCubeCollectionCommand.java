@@ -30,7 +30,7 @@ public class AssistedCubeCollectionCommand extends ParallelCommandGroup {
         super.addCommands(
                 manualDriveWhileLockingOnCubeCommand,
                 Roller.getInstance().getFullCollectionCommand(),
-                SideShooter.getInstance().getSetTargetShooterState(SideShooterConstants.SideShooterState.COLLECTION)
+                SideShooter.getInstance().getSetTargetShooterStateCommand(SideShooterConstants.SideShooterState.COLLECTION)
         );
     }
 

@@ -34,7 +34,7 @@ public class SimulationArmConstants extends ArmConstants {
     private static final Rotation2d
             MIN_ANGLE = Rotation2d.fromDegrees(-45),
             MAX_ANGLE = Rotation2d.fromDegrees(180);
-    private static final boolean ANGLE_SIMULATE_GRAVITY = true;
+    private static final boolean ANGLE_SIMULATE_GRAVITY = false;
     static final SingleJointedArmSim ANGLE_SIMULATION = new SingleJointedArmSim(
             ANGLE_MOTORS,
             ANGLE_GEAR_RATIO,

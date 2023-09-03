@@ -35,25 +35,25 @@ public class Roller extends SubsystemBase {
     /**
      * @return a command that fully closes the roller, which means closing the roller and stopping collection
      */
-    public ParallelCommandGroup getFullCloseCommand() {
+    public CommandBase getFullCloseCommand() {
         final ParallelCommandGroup fullCloseCommand = new ParallelCommandGroup(
                 Commands.withoutRequirements(getCloseCommand()),
                 Commands.withoutRequirements(getStopCollectingCommand())
         );
-        fullCloseCommand.addRequirements(this);
-        return fullCloseCommand;
+
+        return Commands.withRequirements(fullCloseCommand, this);
     }
 
     /**
      * @return a command that fully activates the collection system, which means opening the roller and applying the collection power
      */
-    public SequentialCommandGroup getFullCollectionCommand() {
+    public CommandBase getFullCollectionCommand() {
         final SequentialCommandGroup fullCollectionCommand = new SequentialCommandGroup(
                 getOpenCommand().until(this::isOpen),
                 getStartCollectingCommand()
         );
-        fullCollectionCommand.addRequirements(this);
-        return fullCollectionCommand;
+
+        return Commands.withRequirements(fullCollectionCommand, this);
     }
 
     /**

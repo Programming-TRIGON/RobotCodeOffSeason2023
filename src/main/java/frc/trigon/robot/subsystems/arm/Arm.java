@@ -53,6 +53,23 @@ public class Arm extends SubsystemBase {
     }
 
     /**
+     * Checks if the arm is at a state.
+     *
+     * @param state the state
+     * @return whether the arm is at the state
+     */
+    public boolean atState(ArmConstants.ArmState state) {
+        return elevatorMotorAtPosition(state.elevatorPosition) && angleMotorAtAngle(state.angle);
+    }
+
+    /**
+     * @return if the arm is at its goal
+     */
+    public boolean atGoal() {
+        return angleMotorAtGoal() && elevatorMotorAtGoal();
+    }
+
+    /**
      * Sets the default state of the arm.
      *
      * @param state the default state
@@ -238,12 +255,20 @@ public class Arm extends SubsystemBase {
     }
 
     private boolean elevatorMotorAtGoal() {
-        return Math.abs(targetElevatorPosition - armInputs.elevatorMotorPositionMeters) < ArmConstants.ELEVATOR_MOTOR_POSITION_TOLERANCE &&
-                Math.abs(armInputs.elevatorMotorVelocityMetersPerSecond) < ArmConstants.ELEVATOR_MOTOR_VELOCITY_TOLERANCE;
+        return elevatorMotorAtPosition(targetElevatorPosition);
     }
 
     private boolean angleMotorAtGoal() {
-        return Math.abs(targetAngle.getDegrees() - armInputs.angleMotorPositionDegrees) < ArmConstants.ANGLE_MOTOR_ANGLE_TOLERANCE &&
+        return angleMotorAtAngle(targetAngle);
+    }
+
+    private boolean elevatorMotorAtPosition(double position) {
+        return Math.abs(position - armInputs.elevatorMotorPositionMeters) < ArmConstants.ELEVATOR_MOTOR_POSITION_TOLERANCE &&
+                Math.abs(armInputs.elevatorMotorVelocityMetersPerSecond) < ArmConstants.ELEVATOR_MOTOR_VELOCITY_TOLERANCE;
+    }
+
+    private boolean angleMotorAtAngle(Rotation2d angle) {
+        return Math.abs(angle.getDegrees() - armInputs.angleMotorPositionDegrees) < ArmConstants.ANGLE_MOTOR_ANGLE_TOLERANCE &&
                 Math.abs(armInputs.angleMotorVelocityDegreesPerSecond) < ArmConstants.ANGLE_MOTOR_VELOCITY_TOLERANCE;
     }
 

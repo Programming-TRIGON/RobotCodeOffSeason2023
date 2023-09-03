@@ -39,10 +39,10 @@ public abstract class ArmConstants {
             ANGLE_MOTOR_VELOCITY_TOLERANCE = 10;
 
     private static final double
-            MAX_ANGLE_VELOCITY = 100,
-            MAX_ANGLE_ACCELERATION = 100,
-            MAX_ELEVATOR_VELOCITY = 5,
-            MAX_ELEVATOR_ACCELERATION = 5;
+            MAX_ANGLE_VELOCITY = 700,
+            MAX_ANGLE_ACCELERATION = 700,
+            MAX_ELEVATOR_VELOCITY = 7,
+            MAX_ELEVATOR_ACCELERATION = 7;
     static final TrapezoidProfile.Constraints
             ANGLE_CONSTRAINTS = new TrapezoidProfile.Constraints(
                     MAX_ANGLE_VELOCITY, MAX_ANGLE_ACCELERATION
@@ -70,10 +70,10 @@ public abstract class ArmConstants {
 
     public enum ArmState {
         DEFAULT(0, DEFAULT_ARM_ANGLE),
-        HIGH_CONE(0.5, Rotation2d.fromDegrees(45)),
+        HIGH_CONE(1, Rotation2d.fromDegrees(30)),
         MIDDLE_CONE(0.3, Rotation2d.fromDegrees(30)),
         DOUBLE_SUBSTATION(0.2, Rotation2d.fromDegrees(46.5)),
-        STANDING_CONE_COLLECTION(0, Rotation2d.fromDegrees(-10));
+        STANDING_CONE_COLLECTION(0, Rotation2d.fromDegrees(-6));
 
         ArmState(double elevatorPosition, Rotation2d angle) {
             this.elevatorPosition = elevatorPosition;

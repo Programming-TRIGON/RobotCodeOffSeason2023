@@ -23,10 +23,7 @@ public class PoseEstimatorConstants {
             new PoseLimiter.StraightLine2d(new Translation2d(13.18173, 5.48711), new Translation2d(15.16293, 5.48711)),
             new PoseLimiter.StraightLine2d(new Translation2d(15.16293, 0), new Translation2d(15.16293, 5.48711)),
     };
-    private static final double BUMPERS_LENGTH = 0.08;
-
-    static final double GYRO_UPDATE_TIME_SECONDS = 0.020;
-    static final boolean LIMIT_POSITION = RobotConstants.ROBOT_TYPE == RobotConstants.RobotType.SIMULATION;
+    static final boolean LIMIT_POSITION = true;
 
     static final PoseLimiter POSE_LIMITER = new PoseLimiter(FieldConstants.ROBOT_LENGTH_WITH_BUMPERS, FIELD_LIMIT_LINES);
 

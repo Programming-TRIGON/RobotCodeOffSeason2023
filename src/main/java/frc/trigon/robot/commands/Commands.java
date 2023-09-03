@@ -4,6 +4,7 @@ import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.PathPlannerTrajectory;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.*;
 import frc.trigon.robot.RobotContainer;
 import frc.trigon.robot.constants.AutonomousConstants;
@@ -40,6 +41,9 @@ public class Commands {
      */
     public static CommandBase getMatchStartAuto(String pathName) {
         final List<PathPlannerTrajectory> autonomousPathGroup;
+        if (pathName.contains("ALLIANCE"))
+            pathName = pathName.replace("ALLIANCE", DriverStation.getAlliance().name());
+
         if (AutonomousConstants.PRELOADED_PATHS.containsKey(pathName)) {
             autonomousPathGroup = AutonomousConstants.PRELOADED_PATHS.get(pathName);
         } else {
@@ -55,9 +59,12 @@ public class Commands {
      */
     public static CommandBase getPreloadCurrentMatchStartAutoCommand() {
         return new InstantCommand(() -> {
-            final String pathName = RobotContainer.MATCH_START_PATH_NAME_CHOOSER.get();
+            String pathName = RobotContainer.MATCH_START_AUTO_NAME_CHOOSER.get();
             if (pathName == null)
                 return;
+            if (pathName.contains("ALLIANCE"))
+                pathName = pathName.replace("ALLIANCE", DriverStation.getAlliance().name());
+
             final List<PathPlannerTrajectory> pathGroup = PathPlanner.loadPathGroup(pathName, AutonomousConstants.AUTONOMOUS_PATH_CONSTRAINTS);
             final Pose2d initialPose = pathGroup.get(0).getInitialHolonomicPose();
             final Pose2d initialAlliancePose = new Pose2d(
@@ -67,8 +74,8 @@ public class Commands {
             );
 
             POSE_ESTIMATOR.resetPose(initialAlliancePose);
-            AutonomousConstants.PRELOADED_PATHS.put(RobotContainer.MATCH_START_PATH_NAME_CHOOSER.get(), pathGroup);
-        });
+            AutonomousConstants.PRELOADED_PATHS.put(pathName, pathGroup);
+        }).ignoringDisable(true);
     }
 
     /**
@@ -121,10 +128,10 @@ public class Commands {
             final FieldConstants.GridAlignment targetGridAlignment = FieldConstants.GridAlignment.getGridAlignment(
                     CommandsConstants.GRID_NUMBER.get(), CommandsConstants.IS_LEFT_COLUMN.get() ? 1 : 3
             );
-            final CommandBase driveToGridAlignmentCommand = SwerveCommands.getDriveToPoseCommand(
+            final CommandBase driveToGridAlignmentCommand = SwerveCommands.getEnterCommunityCommand(
                     AutonomousConstants.DRIVE_TO_GRID_ALIGNMENT_CONSTRAINTS,
-                    () -> targetGridAlignment.inFrontOfGridPose,
-                    true,
+                    targetGridAlignment.inFrontOfGridPose,
+                    0.1,
                     5
             );
 
@@ -148,17 +155,17 @@ public class Commands {
                     CommandsConstants.GRID_NUMBER.get(), 2
             );
             final Pose2d targetPose = changeRotation(targetGridAlignment.inFrontOfGridPose, Rotation2d.fromRotations(0.25));
-            final CommandBase driveToGridAlignmentCommand = SwerveCommands.getDriveToPoseCommand(
+            final CommandBase driveToGridAlignmentCommand = SwerveCommands.getEnterCommunityCommand(
                     AutonomousConstants.DRIVE_TO_GRID_ALIGNMENT_CONSTRAINTS,
-                    () -> targetPose,
-                    true,
+                    targetPose,
+                    0.1,
                     5
             );
 
             return new SequentialCommandGroup(
                     ROLLER.getFullCloseCommand().until(ROLLER::isClosed),
                     driveToGridAlignmentCommand.raceWith(SIDE_SHOOTER.getSetTargetShooterAngleCommand(targetState.angle)),
-                    SIDE_SHOOTER.getSetTargetShooterState(targetState).alongWith(getArbitrarySubsystemCommand(SWERVE).asProxy())
+                    SIDE_SHOOTER.getSetTargetShooterStateCommand(targetState).alongWith(getArbitrarySubsystemCommand(SWERVE).asProxy())
             );
         });
     }
@@ -199,7 +206,7 @@ public class Commands {
     public static CommandBase getShootCubeOverChargingStationCommand() {
         return new SequentialCommandGroup(
                 CommandsConstants.TURN_TO_GRID_COMMAND.until(() -> SWERVE.atAngle(Rotation2d.fromRotations(0.5))),
-                SIDE_SHOOTER.getSetTargetShooterState(SideShooterConstants.SideShooterState.SHOOT_OVER_RAMP)
+                SIDE_SHOOTER.getSetTargetShooterStateCommand(SideShooterConstants.SideShooterState.SHOOT_OVER_RAMP)
         );
     }
 
@@ -207,7 +214,7 @@ public class Commands {
     public static CommandBase getNonAssistedCubeCollectionCommand() {
         return new ParallelCommandGroup(
                 ROLLER.getFullCollectionCommand(),
-                SIDE_SHOOTER.getSetTargetShooterState(SideShooterConstants.SideShooterState.COLLECTION)
+                SIDE_SHOOTER.getSetTargetShooterStateCommand(SideShooterConstants.SideShooterState.COLLECTION)
         );
     }
 
@@ -220,6 +227,20 @@ public class Commands {
 
             SWERVE.getDefaultCommand().schedule();
         });
+    }
+
+    public static CommandBase getFullCollectionCloseCommand() {
+        return new ParallelCommandGroup(
+                ROLLER.getFullCloseCommand(),
+                SIDE_SHOOTER.getSetTargetShooterStateCommand(SideShooterConstants.SideShooterState.DEFAULT)
+        );
+    }
+
+    public static CommandBase getPlaceConeAtHighForAutoCommand() {
+        return new SequentialCommandGroup(
+                ARM.getGoToArmStateCommand(ArmConstants.ArmState.HIGH_CONE).until(() -> ARM.atState(ArmConstants.ArmState.HIGH_CONE)),
+                COLLECTOR.getSetTargetStateCommand(CollectorConstants.CollectorState.EJECT).alongWith(ARM.getGoToArmStateCommand(ArmConstants.ArmState.HIGH_CONE))
+        );
     }
 
     private static CommandBase getFullCollectionFromDoubleSubstationCommand(double substationY) {

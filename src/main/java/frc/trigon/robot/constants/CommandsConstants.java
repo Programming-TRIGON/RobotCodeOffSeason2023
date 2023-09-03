@@ -35,7 +35,7 @@ public class CommandsConstants {
 
     public static final CommandBase
             GO_TO_DEFAULT_ARM_STATE_COMMAND = ARM.getCurrentGoToArmPositionCommand(ArmConstants.ArmState.DEFAULT.elevatorPosition, ArmConstants.ArmState.DEFAULT.angle, 100, 100),
-            GO_TO_DEFAULT_SIDE_SHOOTER_STATE_COMMAND = SIDE_SHOOTER.getSetTargetShooterState(SideShooterConstants.SideShooterState.DEFAULT),
+            GO_TO_DEFAULT_SIDE_SHOOTER_STATE_COMMAND = SIDE_SHOOTER.getSetTargetShooterStateCommand(SideShooterConstants.SideShooterState.DEFAULT),
             STOP_COLLECTOR_COMMAND = COLLECTOR.getSetTargetStateCommand(CollectorConstants.CollectorState.STOP),
             FIELD_RELATIVE_DRIVE_COMMAND = SwerveCommands.getOpenLoopFieldRelativeDriveCommand(
                     () -> DRIVER_CONTROLLER.getLeftY() / OperatorConstants.STICKS_SPEED_DIVIDER / calculateShiftModeValue(),
@@ -52,19 +52,13 @@ public class CommandsConstants {
             MANUAL_DRIVE_WITH_TURN_TO_SHOOTING_ANGLE_COMMAND = SwerveCommands.getOpenLoopFieldRelativeDriveCommand(
                     () -> DRIVER_CONTROLLER.getLeftY() / OperatorConstants.STICKS_SPEED_DIVIDER / calculateShiftModeValue(),
                     () -> DRIVER_CONTROLLER.getLeftX() / OperatorConstants.STICKS_SPEED_DIVIDER / calculateShiftModeValue(),
-                    () -> Rotation2d.fromDegrees(AllianceUtilities.isBlueAlliance() ? -90 : 90),
+                    () -> Rotation2d.fromDegrees(90),
                     true
             ),
             SELF_RELATIVE_DRIVE_COMMAND = SwerveCommands.getOpenLoopSelfRelativeDriveCommand(
                     () -> DRIVER_CONTROLLER.getLeftY() / OperatorConstants.STICKS_SPEED_DIVIDER / calculateShiftModeValue(),
                     () -> DRIVER_CONTROLLER.getLeftX() / OperatorConstants.STICKS_SPEED_DIVIDER / calculateShiftModeValue(),
                     () -> DRIVER_CONTROLLER.getRightX() / OperatorConstants.STICKS_SPEED_DIVIDER / calculateShiftModeValue(),
-                    true
-            ),
-            FIELD_RELATIVE_X_AXIS_DRIVE_COMMAND =  SwerveCommands.getOpenLoopFieldRelativeDriveCommand(
-                    () -> DRIVER_CONTROLLER.getLeftY() / OperatorConstants.STICKS_SPEED_DIVIDER / calculateShiftModeValue(),
-                    () -> 0,
-                    () -> 0,
                     true
             ),
             TURN_TO_GRID_COMMAND = SwerveCommands.getOpenLoopFieldRelativeDriveCommand(
@@ -106,11 +100,11 @@ public class CommandsConstants {
     }
 
     private static Rotation2d calculateSimulationShooterAngleFromCube() {
-        final Translation2d cubePosition = new Translation2d(7.071023, 3.418165);
+        final Translation2d cubePosition = AllianceUtilities.toAlliancePose(new Pose2d(7.053130, 0.908663, new Rotation2d())).getTranslation();
         final Rotation2d
                 angleBetweenCube = Maths.getAngleBetweenTranslations(POSE_ESTIMATOR.getCurrentPose().getTranslation(), cubePosition),
                 robotFrontAngleFromCube = angleBetweenCube.minus(POSE_ESTIMATOR.getCurrentPose().getRotation());
-        return AllianceUtilities.isBlueAlliance() ? robotFrontAngleFromCube.plus(Rotation2d.fromDegrees(90)) : robotFrontAngleFromCube.plus(Rotation2d.fromDegrees(-90));
+        return robotFrontAngleFromCube.plus(Rotation2d.fromDegrees(-90));
     }
 
     private static Pose2d changeHeading(Pose2d pose2d, Rotation2d newRotation) {

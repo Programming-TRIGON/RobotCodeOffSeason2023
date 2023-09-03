@@ -5,9 +5,11 @@ import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.PathPlannerTrajectory;
 import com.pathplanner.lib.PathPoint;
 import com.pathplanner.lib.auto.SwerveAutoBuilder;
+import com.pathplanner.lib.commands.PPSwerveControllerCommand;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.*;
 import frc.trigon.robot.RobotContainer;
@@ -16,18 +18,18 @@ import frc.trigon.robot.subsystems.poseestimator.PoseEstimator;
 import frc.trigon.robot.utilities.AllianceUtilities;
 import frc.trigon.robot.utilities.Maths;
 
+import java.lang.reflect.Field;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CyclicBarrier;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
 public class SwerveCommands {
     private static final Swerve SWERVE = Swerve.getInstance();
     private static final PoseEstimator POSE_ESTIMATOR = RobotContainer.POSE_ESTIMATOR;
-    private static List<PathPlannerTrajectory> TARGET_TRAJECTORY = null;
-    private static double TRAJECTORY_START_TIMESTAMP = 0;
-    private static int LAST_TRAJECTORY_INDEX = 0;
 
     /**
      * Creates a command that will drive the robot using the given path group and event map.
@@ -39,7 +41,6 @@ public class SwerveCommands {
     public static SequentialCommandGroup getFollowPathGroupCommand(List<PathPlannerTrajectory> pathGroup, Map<String, Command> eventMap, boolean useAllianceColor) {
         final Command initializeDriveAndShowTargetCommand = new InstantCommand(() -> {
             initializeDrive(true);
-            initializePathGroupLogging(pathGroup, useAllianceColor);
         });
         final SwerveAutoBuilder swerveAutoBuilder = new SwerveAutoBuilder(
                 POSE_ESTIMATOR::getCurrentPose,
@@ -82,7 +83,6 @@ public class SwerveCommands {
     public static CommandBase getDriveToPoseCommand(PathConstraints constraints, Pose2d targetPose, boolean useAllianceColor, int maxRepetition) {
         final Pose2d targetAlliancePose = useAllianceColor ? toTargetAlliancePose(targetPose) : targetPose;
         final Pose2d currentPose = POSE_ESTIMATOR.getCurrentPose();
-
         final Rotation2d angleBetweenTranslations = Maths.getAngleBetweenTranslations(
                 currentPose.getTranslation(),
                 targetAlliancePose.getTranslation()
@@ -98,7 +98,6 @@ public class SwerveCommands {
                 angleBetweenTranslations,
                 targetAlliancePose.getRotation()
         );
-
         final PathPlannerTrajectory path = PathPlanner.generatePath(constraints, currentPoint, targetPoint);
 
         if (maxRepetition == 1 || SWERVE.atPose(targetAlliancePose))
@@ -110,6 +109,7 @@ public class SwerveCommands {
         );
     }
 
+    // TODO: javadocs
     public static FunctionalCommand getClosedLoopFieldRelativeXAxisDriveCommand(DoubleSupplier xSupplier, double yAxisLock, Rotation2d angleLock, boolean rateLimitX) {
         return new FunctionalCommand(
                 () -> {
@@ -124,7 +124,6 @@ public class SwerveCommands {
         );
     }
 
-    // TODO: javadocs
     public static FunctionalCommand getClosedLoopFieldRelativeDriveCommand(DoubleSupplier xSupplier, DoubleSupplier ySupplier, DoubleSupplier thetaSupplier, boolean rateLimit) {
         return new FunctionalCommand(
                 () -> initializeDrive(true),
@@ -191,11 +190,56 @@ public class SwerveCommands {
         );
     }
 
-    private static void updatePose2dFromTrajectory() {
-        final double timeDifference = Timer.getFPGATimestamp() - TRAJECTORY_START_TIMESTAMP;
-        if (TARGET_TRAJECTORY.get(LAST_TRAJECTORY_INDEX).getEndState().timeSeconds < timeDifference)
-            LAST_TRAJECTORY_INDEX++;
-        SWERVE.profiledTargetPose = getHolonomicPose((PathPlannerTrajectory.PathPlannerState) TARGET_TRAJECTORY.get(LAST_TRAJECTORY_INDEX).sample(timeDifference));
+    public static CommandBase getEnterCommunityCommand(PathConstraints constraints, Pose2d targetPose, double xAdder, int maxRepetition) {
+        return new ProxyCommand(() -> {
+            final Pose2d currentPose = POSE_ESTIMATOR.getCurrentPose();
+            final CommandBase enterCommunityCommand;
+
+            if (isHittingChargeStationFromSideOnCommunityEnter(toTargetAlliancePose(currentPose).getTranslation(), targetPose.getTranslation()))
+                enterCommunityCommand = getEnterCommunityFromSideCommand(constraints, targetPose, xAdder);
+            else if (isHittingChargeStationFromFrontOnCommunityEnter(toTargetAlliancePose(currentPose).getTranslation(), targetPose.getTranslation()))
+                enterCommunityCommand = getEnterCommunityFromFrontCommand(constraints, targetPose, xAdder);
+            else return getDriveToPoseCommand(constraints, () -> targetPose, true, maxRepetition);
+
+            return enterCommunityCommand.andThen(getDriveToPoseCommand(constraints, () -> targetPose, true, maxRepetition - 1));
+        });
+    }
+
+    private static CommandBase getEnterCommunityFromSideCommand(PathConstraints constraints, Pose2d targetPose, double xAdder) {
+        final Supplier<Pose2d> driveToXPose = () -> new Pose2d(
+                targetPose.getX() + xAdder,
+                POSE_ESTIMATOR.getCurrentPose().getY(),
+                targetPose.getRotation()
+        );
+        final CommandBase driveToXCommand = getDriveToPoseCommand(constraints, driveToXPose, false, 1);
+        final CommandBase driveToPoseCommand = getDriveToPoseCommand(constraints, () -> targetPose, true, 1);
+        return driveToXCommand.andThen(driveToPoseCommand);
+    }
+
+    private static CommandBase getEnterCommunityFromFrontCommand(PathConstraints constraints, Pose2d targetPose, double xAdder) {
+        final Pose2d currentPose = POSE_ESTIMATOR.getCurrentPose();
+        final double closestY = Maths.getClosestNumber(targetPose.getY(), FieldConstants.CHARGE_STATION_HIGHER_Y_FROM_ROBOT, FieldConstants.CHARGE_STATION_LOWER_Y_FROM_ROBOT);
+        final Pose2d driveToYPose = new Pose2d(
+                currentPose.getX(),
+                closestY,
+                targetPose.getRotation()
+        );
+        final CommandBase driveToYCommand = getDriveToPoseCommand(constraints, () -> driveToYPose, true, 1);
+        return driveToYCommand.andThen(getEnterCommunityFromSideCommand(constraints, targetPose, xAdder));
+    }
+
+    private static boolean isHittingChargeStationFromSideOnCommunityEnter(Translation2d currentPosition, Translation2d targetPosition) {
+        if (currentPosition.getX() < FieldConstants.CHARGE_STATION_INNER_X_FROM_ROBOT || targetPosition.getX() > FieldConstants.CHARGE_STATION_OUTER_X_FROM_ROBOT)
+            return false;
+        if (currentPosition.getY() < FieldConstants.CHARGE_STATION_HIGHER_Y_FROM_ROBOT && currentPosition.getY() > FieldConstants.CHARGE_STATION_LOWER_Y_FROM_ROBOT)
+            return false;
+        return !(targetPosition.getY() > FieldConstants.CHARGE_STATION_HIGHER_Y_FROM_ROBOT) && !(targetPosition.getY() < FieldConstants.CHARGE_STATION_LOWER_Y_FROM_ROBOT);
+    }
+
+    private static boolean isHittingChargeStationFromFrontOnCommunityEnter(Translation2d currentPosition, Translation2d targetPosition) {
+        if (currentPosition.getX() < FieldConstants.CHARGE_STATION_INNER_X_FROM_ROBOT || targetPosition.getX() > FieldConstants.CHARGE_STATION_OUTER_X_FROM_ROBOT)
+            return false;
+        return !(currentPosition.getY() > FieldConstants.CHARGE_STATION_HIGHER_Y_FROM_ROBOT) && !(currentPosition.getY() < FieldConstants.CHARGE_STATION_LOWER_Y_FROM_ROBOT);
     }
 
     private static Pose2d toTargetAlliancePose(Pose2d pose2d) {
@@ -203,18 +247,10 @@ public class SwerveCommands {
             return pose2d;
 
         return new Pose2d(
-                new Translation2d(
-                        pose2d.getX(),
-                        FieldConstants.FIELD_WIDTH_METERS - pose2d.getY()
-                ),
+                pose2d.getX(),
+                FieldConstants.FIELD_WIDTH_METERS - pose2d.getY(),
                 pose2d.getRotation()
         );
-    }
-
-    private static void initializePathGroupLogging(List<PathPlannerTrajectory> pathGroup, boolean useAllianceColor) {
-        TARGET_TRAJECTORY = useAllianceColor ? AllianceUtilities.transformPathGroupForAlliance(pathGroup) : pathGroup;
-        TRAJECTORY_START_TIMESTAMP = Timer.getFPGATimestamp();
-        LAST_TRAJECTORY_INDEX = 0;
     }
 
     private static Pose2d getHolonomicPose(PathPlannerTrajectory.PathPlannerState state) {

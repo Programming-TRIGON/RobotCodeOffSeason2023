@@ -48,7 +48,7 @@ public class SideShooter extends SubsystemBase {
      * @param sideShooterState the target side shooter state
      * @return the command
      */
-    public CommandBase getSetTargetShooterState(SideShooterConstants.SideShooterState sideShooterState) {
+    public CommandBase getSetTargetShooterStateCommand(SideShooterConstants.SideShooterState sideShooterState) {
         final Rotation2d targetAngle = sideShooterState.angle;
         final double targetPower = sideShooterState.power;
 
@@ -57,9 +57,8 @@ public class SideShooter extends SubsystemBase {
                 Commands.withoutRequirements(getSetTargetShooterPowerCommand(targetPower))
                         .alongWith(Commands.withoutRequirements(getSetTargetShooterAngleCommand(targetAngle)))
         );
-        setTargetShooterStateCommand.addRequirements(this);
 
-        return setTargetShooterStateCommand;
+        return Commands.withRequirements(setTargetShooterStateCommand, this);
     }
 
     /**

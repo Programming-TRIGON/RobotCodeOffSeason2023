@@ -4,8 +4,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import frc.trigon.robot.robotposesources.PoseSourceConstants;
 
-import java.util.Dictionary;
-
 public class FieldConstants {
     public static final double
             FIELD_LENGTH_METERS = 16.54175,
@@ -13,7 +11,7 @@ public class FieldConstants {
     public static final double
             INNER_SUBSTATION_Y = 6.13010,
             OUTER_SUBSTATION_Y = 7.44483;
-    public static final double ROBOT_LENGTH_WITH_BUMPERS = ((6.98 * 2 )+ 65) / 100;
+    public static final double ROBOT_LENGTH_WITH_BUMPERS = 0.825;
     private static final double IN_FRONT_OF_GRID_X = 1.37752 + (ROBOT_LENGTH_WITH_BUMPERS / 2);
     private static final double COLUMN_DISTANCE_FROM_MIDDLE_COLUMN = 0.55983;
     private static final double
@@ -21,6 +19,12 @@ public class FieldConstants {
             MIDDLE_GRID_MIDDLE_COLUMN_Y = PoseSourceConstants.TAGS_ID_TO_POSE.get(7).getY(),
             RIGHT_GRID_MIDDLE_COLUMN_Y = PoseSourceConstants.TAGS_ID_TO_POSE.get(8).getY();
     private static final Rotation2d IN_FRONT_OF_GRID_ROTATION = Rotation2d.fromRotations(0.5);
+
+    public static final double
+            CHARGE_STATION_INNER_X_FROM_ROBOT = 2.88 - (ROBOT_LENGTH_WITH_BUMPERS / 2),
+            CHARGE_STATION_OUTER_X_FROM_ROBOT = 4.83 + (ROBOT_LENGTH_WITH_BUMPERS / 2),
+            CHARGE_STATION_HIGHER_Y_FROM_ROBOT = 3.97 + (ROBOT_LENGTH_WITH_BUMPERS / 2),
+            CHARGE_STATION_LOWER_Y_FROM_ROBOT = 1.52 - (ROBOT_LENGTH_WITH_BUMPERS / 2);
 
     public enum GridAlignment {
         LEFT_GRID_LEFT_COLUMN(IN_FRONT_OF_GRID_X, LEFT_GRID_MIDDLE_COLUMN_Y + COLUMN_DISTANCE_FROM_MIDDLE_COLUMN, IN_FRONT_OF_GRID_ROTATION),
