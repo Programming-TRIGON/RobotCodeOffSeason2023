@@ -1,7 +1,10 @@
 package frc.trigon.robot.subsystems.sideshooter.kablamasideshooter;
 
-import com.ctre.phoenix.motorcontrol.NeutralMode;
-import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
+import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel;
 import com.revrobotics.SparkMaxAbsoluteEncoder;
@@ -11,14 +14,14 @@ import frc.trigon.robot.subsystems.sideshooter.SideShooterConstants;
 
 public class KablamaSideShooterConstants extends SideShooterConstants {
     static final double VOLTAGE_COMPENSATION_SATURATION = 12;
+    static final boolean SHOOTING_MOTOR_FOC = false;
 
-    private static final boolean
-            SHOOTING_MOTOR_INVERTED = false,
-            ANGLE_MOTOR_INVERTED = false;
+    private static final boolean ANGLE_MOTOR_INVERTED = false;
+    private static final InvertedValue SHOOTING_MOTOR_INVERTED_VALUE = InvertedValue.CounterClockwise_Positive;
     private static final int
             SHOOTING_MOTOR_ID = 1,
             ANGLE_MOTOR_ID = 1;
-    private static final NeutralMode DEFAULT_SHOOTING_MOTOR_NEUTRAL_MODE = NeutralMode.Brake;
+    private static final NeutralModeValue DEFAULT_SHOOTING_MOTOR_NEUTRAL_MODE_VALUE = NeutralModeValue.Brake;
     private static final CANSparkMax.IdleMode DEFAULT_ANGLE_MOTOR_IDLE_MODE = CANSparkMax.IdleMode.kBrake;
     private static final double
             ANGLE_MOTOR_P = 1,
@@ -29,9 +32,11 @@ public class KablamaSideShooterConstants extends SideShooterConstants {
             ANGLE_MOTOR_CURRENT_LIMIT = 30,
             SHOOTING_MOTOR_CURRENT_LIMIT = 30;
 
-    static final WPI_TalonSRX SHOOTING_MOTOR = new WPI_TalonSRX(SHOOTING_MOTOR_ID);
+    static final TalonFX SHOOTING_MOTOR = new TalonFX(SHOOTING_MOTOR_ID);
     static final CANSparkMax ANGLE_MOTOR = new CANSparkMax(ANGLE_MOTOR_ID, CANSparkMaxLowLevel.MotorType.kBrushless);
     static final SparkMaxAbsoluteEncoder ANGLE_ENCODER = ANGLE_MOTOR.getAbsoluteEncoder(SparkMaxAbsoluteEncoder.Type.kDutyCycle);
+
+    static StatusSignal<Double> STATOR_CURRENT_SIGNAL, MOTOR_OUTPUT_PERCENT_SIGNAL;
 
     private static final double
             ANGLE_MOTOR_KS = 0,
@@ -55,16 +60,21 @@ public class KablamaSideShooterConstants extends SideShooterConstants {
     }
 
     private static void configureShootingMotor() {
-        SHOOTING_MOTOR.configFactoryDefault();
+        final TalonFXConfiguration config = new TalonFXConfiguration();
 
-        SHOOTING_MOTOR.configVoltageCompSaturation(VOLTAGE_COMPENSATION_SATURATION);
-        SHOOTING_MOTOR.enableVoltageCompensation(true);
+        config.MotorOutput.Inverted = SHOOTING_MOTOR_INVERTED_VALUE;
+        config.MotorOutput.NeutralMode = DEFAULT_SHOOTING_MOTOR_NEUTRAL_MODE_VALUE;
 
-        SHOOTING_MOTOR.setInverted(SHOOTING_MOTOR_INVERTED);
-        SHOOTING_MOTOR.setNeutralMode(DEFAULT_SHOOTING_MOTOR_NEUTRAL_MODE);
+        config.CurrentLimits.StatorCurrentLimit = SHOOTING_MOTOR_CURRENT_LIMIT;
+        config.CurrentLimits.StatorCurrentLimitEnable = true;
 
-        SHOOTING_MOTOR.configPeakCurrentLimit(SHOOTING_MOTOR_CURRENT_LIMIT);
-        SHOOTING_MOTOR.enableCurrentLimit(true);
+        SHOOTING_MOTOR.getConfigurator().apply(config);
+
+        STATOR_CURRENT_SIGNAL = SHOOTING_MOTOR.getStatorCurrent();
+        MOTOR_OUTPUT_PERCENT_SIGNAL = SHOOTING_MOTOR.getDutyCycle();
+
+        STATOR_CURRENT_SIGNAL.setUpdateFrequency(10);
+        MOTOR_OUTPUT_PERCENT_SIGNAL.setUpdateFrequency(10);
     }
 
     private static void configureAngleMotor() {

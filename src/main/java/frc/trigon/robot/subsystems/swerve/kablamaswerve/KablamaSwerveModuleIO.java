@@ -1,5 +1,6 @@
 package frc.trigon.robot.subsystems.swerve.kablamaswerve;
 
+import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
@@ -17,24 +18,31 @@ public class KablamaSwerveModuleIO extends SwerveModuleIO {
     private final CANSparkMax steerMotor;
     private final SparkMaxAbsoluteEncoder steerEncoder;
 
-    public KablamaSwerveModuleIO(KablamaSwerveModuleConstants.KablamaSwerveModules module) {
+    private final StatusSignal<Double> positionSignal, velocitySignal, dutyCycleSignal;
+
+    KablamaSwerveModuleIO(KablamaSwerveModuleConstants.KablamaSwerveModules module) {
         super(module.name());
         final KablamaSwerveModuleConstants moduleConstants = module.swerveModuleConstants;
 
         this.steerMotor = moduleConstants.steerMotor;
         this.driveMotor = moduleConstants.driveMotor;
         steerEncoder = steerMotor.getAbsoluteEncoder(SparkMaxAbsoluteEncoder.Type.kDutyCycle);
+
+        positionSignal = driveMotor.getPosition();
+        velocitySignal = driveMotor.getVelocity();
+        dutyCycleSignal = driveMotor.getDutyCycle();
     }
 
     @Override
     protected void updateInputs(SwerveModuleInputsAutoLogged inputs) {
         inputs.steerAngleDegrees = steerEncoder.getPosition();
         inputs.steerAppliedVoltage = steerMotor.getBusVoltage();
-        inputs.drivePositionRevolutions = driveMotor.getPosition().getValue();
+
+        inputs.drivePositionRevolutions = positionSignal.refresh().getValue();
         inputs.driveDistanceMeters = Conversions.revolutionsToDistance(inputs.drivePositionRevolutions, KablamaSwerveModuleConstants.WHEEL_DIAMETER_METERS);
+        inputs.driveVelocityRevolutionsPerSecond = velocitySignal.refresh().getValue();
         inputs.driveVelocityMetersPerSecond = Conversions.revolutionsToDistance(inputs.driveVelocityRevolutionsPerSecond, KablamaSwerveModuleConstants.WHEEL_DIAMETER_METERS);
-        inputs.driveVelocityRevolutionsPerSecond = driveMotor.getVelocity().getValue();
-        inputs.driveAppliedVoltage = driveMotor.getSupplyVoltage().getValue();
+        inputs.driveAppliedVoltage = dutyCycleSignal.refresh().getValue() * KablamaSwerveModuleConstants.VOLTAGE_COMPENSATION_SATURATION;
     }
 
     @Override

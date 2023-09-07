@@ -33,14 +33,4 @@ public class AllianceUtilities {
                 pose.getRotation().minus(Rotation2d.fromRotations(0.5))
         );
     }
-
-    //TODO: docs
-    public static List<PathPlannerTrajectory> transformPathGroupForAlliance(List<PathPlannerTrajectory> pathGroup) {
-        final List<PathPlannerTrajectory> toReturn = new ArrayList<>();
-        final DriverStation.Alliance alliance = DriverStation.getAlliance();
-        for (PathPlannerTrajectory pathPlannerTrajectory : pathGroup)
-            toReturn.add(PathPlannerTrajectory.transformTrajectoryForAlliance(pathPlannerTrajectory, alliance));
-
-        return toReturn;
-    }
 }

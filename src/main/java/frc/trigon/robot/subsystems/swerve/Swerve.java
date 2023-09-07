@@ -83,7 +83,7 @@ public class Swerve extends SubsystemBase {
      * @return the heading of the robot
      */
     public Rotation2d getHeading() {
-        final double heading = swerveInputs.gyroAngleDegrees;
+        final double heading = swerveInputs.gyroYawDegrees;
         final double inputtedHeading = MathUtil.inputModulus(heading, -180, 180);
 
         return Rotation2d.fromDegrees(inputtedHeading);

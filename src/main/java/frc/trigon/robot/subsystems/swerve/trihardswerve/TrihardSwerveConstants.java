@@ -1,5 +1,6 @@
 package frc.trigon.robot.subsystems.swerve.trihardswerve;
 
+import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.hardware.Pigeon2;
 import com.pathplanner.lib.auto.PIDConstants;
@@ -82,28 +83,36 @@ public class TrihardSwerveConstants extends SwerveConstants {
             TRANSLATION_VELOCITY_TOLERANCE = 0.05,
             ROTATION_VELOCITY_TOLERANCE = 0.05;
 
+    static StatusSignal<Double> YAW_SIGNAL, PITCH_SIGNAL, X_ACCELERATION_SIGNAL, Y_ACCELERATION_SIGNAL, Z_ACCELERATION_SIGNAL;
+
     static {
         ROTATION_CONTROLLER.enableContinuousInput(-180, 180);
         ROTATION_CONTROLLER.setIntegratorRange(-30, 30);
-        if (!RobotConstants.IS_REPLAY) {
-            final Pigeon2Configuration gyroConfig = new Pigeon2Configuration();
 
-            gyroConfig.MountPose.MountPoseRoll = Units.radiansToDegrees(GYRO_MOUNT_POSITION.getX());
-            gyroConfig.MountPose.MountPosePitch = Units.radiansToDegrees(GYRO_MOUNT_POSITION.getY());
-            gyroConfig.MountPose.MountPoseYaw = Units.radiansToDegrees(GYRO_MOUNT_POSITION.getZ());
+        if (!RobotConstants.IS_REPLAY)
+            configureGyro();
+    }
 
-            GYRO.getConfigurator().apply(gyroConfig);
-            // TODO: Status signals
-//        GYRO.setStatusFramePeriod(PigeonIMU_StatusFrame.CondStatus_1_General, 200);
-//        GYRO.setStatusFramePeriod(PigeonIMU_StatusFrame.CondStatus_2_GeneralCompass, 1000);
-//        GYRO.setStatusFramePeriod(PigeonIMU_StatusFrame.CondStatus_3_GeneralAccel, 1000);
-//        GYRO.setStatusFramePeriod(PigeonIMU_StatusFrame.CondStatus_6_SensorFusion, 1000);
-//        GYRO.setStatusFramePeriod(PigeonIMU_StatusFrame.CondStatus_10_SixDeg_Quat, 1000);
-//        GYRO.setStatusFramePeriod(PigeonIMU_StatusFrame.CondStatus_11_GyroAccum, 1000);
-//        GYRO.setStatusFramePeriod(PigeonIMU_StatusFrame.BiasedStatus_2_Gyro, 1000);
-//        GYRO.setStatusFramePeriod(PigeonIMU_StatusFrame.BiasedStatus_4_Mag, 1000);
-//        GYRO.setStatusFramePeriod(PigeonIMU_StatusFrame.BiasedStatus_6_Accel, 30);
-        }
+    private static void configureGyro() {
+        final Pigeon2Configuration gyroConfig = new Pigeon2Configuration();
+
+        gyroConfig.MountPose.MountPoseRoll = Units.radiansToDegrees(GYRO_MOUNT_POSITION.getX());
+        gyroConfig.MountPose.MountPosePitch = Units.radiansToDegrees(GYRO_MOUNT_POSITION.getY());
+        gyroConfig.MountPose.MountPoseYaw = Units.radiansToDegrees(GYRO_MOUNT_POSITION.getZ());
+
+        GYRO.getConfigurator().apply(gyroConfig);
+
+        YAW_SIGNAL = GYRO.getYaw();
+        PITCH_SIGNAL = GYRO.getPitch();
+        X_ACCELERATION_SIGNAL = GYRO.getAccelerationX();
+        Y_ACCELERATION_SIGNAL = GYRO.getAccelerationY();
+        Z_ACCELERATION_SIGNAL = GYRO.getAccelerationZ();
+
+        YAW_SIGNAL.setUpdateFrequency(200);
+        PITCH_SIGNAL.setUpdateFrequency(100);
+        X_ACCELERATION_SIGNAL.setUpdateFrequency(50);
+        Y_ACCELERATION_SIGNAL.setUpdateFrequency(50);
+        Z_ACCELERATION_SIGNAL.setUpdateFrequency(50);
     }
 
     @Override

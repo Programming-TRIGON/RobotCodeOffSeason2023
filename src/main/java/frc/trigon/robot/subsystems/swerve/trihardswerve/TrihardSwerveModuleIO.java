@@ -1,5 +1,6 @@
 package frc.trigon.robot.subsystems.swerve.trihardswerve;
 
+import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
@@ -13,24 +14,33 @@ import frc.trigon.robot.utilities.Conversions;
 
 public class TrihardSwerveModuleIO extends SwerveModuleIO {
     private final TalonFX steerMotor, driveMotor;
+    private final StatusSignal<Double> steerPositionSignal, steerDutyCycleSignal, drivePositionSignal, driveVelocitySignal, driveDutyCycleSignal;
 
-    public TrihardSwerveModuleIO(TrihardSwerveModuleConstants.TrihardSwerveModules module) {
+    TrihardSwerveModuleIO(TrihardSwerveModuleConstants.TrihardSwerveModules module) {
         super(module.name());
         final TrihardSwerveModuleConstants moduleConstants = module.swerveModuleConstants;
 
         this.steerMotor = moduleConstants.steerMotor;
         this.driveMotor = moduleConstants.driveMotor;
+
+        steerPositionSignal = steerMotor.getPosition();
+        steerDutyCycleSignal = steerMotor.getDutyCycle();
+
+        drivePositionSignal = driveMotor.getPosition();
+        driveVelocitySignal = driveMotor.getVelocity();
+        driveDutyCycleSignal = driveMotor.getDutyCycle();
     }
 
     @Override
     protected void updateInputs(SwerveModuleInputsAutoLogged inputs) {
         inputs.steerAngleDegrees = getAngleDegrees();
-        inputs.steerAppliedVoltage = steerMotor.getSupplyVoltage().getValue();
-        inputs.drivePositionRevolutions = driveMotor.getPosition().getValue();
+        inputs.steerAppliedVoltage = steerDutyCycleSignal.refresh().getValue() * TrihardSwerveModuleConstants.VOLTAGE_COMPENSATION_SATURATION;
+
+        inputs.drivePositionRevolutions = drivePositionSignal.refresh().getValue();
         inputs.driveDistanceMeters = driveMotorValueToDistance(inputs.drivePositionRevolutions);
+        inputs.driveVelocityRevolutionsPerSecond = driveVelocitySignal.refresh().getValue();
         inputs.driveVelocityMetersPerSecond = driveMotorValueToDistance(inputs.driveVelocityRevolutionsPerSecond);
-        inputs.driveVelocityRevolutionsPerSecond = driveMotor.getVelocity().getValue();
-        inputs.driveAppliedVoltage = driveMotor.getSupplyVoltage().getValue();
+        inputs.driveAppliedVoltage = driveDutyCycleSignal.refresh().getValue() * TrihardSwerveModuleConstants.VOLTAGE_COMPENSATION_SATURATION;
     }
 
     @Override
@@ -82,7 +92,7 @@ public class TrihardSwerveModuleIO extends SwerveModuleIO {
     }
 
     private double getAngleDegrees() {
-        final double motorRevolutions = steerMotor.getPosition().getValue();
+        final double motorRevolutions = steerPositionSignal.refresh().getValue();
         final double motorDegrees = Conversions.revolutionsToDegrees(motorRevolutions);
 
         return Conversions.motorToSystem(motorDegrees, TrihardSwerveModuleConstants.STEER_GEAR_RATIO);

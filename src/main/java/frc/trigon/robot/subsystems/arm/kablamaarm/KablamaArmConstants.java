@@ -9,6 +9,7 @@ import frc.trigon.robot.constants.RobotConstants;
 import frc.trigon.robot.subsystems.arm.ArmConstants;
 
 import java.util.HashMap;
+import java.util.List;
 
 public class KablamaArmConstants extends ArmConstants {
     private static final double VOLTAGE_COMPENSATION_SATURATION = 12;
@@ -29,10 +30,10 @@ public class KablamaArmConstants extends ArmConstants {
     private static final double ANGLE_ENCODER_OFFSET = 0;
     private static final int ANGLE_CURRENT_LIMIT = 30;
     static final CANSparkMax MASTER_ANGLE_MOTOR = new CANSparkMax(MASTER_ANGLE_MOTOR_ID, CANSparkMaxLowLevel.MotorType.kBrushless);
-    static final SparkMaxAbsoluteEncoder ANGLE_ENCODER = MASTER_ANGLE_MOTOR.getAbsoluteEncoder(SparkMaxAbsoluteEncoder.Type.kDutyCycle);
     private static final CANSparkMax
             FIRST_FOLLOWER_ANGLE_MOTOR = new CANSparkMax(FIRST_FOLLOWER_ANGLE_MOTOR_ID, CANSparkMaxLowLevel.MotorType.kBrushless),
             SECOND_FOLLOWER_ANGLE_MOTOR = new CANSparkMax(SECOND_FOLLOWER_ANGLE_MOTOR_ID, CANSparkMaxLowLevel.MotorType.kBrushless);
+    static final SparkMaxAbsoluteEncoder ANGLE_ENCODER = MASTER_ANGLE_MOTOR.getAbsoluteEncoder(SparkMaxAbsoluteEncoder.Type.kDutyCycle);
 
     private static final int
             MASTER_ELEVATOR_MOTOR_ID = 0,
@@ -48,8 +49,8 @@ public class KablamaArmConstants extends ArmConstants {
     private static final double ELEVATOR_ENCODER_OFFSET = 0;
     private static final int ELEVATOR_CURRENT_LIMIT = 30;
     static final CANSparkMax MASTER_ELEVATOR_MOTOR = new CANSparkMax(MASTER_ELEVATOR_MOTOR_ID, CANSparkMaxLowLevel.MotorType.kBrushless);
-    static final SparkMaxAbsoluteEncoder ELEVATOR_ENCODER = MASTER_ELEVATOR_MOTOR.getAbsoluteEncoder(SparkMaxAbsoluteEncoder.Type.kDutyCycle);
     private static final CANSparkMax FOLLOWER_ELEVATOR_MOTOR = new CANSparkMax(FOLLOWER_ELEVATOR_MOTOR_ID, CANSparkMaxLowLevel.MotorType.kBrushless);
+    static final SparkMaxAbsoluteEncoder ELEVATOR_ENCODER = MASTER_ELEVATOR_MOTOR.getAbsoluteEncoder(SparkMaxAbsoluteEncoder.Type.kDutyCycle);
 
     private static final double
             ELEVATOR_MOTOR_KS = 0,
@@ -133,7 +134,14 @@ public class KablamaArmConstants extends ArmConstants {
         FIRST_FOLLOWER_ANGLE_MOTOR.setSmartCurrentLimit(ANGLE_CURRENT_LIMIT);
         SECOND_FOLLOWER_ANGLE_MOTOR.setSmartCurrentLimit(ANGLE_CURRENT_LIMIT);
 
-        // TODO: Periodic Frame Periods
+        for (CANSparkMax currentAngleMotor : List.of(MASTER_ANGLE_MOTOR, FIRST_FOLLOWER_ANGLE_MOTOR, SECOND_FOLLOWER_ANGLE_MOTOR)){
+            currentAngleMotor.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus0, 300); // Applied output
+            currentAngleMotor.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus1, 10); // Motor movement
+            currentAngleMotor.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus2, 10); // Motor position
+            currentAngleMotor.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus3, 1000); // Analog sensor
+            currentAngleMotor.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus4, 1000); // Alternate encoder
+            currentAngleMotor.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus5, 100); // Duty cycle position
+        }
 
         MASTER_ANGLE_MOTOR.burnFlash();
         FIRST_FOLLOWER_ANGLE_MOTOR.burnFlash();
@@ -165,7 +173,14 @@ public class KablamaArmConstants extends ArmConstants {
         MASTER_ELEVATOR_MOTOR.setSmartCurrentLimit(ELEVATOR_CURRENT_LIMIT);
         FOLLOWER_ELEVATOR_MOTOR.setSmartCurrentLimit(ELEVATOR_CURRENT_LIMIT);
 
-        // TODO: Periodic Frame Periods
+        for (CANSparkMax currentElevatorMotor : List.of(MASTER_ELEVATOR_MOTOR, FOLLOWER_ELEVATOR_MOTOR)){
+            currentElevatorMotor.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus0, 300); // Applied output
+            currentElevatorMotor.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus1, 10); // Motor movement
+            currentElevatorMotor.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus2, 10); // Motor position
+            currentElevatorMotor.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus3, 1000); // Analog sensor
+            currentElevatorMotor.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus4, 1000); // Alternate encoder
+            currentElevatorMotor.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus5, 100); // Duty cycle position
+        }
 
         MASTER_ELEVATOR_MOTOR.burnFlash();
         FOLLOWER_ELEVATOR_MOTOR.burnFlash();

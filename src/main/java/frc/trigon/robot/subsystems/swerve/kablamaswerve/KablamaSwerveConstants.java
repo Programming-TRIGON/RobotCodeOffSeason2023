@@ -1,5 +1,6 @@
 package frc.trigon.robot.subsystems.swerve.kablamaswerve;
 
+import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.hardware.Pigeon2;
 import com.pathplanner.lib.auto.PIDConstants;
@@ -75,22 +76,29 @@ public class KablamaSwerveConstants extends SwerveConstants {
             TRANSLATION_VELOCITY_TOLERANCE = 0.05,
             ROTATION_VELOCITY_TOLERANCE = 0.05;
 
+    static StatusSignal<Double> YAW_SIGNAL, PITCH_SIGNAL, X_ACCELERATION_SIGNAL, Y_ACCELERATION_SIGNAL, Z_ACCELERATION_SIGNAL;
+
     static {
         ROTATION_CONTROLLER.enableContinuousInput(-180, 180);
-        if (!RobotConstants.IS_REPLAY) {
-            GYRO.getConfigurator().apply(new Pigeon2Configuration());
 
-            // TODO: Status signals
-//        GYRO.get(PigeonIMU_StatusFrame.CondStatus_1_General, 200);
-//        GYRO.setStatusFramePeriod(PigeonIMU_StatusFrame.CondStatus_2_GeneralCompass, 1000);
-//        GYRO.setStatusFramePeriod(PigeonIMU_StatusFrame.CondStatus_3_GeneralAccel, 1000);
-//        GYRO.setStatusFramePeriod(PigeonIMU_StatusFrame.CondStatus_6_SensorFusion, 1000);
-//        GYRO.setStatusFramePeriod(PigeonIMU_StatusFrame.CondStatus_10_SixDeg_Quat, 1000);
-//        GYRO.setStatusFramePeriod(PigeonIMU_StatusFrame.CondStatus_11_GyroAccum, 1000);
-//        GYRO.setStatusFramePeriod(PigeonIMU_StatusFrame.BiasedStatus_2_Gyro, 1000);
-//        GYRO.setStatusFramePeriod(PigeonIMU_StatusFrame.BiasedStatus_4_Mag, 1000);
-//        GYRO.setStatusFramePeriod(PigeonIMU_StatusFrame.BiasedStatus_6_Accel, 1000);
-        }
+        if (!RobotConstants.IS_REPLAY)
+            configureGyro();
+    }
+
+    private static void configureGyro() {
+        GYRO.getConfigurator().apply(new Pigeon2Configuration());
+
+        YAW_SIGNAL = GYRO.getYaw();
+        PITCH_SIGNAL = GYRO.getPitch();
+        X_ACCELERATION_SIGNAL = GYRO.getAccelerationX();
+        Y_ACCELERATION_SIGNAL = GYRO.getAccelerationY();
+        Z_ACCELERATION_SIGNAL = GYRO.getAccelerationZ();
+
+        YAW_SIGNAL.setUpdateFrequency(200);
+        PITCH_SIGNAL.setUpdateFrequency(100);
+        X_ACCELERATION_SIGNAL.setUpdateFrequency(50);
+        Y_ACCELERATION_SIGNAL.setUpdateFrequency(50);
+        Z_ACCELERATION_SIGNAL.setUpdateFrequency(50);
     }
 
     @Override

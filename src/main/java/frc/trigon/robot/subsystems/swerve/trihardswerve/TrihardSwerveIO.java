@@ -10,16 +10,15 @@ public class TrihardSwerveIO extends SwerveIO {
 
     @Override
     protected void updateInputs(SwerveInputsAutoLogged inputs) {
-        inputs.gyroAngleDegrees = gyro.getRotation2d().getDegrees();
-        inputs.gyroPitchDegrees = gyro.getPitch().getValue();
-        inputs.accelerationX = gyro.getAccelerationX().getValue();
-        inputs.accelerationY = gyro.getAccelerationY().getValue();
-        inputs.accelerationZ = gyro.getAccelerationZ().getValue();
+        inputs.gyroYawDegrees = TrihardSwerveConstants.YAW_SIGNAL.refresh().getValue();
+        inputs.gyroPitchDegrees = TrihardSwerveConstants.PITCH_SIGNAL.refresh().getValue();
+        inputs.accelerationX = TrihardSwerveConstants.X_ACCELERATION_SIGNAL.refresh().getValue();
+        inputs.accelerationY = TrihardSwerveConstants.Y_ACCELERATION_SIGNAL.refresh().getValue();
+        inputs.accelerationZ = TrihardSwerveConstants.Z_ACCELERATION_SIGNAL.refresh().getValue();
     }
 
     @Override
     protected void setHeading(Rotation2d heading) {
-        // TODO: check if this is degrees or something else
         gyro.setYaw(heading.getDegrees());
     }
 }

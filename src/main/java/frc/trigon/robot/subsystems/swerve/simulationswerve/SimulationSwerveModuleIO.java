@@ -14,7 +14,7 @@ public class SimulationSwerveModuleIO extends SwerveModuleIO {
     private double driveAppliedVoltage, steerAppliedVoltage;
     private SwerveModuleInputsAutoLogged lastInputs = new SwerveModuleInputsAutoLogged();
 
-    public SimulationSwerveModuleIO(SimulationSwerveModuleConstants.SimulationSwerveModules module) {
+    SimulationSwerveModuleIO(SimulationSwerveModuleConstants.SimulationSwerveModules module) {
         super(module.name());
         final SimulationSwerveModuleConstants moduleConstants = module.swerveModuleConstants;
 

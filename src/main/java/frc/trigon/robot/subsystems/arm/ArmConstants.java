@@ -28,9 +28,7 @@ public abstract class ArmConstants {
     static final Translation3d ARM_ROOT_TRANSLATION = new Translation3d(
             ARM_ROOT_X, 0, ARM_ROOT_HEIGHT
     );
-    static final double
-            THIRD_ELEVATOR_LEVEL_EXTENDED_LENGTH = 0.528,
-            SECOND_ELEVATOR_LEVEL_EXTENDED_LENGTH = 0.525;
+    static final double SECOND_ELEVATOR_LEVEL_EXTENDED_LENGTH = 0.525;
 
     static final double
             ELEVATOR_MOTOR_POSITION_TOLERANCE = 0.1,

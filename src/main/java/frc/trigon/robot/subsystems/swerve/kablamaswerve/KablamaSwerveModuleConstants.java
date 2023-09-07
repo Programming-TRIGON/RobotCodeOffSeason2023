@@ -30,7 +30,6 @@ public class KablamaSwerveModuleConstants {
             FRONT_RIGHT_DRIVE_MOTOR_ID = FRONT_RIGHT_ID + 1,
             REAR_LEFT_DRIVE_MOTOR_ID = REAR_LEFT_ID + 1,
             REAR_RIGHT_DRIVE_MOTOR_ID = REAR_RIGHT_ID + 1;
-    // TODO: Why is this inverted?
     private static final InvertedValue DRIVE_MOTOR_INVERTED_VALUE = InvertedValue.Clockwise_Positive;
     private static final double
             DRIVE_OPEN_LOOP_RAMP_RATE = 0.2,
@@ -166,6 +165,10 @@ public class KablamaSwerveModuleConstants {
         motorConfig.Audio.BeepOnBoot = false;
 
         driveMotor.getConfigurator().apply(motorConfig);
+
+        driveMotor.getPosition().setUpdateFrequency(100);
+        driveMotor.getVelocity().setUpdateFrequency(25);
+        driveMotor.getDutyCycle().setUpdateFrequency(10);
     }
 
     enum KablamaSwerveModules {

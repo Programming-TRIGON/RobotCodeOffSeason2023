@@ -14,7 +14,7 @@ public class SimulationSwerveIO extends SwerveIO {
     protected void updateInputs(SwerveInputsAutoLogged inputs) {
         simulationRadians += Swerve.getInstance().getCurrentVelocity().omegaRadiansPerSecond * RobotConstants.PERIODIC_TIME_SECONDS;
 
-        inputs.gyroAngleDegrees = Units.radiansToDegrees(simulationRadians);
+        inputs.gyroYawDegrees = Units.radiansToDegrees(simulationRadians);
     }
 
     @Override

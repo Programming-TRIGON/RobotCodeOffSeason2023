@@ -10,16 +10,15 @@ public class KablamaSwerveIO extends SwerveIO {
 
     @Override
     protected void updateInputs(SwerveInputsAutoLogged inputs) {
-        inputs.gyroAngleDegrees = gyro.getRotation2d().getDegrees();
-        inputs.gyroPitchDegrees = gyro.getPitch().getValue();
-        inputs.accelerationX = gyro.getAccelerationX().getValue();
-        inputs.accelerationY = gyro.getAccelerationY().getValue();
-        inputs.accelerationZ = gyro.getAccelerationZ().getValue();
+        inputs.gyroYawDegrees = KablamaSwerveConstants.YAW_SIGNAL.refresh().getValue();
+        inputs.gyroPitchDegrees = KablamaSwerveConstants.PITCH_SIGNAL.refresh().getValue();
+        inputs.accelerationX = KablamaSwerveConstants.X_ACCELERATION_SIGNAL.refresh().getValue();
+        inputs.accelerationY = KablamaSwerveConstants.Y_ACCELERATION_SIGNAL.refresh().getValue();
+        inputs.accelerationZ = KablamaSwerveConstants.Z_ACCELERATION_SIGNAL.refresh().getValue();
     }
 
     @Override
     protected void setHeading(Rotation2d heading) {
-        // TODO: check if this is degrees or something else
         gyro.setYaw(heading.getDegrees());
     }
 }

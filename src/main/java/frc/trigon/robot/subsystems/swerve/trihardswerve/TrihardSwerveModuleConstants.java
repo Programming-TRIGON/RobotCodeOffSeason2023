@@ -138,13 +138,6 @@ public class TrihardSwerveModuleConstants {
     private void configureSteerMotor() {
         final TalonFXConfiguration steerMotorConfig = new TalonFXConfiguration();
 
-        // TODO: Status signals
-//        steerMotor.setStatusFramePeriod(StatusFrame.Status_1_General, 255); // Applied output
-//        steerMotor.setStatusFramePeriod(StatusFrame.Status_2_Feedback0, 10); // Sensor position and velocity
-//        steerMotor.setStatusFramePeriod(StatusFrame.Status_4_AinTempVbat, 255); // Battery and temperature
-//        steerMotor.setStatusFramePeriod(StatusFrame.Status_10_MotionMagic, 255); // Motion magic and profiling
-//        steerMotor.setStatusFramePeriod(StatusFrame.Status_12_Feedback1, 255); // Aux pid feedback
-//        steerMotor.setStatusFramePeriod(StatusFrame.Status_14_Turn_PIDF1, 255); // Aux pid information
         steerMotorConfig.MotorOutput.Inverted = STEER_MOTOR_INVERTED_VALUE;
         steerMotorConfig.Slot0.kP = STEER_MOTOR_P;
         steerMotorConfig.Slot0.kI = STEER_MOTOR_I;
@@ -152,6 +145,10 @@ public class TrihardSwerveModuleConstants {
         steerMotorConfig.Audio.BeepOnBoot = false;
 
         steerMotor.getConfigurator().apply(steerMotorConfig);
+
+        steerMotor.getPosition().setUpdateFrequency(150);
+        steerMotor.getStatorCurrent().setUpdateFrequency(50);
+
         new Notifier(this::setSteerMotorPositionToAbsolute).startSingle(ENCODER_UPDATE_TIME_SECONDS);
     }
 
@@ -164,6 +161,10 @@ public class TrihardSwerveModuleConstants {
         driveMotorConfig.Audio.BeepOnBoot = false;
 
         driveMotor.getConfigurator().apply(driveMotorConfig);
+
+        driveMotor.getPosition().setUpdateFrequency(100);
+        driveMotor.getVelocity().setUpdateFrequency(25);
+        driveMotor.getDutyCycle().setUpdateFrequency(10);
     }
 
     private void setSteerMotorPositionToAbsolute() {
