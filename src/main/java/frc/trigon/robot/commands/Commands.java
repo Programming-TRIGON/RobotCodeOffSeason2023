@@ -210,7 +210,9 @@ public class Commands {
         );
     }
 
-    // TODO: javadocs
+    /**
+     * @return a command to collect a cube from the ground, without any drive assistance
+     */
     public static CommandBase getNonAssistedCubeCollectionCommand() {
         return new ParallelCommandGroup(
                 ROLLER.getFullCollectionCommand(),
@@ -218,10 +220,13 @@ public class Commands {
         );
     }
 
-    public static CommandBase getToggleFieldAndSelfRelativeDriveCommand() {
+    /**
+     * @return a command that toggles between the swerve's default command, from field relative to shooter relative
+     */
+    public static CommandBase getToggleFieldAndShooterRelativeDriveCommand() {
         return new InstantCommand(() -> {
             if (SWERVE.getDefaultCommand().equals(CommandsConstants.FIELD_RELATIVE_DRIVE_COMMAND))
-                SWERVE.setDefaultCommand(CommandsConstants.SELF_RELATIVE_DRIVE_COMMAND);
+                SWERVE.setDefaultCommand(CommandsConstants.SHOOTER_RELATIVE_DRIVE_COMMAND);
             else
                 SWERVE.setDefaultCommand(CommandsConstants.FIELD_RELATIVE_DRIVE_COMMAND);
 
@@ -229,6 +234,9 @@ public class Commands {
         });
     }
 
+    /**
+     * @return a command that fully closes the roller and the side shooter
+     */
     public static CommandBase getFullCollectionCloseCommand() {
         return new ParallelCommandGroup(
                 ROLLER.getFullCloseCommand(),
@@ -236,6 +244,9 @@ public class Commands {
         );
     }
 
+    /**
+     * @return a command that places a cone at the high node, for autonomous
+     */
     public static CommandBase getPlaceConeAtHighForAutoCommand() {
         return new SequentialCommandGroup(
                 ARM.getGoToArmStateCommand(ArmConstants.ArmState.HIGH_CONE).until(() -> ARM.atState(ArmConstants.ArmState.HIGH_CONE)),
@@ -244,7 +255,7 @@ public class Commands {
     }
 
     private static CommandBase getFullCollectionFromDoubleSubstationCommand(double substationY) {
-        final CommandBase fieldRelativeXAxisDriveCommand = SwerveCommands.getClosedLoopFieldRelativeXAxisDriveCommand(
+        final CommandBase xAxisDriveCommand = SwerveCommands.getClosedLoopXAxisDriveCommand(
                 () -> OperatorConstants.DRIVER_CONTROLLER.getLeftY() / OperatorConstants.STICKS_SPEED_DIVIDER / CommandsConstants.calculateShiftModeValue(),
                 substationY,
                 new Rotation2d(),
@@ -252,7 +263,7 @@ public class Commands {
         );
 
         return new ParallelCommandGroup(
-                fieldRelativeXAxisDriveCommand,
+                xAxisDriveCommand,
                 COLLECTOR.getSetTargetStateCommand(CollectorConstants.CollectorState.COLLECT),
                 ARM.getGoToArmStateCommand(ArmConstants.ArmState.DOUBLE_SUBSTATION, 100, 100)
         );

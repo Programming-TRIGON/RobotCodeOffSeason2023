@@ -55,7 +55,7 @@ public class CommandsConstants {
                     () -> Rotation2d.fromDegrees(90),
                     true
             ),
-            SELF_RELATIVE_DRIVE_COMMAND = SwerveCommands.getOpenLoopSelfRelativeDriveCommand(
+            SHOOTER_RELATIVE_DRIVE_COMMAND = SwerveCommands.getOpenLoopShooterRelativeDriveCommand(
                     () -> DRIVER_CONTROLLER.getLeftY() / OperatorConstants.STICKS_SPEED_DIVIDER / calculateShiftModeValue(),
                     () -> DRIVER_CONTROLLER.getLeftX() / OperatorConstants.STICKS_SPEED_DIVIDER / calculateShiftModeValue(),
                     () -> DRIVER_CONTROLLER.getRightX() / OperatorConstants.STICKS_SPEED_DIVIDER / calculateShiftModeValue(),
@@ -84,7 +84,9 @@ public class CommandsConstants {
             SET_LEVEL_TO_HIGH = new InstantCommand(() -> IS_HIGH_LEVEL.set(true)).ignoringDisable(true),
             SET_LEVEL_TO_MIDDLE = new InstantCommand(() -> IS_HIGH_LEVEL.set(false)).ignoringDisable(true);
 
-    // TODO: javadoc
+    /**
+     * @return the shift mode value to be applied to the robot's speed, from the right trigger axis
+     */
     public static double calculateShiftModeValue() {
         final double squaredShiftModeValue = Math.pow(DRIVER_CONTROLLER.getRightTriggerAxis(), 2);
 

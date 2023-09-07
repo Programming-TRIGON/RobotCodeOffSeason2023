@@ -23,7 +23,7 @@ public class Arm extends SubsystemBase {
     private final static Arm INSTANCE = new Arm();
     private final ArmIO armIO;
     private final ArmConstants armConstants;
-    private final ArmInputsAutoLogged armInputs = new ArmInputsAutoLogged();
+        private final ArmInputsAutoLogged armInputs = new ArmInputsAutoLogged();
 
     private TrapezoidProfile
             angleMotorProfile = null,

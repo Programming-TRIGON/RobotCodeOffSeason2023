@@ -334,6 +334,8 @@ bin/
 networktables.json
 *.wpilog
 BuildConstants.java
+simgui.json
+simgui-ds.json
 
 
 # Project exclude paths

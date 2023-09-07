@@ -166,14 +166,14 @@ public class Swerve extends SubsystemBase {
 
     /**
      * Drives the x-axis of the swerve with the given power, relative to the field's frame of reference.
-     * This command will lock the y-axis and angle.
+     * This will also lock the y-axis and angle.
      *
-     * @param xPower    the target x power
-     * @param yAxisLock the y position axis lock
-     * @param angleLock the target angle lock
-     * @param rateLimitX whether the a-axis should be rate limited
+     * @param xPower     the target x power
+     * @param yAxisLock  the y position to lock the robot to
+     * @param angleLock  the angle to lock the robot to
+     * @param rateLimitX whether to rate limit the x-axis (no need for y-axis since it's locked)
      */
-    void fieldRelativeXAxisDrive(double xPower, double yAxisLock, Rotation2d angleLock, boolean rateLimitX) {
+    void xAxisDrive(double xPower, double yAxisLock, Rotation2d angleLock, boolean rateLimitX) {
         yAxisLock = AllianceUtilities.isBlueAlliance() ? yAxisLock : FieldConstants.FIELD_WIDTH_METERS - yAxisLock;
         angleLock = AllianceUtilities.isBlueAlliance() ? angleLock : angleLock.unaryMinus();
 
@@ -198,7 +198,8 @@ public class Swerve extends SubsystemBase {
                 ),
                 Rotation2d.fromDegrees(thetaOutput),
                 rateLimitX,
-                false
+                false,
+                RobotContainer.POSE_ESTIMATOR.getCurrentPose().getRotation()
         );
     }
 
@@ -252,7 +253,26 @@ public class Swerve extends SubsystemBase {
                 getDriveTranslation(xPower, yPower),
                 getDriveRotation(thetaPower),
                 rateLimit,
-                rateLimit
+                rateLimit,
+                RobotContainer.POSE_ESTIMATOR.getCurrentPose().getRotation()
+        );
+    }
+
+    /**
+     * Drives the swerve with the given powers, relative to the field's frame of reference.
+     *
+     * @param xPower     the target x power
+     * @param yPower     the target y power
+     * @param thetaPower the target theta power
+     * @param rateLimit  whether the swerve should be rate limited
+     */
+    void fieldRelativeDrive(double xPower, double yPower, double thetaPower, boolean rateLimit, Rotation2d robotAngle) {
+        fieldRelativeDrive(
+                getDriveTranslation(xPower, yPower),
+                getDriveRotation(thetaPower),
+                rateLimit,
+                rateLimit,
+                robotAngle
         );
     }
 
@@ -277,7 +297,8 @@ public class Swerve extends SubsystemBase {
                         constants.getRotationController().calculate(currentAngle.getDegrees())
                 ),
                 rateLimit,
-                rateLimit
+                rateLimit,
+                RobotContainer.POSE_ESTIMATOR.getCurrentPose().getRotation()
         );
     }
 
@@ -288,15 +309,16 @@ public class Swerve extends SubsystemBase {
      * @param rotation    the target theta velocity in radians per second
      * @param rateLimitX  whether the swerve's x-axis should be rate limited
      * @param rateLimitY  whether the swerve's y-axis should be rate limited
+     * @param robotAngle  the current robot angle, to drive relative from
      */
-    void fieldRelativeDrive(Translation2d translation, Rotation2d rotation, boolean rateLimitX, boolean rateLimitY) {
+    void fieldRelativeDrive(Translation2d translation, Rotation2d rotation, boolean rateLimitX, boolean rateLimitY, Rotation2d robotAngle) {
         translation = rateLimit(translation, rateLimitX, rateLimitY);
 
         ChassisSpeeds chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
                 translation.getX(),
                 translation.getY(),
                 rotation.getRadians(),
-                RobotContainer.POSE_ESTIMATOR.getCurrentPose().getRotation()
+                robotAngle
         );
         selfRelativeDrive(chassisSpeeds);
     }

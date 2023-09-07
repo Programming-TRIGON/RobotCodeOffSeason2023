@@ -5,7 +5,6 @@
 
 package frc.trigon.robot;
 
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.trigon.robot.commands.Commands;
 import frc.trigon.robot.constants.AutonomousConstants;
@@ -60,7 +59,7 @@ public class RobotContainer {
         OperatorConstants.RESET_HEADING_TRIGGER.onTrue(CommandsConstants.RESET_HEADING_COMMAND);
         OperatorConstants.PRELOAD_CURRENT_MATCH_START_AUTO_TRIGGER.onTrue(Commands.getPreloadCurrentMatchStartAutoCommand());
 
-        OperatorConstants.TOGGLE_FIELD_AND_SELF_RELATIVE_DRIVE_TRIGGER.onTrue(Commands.getToggleFieldAndSelfRelativeDriveCommand());
+        OperatorConstants.TOGGLE_FIELD_AND_SHOOTER_RELATIVE_DRIVE_TRIGGER.onTrue(Commands.getToggleFieldAndShooterRelativeDriveCommand());
         OperatorConstants.MANUAL_DRIVE_WITH_TURN_TO_COMMUNITY_TRIGGER.whileTrue(CommandsConstants.MANUAL_DRIVE_WITH_TURN_TO_COMMUNITY_COMMAND);
         OperatorConstants.MANUAL_DRIVE_WITH_TURN_TO_SHOOTING_ANGLE_TRIGGER.whileTrue(CommandsConstants.MANUAL_DRIVE_WITH_TURN_TO_SHOOTING_ANGLE_COMMAND);
 

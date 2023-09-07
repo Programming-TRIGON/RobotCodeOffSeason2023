@@ -18,10 +18,16 @@ public class AssistedCubeCollectionCommand extends ParallelCommandGroup {
     private static final PIDController CUBE_ALIGNMENT_PID = new PIDController(0.8, 0, 0);
     private double lastPower = Double.NaN;
 
+    /**
+     * Constructs a new AssistedCubeCollectionCommand.
+     *
+     * @param cubePositionSupplier a supplier of the cube position on the camera's screen
+     * @param hasTargetSupplier    a supplier of whether the camera has a target cube visible
+     */
     public AssistedCubeCollectionCommand(DoubleSupplier cubePositionSupplier, BooleanSupplier hasTargetSupplier) {
         super();
         CUBE_ALIGNMENT_PID.setSetpoint(0);
-        final CommandBase manualDriveWhileLockingOnCubeCommand = SwerveCommands.getClosedLoopFieldRelativeDriveCommand(
+        final CommandBase manualDriveWhileLockingOnCubeCommand = SwerveCommands.getClosedLoopShooterRelativeDriveCommand(
                 () -> OperatorConstants.DRIVER_CONTROLLER.getLeftY() / OperatorConstants.STICKS_SPEED_DIVIDER / CommandsConstants.calculateShiftModeValue(),
                 () -> OperatorConstants.DRIVER_CONTROLLER.getLeftX() / OperatorConstants.STICKS_SPEED_DIVIDER / CommandsConstants.calculateShiftModeValue(),
                 () -> calculatePIDOutput(cubePositionSupplier.getAsDouble(), hasTargetSupplier.getAsBoolean()),

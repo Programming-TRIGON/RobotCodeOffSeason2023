@@ -5,12 +5,9 @@ import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.PathPlannerTrajectory;
 import com.pathplanner.lib.PathPoint;
 import com.pathplanner.lib.auto.SwerveAutoBuilder;
-import com.pathplanner.lib.commands.PPSwerveControllerCommand;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.wpilibj.PowerDistribution;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.*;
 import frc.trigon.robot.RobotContainer;
 import frc.trigon.robot.constants.FieldConstants;
@@ -18,18 +15,40 @@ import frc.trigon.robot.subsystems.poseestimator.PoseEstimator;
 import frc.trigon.robot.utilities.AllianceUtilities;
 import frc.trigon.robot.utilities.Maths;
 
-import java.lang.reflect.Field;
-import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CyclicBarrier;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
 public class SwerveCommands {
     private static final Swerve SWERVE = Swerve.getInstance();
     private static final PoseEstimator POSE_ESTIMATOR = RobotContainer.POSE_ESTIMATOR;
+
+    /**
+     * Constructs a command that autonomously drives the robot to a target pose, in the community zone.
+     * This command will avoid hitting the charge station.
+     *
+     * @param constraints   the path constraints to use
+     * @param targetPose    the target pose
+     * @param xAdder        how much to add to the target x position on the first enter to the community zone (this should be used when you don't want the robot to touch the grid initially)
+     * @param maxRepetition how many times should the path repeat to try and reach the setpoint
+     * @return the command
+     */
+    public static CommandBase getEnterCommunityCommand(PathConstraints constraints, Pose2d targetPose, double xAdder, int maxRepetition) {
+        return new ProxyCommand(() -> {
+            final Pose2d currentPose = POSE_ESTIMATOR.getCurrentPose();
+            final CommandBase enterCommunityCommand;
+
+            if (isHittingChargeStationFromSideOnCommunityEnter(toTargetAlliancePose(currentPose).getTranslation(), targetPose.getTranslation()))
+                enterCommunityCommand = getEnterCommunityFromSideCommand(constraints, targetPose, xAdder);
+            else if (isHittingChargeStationFromFrontOnCommunityEnter(toTargetAlliancePose(currentPose).getTranslation(), targetPose.getTranslation()))
+                enterCommunityCommand = getEnterCommunityFromFrontCommand(constraints, targetPose, xAdder);
+            else return getDriveToPoseCommand(constraints, () -> targetPose, true, maxRepetition);
+
+            return enterCommunityCommand.andThen(getDriveToPoseCommand(constraints, () -> targetPose, true, maxRepetition - 1));
+        });
+    }
 
     /**
      * Creates a command that will drive the robot using the given path group and event map.
@@ -109,21 +128,38 @@ public class SwerveCommands {
         );
     }
 
-    // TODO: javadocs
-    public static FunctionalCommand getClosedLoopFieldRelativeXAxisDriveCommand(DoubleSupplier xSupplier, double yAxisLock, Rotation2d angleLock, boolean rateLimitX) {
+    /**
+     * Constructs a command that drives the x-axis of the swerve with the given power, relative to the field's frame of reference.
+     * This command will lock the y-axis and angle.
+     *
+     * @param xSupplier  the target x-axis power supplier
+     * @param yAxisLock  the y position to lock the robot to
+     * @param angleLock  the angle to lock the robot to
+     * @param rateLimitX whether to rate limit the x-axis (no need for y-axis since it's locked)
+     * @return the command
+     */
+    public static FunctionalCommand getClosedLoopXAxisDriveCommand(DoubleSupplier xSupplier, double yAxisLock, Rotation2d angleLock, boolean rateLimitX) {
         return new FunctionalCommand(
                 () -> {
                     initializeDrive(true);
                     SWERVE.resetYAxisController();
                     SWERVE.resetRotationController();
                 },
-                () -> SWERVE.fieldRelativeXAxisDrive(xSupplier.getAsDouble(), yAxisLock, angleLock, rateLimitX),
+                () -> SWERVE.xAxisDrive(xSupplier.getAsDouble(), yAxisLock, angleLock, rateLimitX),
                 (interrupted) -> stopDrive(),
                 () -> false,
                 SWERVE
         );
     }
 
+    /**
+     * Creates a command that drives the swerve with the given powers, relative to the field's frame of reference, in closed loop mode.
+     *
+     * @param xSupplier     the target forwards power
+     * @param ySupplier     the target leftwards power
+     * @param thetaSupplier the target theta power, CCW+
+     * @return the command
+     */
     public static FunctionalCommand getClosedLoopFieldRelativeDriveCommand(DoubleSupplier xSupplier, DoubleSupplier ySupplier, DoubleSupplier thetaSupplier, boolean rateLimit) {
         return new FunctionalCommand(
                 () -> initializeDrive(true),
@@ -134,19 +170,36 @@ public class SwerveCommands {
         );
     }
 
-    public static FunctionalCommand getClosedLoopFieldRelativeDriveCommand(DoubleSupplier xSupplier, DoubleSupplier ySupplier, Supplier<Rotation2d> angle, boolean rateLimit) {
+    /**
+     * Creates a command that drives the swerve with the given powers, relative to the field's frame of reference, in closed loop mode.
+     * This command will use pid to reach the target angle.
+     *
+     * @param xSupplier     the target forwards power
+     * @param ySupplier     the target leftwards power
+     * @param angleSupplier the target angle supplier
+     * @return the command
+     */
+    public static FunctionalCommand getClosedLoopFieldRelativeDriveCommand(DoubleSupplier xSupplier, DoubleSupplier ySupplier, Supplier<Rotation2d> angleSupplier, boolean rateLimit) {
         return new FunctionalCommand(
                 () -> {
                     initializeDrive(true);
                     SWERVE.resetRotationController();
                 },
-                () -> SWERVE.fieldRelativeDrive(xSupplier.getAsDouble(), ySupplier.getAsDouble(), angle.get(), rateLimit),
+                () -> SWERVE.fieldRelativeDrive(xSupplier.getAsDouble(), ySupplier.getAsDouble(), angleSupplier.get(), rateLimit),
                 (interrupted) -> stopDrive(),
                 () -> false,
                 SWERVE
         );
     }
 
+    /**
+     * Creates a command that drives the swerve with the given powers, relative to the field's frame of reference, in closed open mode.
+     *
+     * @param xSupplier     the target forwards power
+     * @param ySupplier     the target leftwards power
+     * @param thetaSupplier the target theta power, CCW+
+     * @return the command
+     */
     public static FunctionalCommand getOpenLoopFieldRelativeDriveCommand(DoubleSupplier xSupplier, DoubleSupplier ySupplier, DoubleSupplier thetaSupplier, boolean rateLimit) {
         return new FunctionalCommand(
                 () -> initializeDrive(false),
@@ -157,19 +210,74 @@ public class SwerveCommands {
         );
     }
 
-    public static FunctionalCommand getOpenLoopFieldRelativeDriveCommand(DoubleSupplier xSupplier, DoubleSupplier ySupplier, Supplier<Rotation2d> angle, boolean rateLimit) {
+    /**
+     * Creates a command that drives the swerve with the given powers, relative to the field's frame of reference, in open loop mode.
+     * This command will use pid to reach the target angle.
+     *
+     * @param xSupplier     the target forwards power
+     * @param ySupplier     the target leftwards power
+     * @param angleSupplier the target angle supplier
+     * @return the command
+     */
+    public static FunctionalCommand getOpenLoopFieldRelativeDriveCommand(DoubleSupplier xSupplier, DoubleSupplier ySupplier, Supplier<Rotation2d> angleSupplier, boolean rateLimit) {
         return new FunctionalCommand(
                 () -> {
                     initializeDrive(false);
                     SWERVE.resetRotationController();
                 },
-                () -> SWERVE.fieldRelativeDrive(xSupplier.getAsDouble(), ySupplier.getAsDouble(), angle.get(), rateLimit),
+                () -> SWERVE.fieldRelativeDrive(xSupplier.getAsDouble(), ySupplier.getAsDouble(), angleSupplier.get(), rateLimit),
                 (interrupted) -> stopDrive(),
                 () -> false,
                 SWERVE
         );
     }
 
+    /**
+     * Creates a command that drives the swerve with the given powers, relative to the robot's shooter frame of reference, in closed loop mode.
+     * This is like self relative drive, but with a change to the robot's forward angle.
+     *
+     * @param xSupplier     the target forwards power
+     * @param ySupplier     the target leftwards power
+     * @param thetaSupplier the target theta power, CCW+
+     * @return the command
+     */
+    public static FunctionalCommand getClosedLoopShooterRelativeDriveCommand(DoubleSupplier xSupplier, DoubleSupplier ySupplier, DoubleSupplier thetaSupplier, boolean rateLimit) {
+        return new FunctionalCommand(
+                () -> initializeDrive(true),
+                () -> SWERVE.fieldRelativeDrive(xSupplier.getAsDouble(), ySupplier.getAsDouble(), thetaSupplier.getAsDouble(), rateLimit, Rotation2d.fromDegrees(-90)),
+                (interrupted) -> stopDrive(),
+                () -> false,
+                SWERVE
+        );
+    }
+
+    /**
+     * Creates a command that drives the swerve with the given powers, relative to the robot's shooter frame of reference, in open loop mode.
+     * This is like self relative drive, but with a change to the robot's forward angle.
+     *
+     * @param xSupplier     the target forwards power
+     * @param ySupplier     the target leftwards power
+     * @param thetaSupplier the target theta power, CCW+
+     * @return the command
+     */
+    public static FunctionalCommand getOpenLoopShooterRelativeDriveCommand(DoubleSupplier xSupplier, DoubleSupplier ySupplier, DoubleSupplier thetaSupplier, boolean rateLimit) {
+        return new FunctionalCommand(
+                () -> initializeDrive(false),
+                () -> SWERVE.fieldRelativeDrive(xSupplier.getAsDouble(), ySupplier.getAsDouble(), thetaSupplier.getAsDouble(), rateLimit, Rotation2d.fromDegrees(-90)),
+                (interrupted) -> stopDrive(),
+                () -> false,
+                SWERVE
+        );
+    }
+
+    /**
+     * Creates a command that drives the swerve with the given powers, relative to the robot's frame of reference, in closed loop mode.
+     *
+     * @param xSupplier     the target forwards power
+     * @param ySupplier     the target leftwards power
+     * @param thetaSupplier the target theta power, CCW+
+     * @return the command
+     */
     public static FunctionalCommand getClosedLoopSelfRelativeDriveCommand(DoubleSupplier xSupplier, DoubleSupplier ySupplier, DoubleSupplier thetaSupplier, boolean rateLimit) {
         return new FunctionalCommand(
                 () -> initializeDrive(true),
@@ -180,6 +288,14 @@ public class SwerveCommands {
         );
     }
 
+    /**
+     * Creates a command that drives the swerve with the given powers, relative to the robot's frame of reference, in open loop mode.
+     *
+     * @param xSupplier     the target forwards power
+     * @param ySupplier     the target leftwards power
+     * @param thetaSupplier the target theta power, CCW+
+     * @return the command
+     */
     public static FunctionalCommand getOpenLoopSelfRelativeDriveCommand(DoubleSupplier xSupplier, DoubleSupplier ySupplier, DoubleSupplier thetaSupplier, boolean rateLimit) {
         return new FunctionalCommand(
                 () -> initializeDrive(false),
@@ -188,21 +304,6 @@ public class SwerveCommands {
                 () -> false,
                 SWERVE
         );
-    }
-
-    public static CommandBase getEnterCommunityCommand(PathConstraints constraints, Pose2d targetPose, double xAdder, int maxRepetition) {
-        return new ProxyCommand(() -> {
-            final Pose2d currentPose = POSE_ESTIMATOR.getCurrentPose();
-            final CommandBase enterCommunityCommand;
-
-            if (isHittingChargeStationFromSideOnCommunityEnter(toTargetAlliancePose(currentPose).getTranslation(), targetPose.getTranslation()))
-                enterCommunityCommand = getEnterCommunityFromSideCommand(constraints, targetPose, xAdder);
-            else if (isHittingChargeStationFromFrontOnCommunityEnter(toTargetAlliancePose(currentPose).getTranslation(), targetPose.getTranslation()))
-                enterCommunityCommand = getEnterCommunityFromFrontCommand(constraints, targetPose, xAdder);
-            else return getDriveToPoseCommand(constraints, () -> targetPose, true, maxRepetition);
-
-            return enterCommunityCommand.andThen(getDriveToPoseCommand(constraints, () -> targetPose, true, maxRepetition - 1));
-        });
     }
 
     private static CommandBase getEnterCommunityFromSideCommand(PathConstraints constraints, Pose2d targetPose, double xAdder) {
