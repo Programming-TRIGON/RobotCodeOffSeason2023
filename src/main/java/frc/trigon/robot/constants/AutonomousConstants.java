@@ -36,8 +36,8 @@ public class AutonomousConstants {
         EVENT_MAP.put("close-roller", Roller.getInstance().getCloseCommand());
         EVENT_MAP.put("shoot-cude-3", SideShooter.getInstance().getSetTargetShooterStateCommand(SideShooterConstants.SideShooterState.HIGH));
         EVENT_MAP.put("prepare-shoot-cude-3", SideShooter.getInstance().getSetTargetShooterAngleCommand(SideShooterConstants.SideShooterState.HIGH.angle));
-        EVENT_MAP.put("prepare-shoot-cude-1-from-afar", SideShooter.getInstance().getSetTargetShooterAngleCommand(SideShooterConstants.SideShooterState.LOW_FROM_AFAR.angle));
-        EVENT_MAP.put("shoot-cude-1-from-afar", SideShooter.getInstance().getSetTargetShooterStateCommand(SideShooterConstants.SideShooterState.LOW_FROM_AFAR));
+        EVENT_MAP.put("prepare-shoot-cude-1-from-afar", SideShooter.getInstance().getSetTargetShooterAngleCommand(SideShooterConstants.SideShooterState.HYBRID_FROM_AFAR.angle));
+        EVENT_MAP.put("shoot-cude-1-from-afar", SideShooter.getInstance().getSetTargetShooterStateCommand(SideShooterConstants.SideShooterState.HYBRID_FROM_AFAR));
     }
 
     private static void configureAutonomousPathsNames() {

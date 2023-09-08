@@ -27,7 +27,7 @@ public class T265 extends RobotPoseSourceIO {
     }
 
     private Pose3d getCameraPose() {
-        if(!canUseJsonDump())
+        if (!canUseJsonDump())
             return new Pose3d();
 
         return getRobotPoseFromJsonDump();
@@ -63,7 +63,7 @@ public class T265 extends RobotPoseSourceIO {
         try {
             Logger.getInstance().recordOutput(name + "/confidence", jsonDump.confidence);
             return jsonDump.confidence >= CONFIDENCE_THRESHOLD && jsonDump.translation.length == 3 && jsonDump.rotation.length == 4;
-        } catch(NullPointerException e) {
+        } catch (NullPointerException e) {
             return false;
         }
     }

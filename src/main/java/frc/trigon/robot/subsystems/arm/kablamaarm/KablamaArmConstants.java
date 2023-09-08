@@ -134,7 +134,7 @@ public class KablamaArmConstants extends ArmConstants {
         FIRST_FOLLOWER_ANGLE_MOTOR.setSmartCurrentLimit(ANGLE_CURRENT_LIMIT);
         SECOND_FOLLOWER_ANGLE_MOTOR.setSmartCurrentLimit(ANGLE_CURRENT_LIMIT);
 
-        for (CANSparkMax currentAngleMotor : List.of(MASTER_ANGLE_MOTOR, FIRST_FOLLOWER_ANGLE_MOTOR, SECOND_FOLLOWER_ANGLE_MOTOR)){
+        for (CANSparkMax currentAngleMotor : List.of(MASTER_ANGLE_MOTOR, FIRST_FOLLOWER_ANGLE_MOTOR, SECOND_FOLLOWER_ANGLE_MOTOR)) {
             currentAngleMotor.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus0, 300); // Applied output
             currentAngleMotor.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus1, 10); // Motor movement
             currentAngleMotor.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus2, 10); // Motor position
@@ -173,7 +173,7 @@ public class KablamaArmConstants extends ArmConstants {
         MASTER_ELEVATOR_MOTOR.setSmartCurrentLimit(ELEVATOR_CURRENT_LIMIT);
         FOLLOWER_ELEVATOR_MOTOR.setSmartCurrentLimit(ELEVATOR_CURRENT_LIMIT);
 
-        for (CANSparkMax currentElevatorMotor : List.of(MASTER_ELEVATOR_MOTOR, FOLLOWER_ELEVATOR_MOTOR)){
+        for (CANSparkMax currentElevatorMotor : List.of(MASTER_ELEVATOR_MOTOR, FOLLOWER_ELEVATOR_MOTOR)) {
             currentElevatorMotor.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus0, 300); // Applied output
             currentElevatorMotor.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus1, 10); // Motor movement
             currentElevatorMotor.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus2, 10); // Motor position

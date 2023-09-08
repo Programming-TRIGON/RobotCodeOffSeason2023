@@ -2,7 +2,6 @@ package frc.trigon.robot.subsystems.collector.simulationcollector;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.simulation.FlywheelSim;
-import frc.trigon.robot.RobotContainer;
 import frc.trigon.robot.constants.RobotConstants;
 import frc.trigon.robot.subsystems.collector.CollectorIO;
 import frc.trigon.robot.subsystems.collector.CollectorInputsAutoLogged;

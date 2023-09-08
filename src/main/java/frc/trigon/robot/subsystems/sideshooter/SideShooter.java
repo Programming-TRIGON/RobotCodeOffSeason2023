@@ -10,10 +10,10 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.*;
 import frc.trigon.robot.commands.Commands;
 import frc.trigon.robot.constants.RobotConstants;
-import frc.trigon.robot.subsystems.sideshooter.simulationsideshooter.SimulationSideShooterConstants;
-import frc.trigon.robot.subsystems.sideshooter.simulationsideshooter.SimulationSideShooterIO;
 import frc.trigon.robot.subsystems.sideshooter.kablamasideshooter.KablamaSideShooterConstants;
 import frc.trigon.robot.subsystems.sideshooter.kablamasideshooter.KablamaSideShooterIO;
+import frc.trigon.robot.subsystems.sideshooter.simulationsideshooter.SimulationSideShooterConstants;
+import frc.trigon.robot.subsystems.sideshooter.simulationsideshooter.SimulationSideShooterIO;
 import org.littletonrobotics.junction.Logger;
 
 public class SideShooter extends SubsystemBase {
@@ -71,7 +71,8 @@ public class SideShooter extends SubsystemBase {
         return new FunctionalCommand(
                 () -> generateAngleMotorProfile(angle),
                 this::setTargetAngleFromProfile,
-                (interrupted) -> {},
+                (interrupted) -> {
+                },
                 () -> false,
                 this
         );
@@ -86,7 +87,8 @@ public class SideShooter extends SubsystemBase {
     public CommandBase getSetTargetShooterPowerCommand(double power) {
         return new StartEndCommand(
                 () -> sideShooterIO.setTargetShootingPower(power),
-                () -> {},
+                () -> {
+                },
                 this
         );
     }

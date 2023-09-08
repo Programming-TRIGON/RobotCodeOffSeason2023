@@ -3,7 +3,6 @@ package frc.trigon.robot.components.cubedetectioncamera;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.trigon.robot.Robot;
 import org.littletonrobotics.junction.Logger;
-import org.photonvision.PhotonCamera;
 
 /**
  * A class that represents a cube detection camera that detects cubes.

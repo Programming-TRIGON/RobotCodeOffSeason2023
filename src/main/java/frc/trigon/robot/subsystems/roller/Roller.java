@@ -7,8 +7,8 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.*;
 import frc.trigon.robot.commands.Commands;
 import frc.trigon.robot.constants.RobotConstants;
-import frc.trigon.robot.subsystems.roller.simulationroller.SimulationRollerIO;
 import frc.trigon.robot.subsystems.roller.kablamaroller.KablamaRollerIO;
+import frc.trigon.robot.subsystems.roller.simulationroller.SimulationRollerIO;
 import org.littletonrobotics.junction.Logger;
 
 public class Roller extends SubsystemBase {
@@ -62,7 +62,8 @@ public class Roller extends SubsystemBase {
     public StartEndCommand getStartCollectingCommand() {
         return new StartEndCommand(
                 this::startCollecting,
-                () -> {},
+                () -> {
+                },
                 this
         );
     }
@@ -79,7 +80,8 @@ public class Roller extends SubsystemBase {
      */
     public FunctionalCommand getCloseCommand() {
         return new FunctionalCommand(
-                () -> {},
+                () -> {
+                },
                 this::close,
                 (interrupted) -> rollerIO.stopAngleMotor(),
                 this::isClosed,

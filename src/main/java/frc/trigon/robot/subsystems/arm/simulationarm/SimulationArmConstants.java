@@ -70,7 +70,7 @@ public class SimulationArmConstants extends ArmConstants {
             HEIGHT_0_ANGLE_MOTOR_KS, HEIGHT_0_ANGLE_MOTOR_KG, HEIGHT_0_ANGLE_MOTOR_KV
     );
     private static final HashMap<Double, ArmFeedforward> HEIGHT_TO_ANGLE_MOTOR_FEEDFORWARD = new HashMap<>();
-    
+
     static {
         HEIGHT_TO_ANGLE_MOTOR_FEEDFORWARD.put(0.0, HEIGHT_0_ANGLE_MOTOR_FEEDFORWARD);
     }

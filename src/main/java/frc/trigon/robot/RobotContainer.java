@@ -66,6 +66,14 @@ public class RobotContainer {
         OperatorConstants.STANDING_CONE_COLLECTION_TRIGGER.whileTrue(Commands.getStandingConeCollectionCommand());
         OperatorConstants.NON_ASSISTED_CUBE_COLLECTION_TRIGGER.whileTrue(Commands.getNonAssistedCubeCollectionCommand());
         OperatorConstants.ASSISTED_CUBE_COLLECTION_TRIGGER.whileTrue(RobotConstants.ROBOT_TYPE == RobotConstants.RobotType.SIMULATION ? CommandsConstants.ASSISTED_CUBE_COLLECTION_FOR_SIMULATION : CommandsConstants.ASSISTED_CUBE_COLLECTION);
+
+        OperatorConstants.SHOOT_CUBE_TO_HIGH_LEVEL_TRIGGER.whileTrue(Commands.getShootCubeToHighLevelCommand());
+        OperatorConstants.SHOOT_CUBE_TO_MIDDLE_LEVEL_TRIGGER.whileTrue(Commands.getShootCubeToMiddleLevelCommand());
+        OperatorConstants.SHOOT_CUBE_TO_HYBRID_LEVEL_TRIGGER.whileTrue(Commands.getShootCubeToHybridLevelCommand());
+
+        OperatorConstants.PLACE_CONE_AT_HIGH_LEVEL_TRIGGER.whileTrue(Commands.getPlaceConeAtHighLevelCommand());
+        OperatorConstants.PLACE_CONE_AT_MIDDLE_LEVEL_TRIGGER.whileTrue(Commands.getPlaceConeAtMiddleLevelCommand());
+        OperatorConstants.PLACE_CONE_AT_HYBRID_LEVEL_TRIGGER.whileTrue(Commands.getPlaceConeAtHybridLevelCommand());
     }
 
     private void bindDefaultCommands() {

@@ -165,7 +165,7 @@ public class KeyboardController extends CommandGenericHID {
     public Trigger o() {
         return getButtonFromBitOfAxis(5, 0);
     }
-    
+
     public Trigger p() {
         return getButtonFromBitOfAxis(6, 0);
     }
@@ -343,9 +343,9 @@ public class KeyboardController extends CommandGenericHID {
         double rawValue = (getRawAxis(axis) + 1) / 2 * 256;
         int value = (int) (
                 Robot.IS_REAL ?
-                Math.ceil(rawValue): Math.round(rawValue)
+                        Math.ceil(rawValue) : Math.round(rawValue)
         );
-        for(int i = 0; i < bits.length; i++) {
+        for (int i = 0; i < bits.length; i++) {
             bits[i] = value % 2 == 1;
             value /= 2;
         }

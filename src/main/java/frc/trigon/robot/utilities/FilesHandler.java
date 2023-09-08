@@ -25,7 +25,7 @@ public class FilesHandler {
      */
     public static void setPermissions(File file, boolean isReadable, boolean isWriteable, boolean isExecutable) throws IOException, InterruptedException {
         final Process process = Runtime.getRuntime().exec(
-                new String[] {"chmod -R " + getChmodValue(isReadable, isWriteable, isExecutable) + " " + file.getAbsoluteFile()}
+                new String[]{"chmod -R " + getChmodValue(isReadable, isWriteable, isExecutable) + " " + file.getAbsoluteFile()}
         );
         process.waitFor();
     }

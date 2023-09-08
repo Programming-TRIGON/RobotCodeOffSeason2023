@@ -6,7 +6,7 @@ import edu.wpi.first.wpilibj.DigitalInput;
 
 public class KablamaRollerConstants {
     static final double VOLTAGE_COMPENSATION_SATURATION = 12;
-    
+
     private static final boolean
             ANGLE_MOTOR_INVERTED = false,
             COLLECTION_MOTOR_INVERTED = false;
@@ -24,25 +24,22 @@ public class KablamaRollerConstants {
             ANGLE_MOTOR = new CANSparkMax(ANGLE_MOTOR_ID, CANSparkMaxLowLevel.MotorType.kBrushless),
             COLLECTION_MOTOR = new CANSparkMax(COLLECTION_MOTOR_ID, CANSparkMaxLowLevel.MotorType.kBrushless);
 
-    private static final int LIMIT_SWITCH_CHANNEL = 0;
-    static final DigitalInput ANGLE_MOTOR_LIMIT_SWITCH = new DigitalInput(LIMIT_SWITCH_CHANNEL);
-
     static {
         configureAngleMotor();
         configureCollectionMotor();
     }
-    
+
     private static void configureAngleMotor() {
         ANGLE_MOTOR.restoreFactoryDefaults();
-        
+
         ANGLE_MOTOR.enableVoltageCompensation(VOLTAGE_COMPENSATION_SATURATION);
         ANGLE_MOTOR.setInverted(ANGLE_MOTOR_INVERTED);
         ANGLE_MOTOR.setIdleMode(DEFAULT_ANGLE_MOTOR_IDLE_MODE);
         ANGLE_MOTOR.setSmartCurrentLimit(ANGLE_MOTOR_CURRENT_LIMIT);
-        
+
         ANGLE_MOTOR.burnFlash();
     }
-    
+
     private static void configureCollectionMotor() {
         COLLECTION_MOTOR.restoreFactoryDefaults();
 

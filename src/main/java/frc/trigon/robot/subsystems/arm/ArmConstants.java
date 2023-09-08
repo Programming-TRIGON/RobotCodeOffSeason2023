@@ -70,6 +70,7 @@ public abstract class ArmConstants {
         DEFAULT(0, DEFAULT_ARM_ANGLE),
         HIGH_CONE(1, Rotation2d.fromDegrees(30)),
         MIDDLE_CONE(0.3, Rotation2d.fromDegrees(30)),
+        HYBRID_CONE(0, Rotation2d.fromDegrees(0)),
         DOUBLE_SUBSTATION(0.2, Rotation2d.fromDegrees(46.5)),
         STANDING_CONE_COLLECTION(0, Rotation2d.fromDegrees(-6));
 

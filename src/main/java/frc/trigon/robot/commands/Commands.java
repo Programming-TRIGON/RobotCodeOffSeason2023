@@ -94,20 +94,6 @@ public class Commands {
     }
 
     /**
-     * Constructs a new command that requires subsystems so no other commands can use the,m.
-     *
-     * @param subsystems the subsystems to use
-     * @return the command
-     */
-    public static CommandBase getArbitrarySubsystemCommand(Subsystem... subsystems) {
-        return new StartEndCommand(
-                () -> {},
-                () -> {},
-                subsystems
-        );
-    }
-
-    /**
      * Decorates a Command with requirements.
      *
      * @param command    the command to decorate
@@ -117,6 +103,22 @@ public class Commands {
     public static CommandBase withRequirements(CommandBase command, Subsystem... subsystems) {
         command.addRequirements(subsystems);
         return command;
+    }
+
+    /**
+     * Constructs a new command that requires the given subsystems, so no other commands can use them.
+     *
+     * @param subsystems the subsystems to require
+     * @return the command
+     */
+    public static CommandBase getArbitrarySubsystemCommand(Subsystem... subsystems) {
+        return new StartEndCommand(
+                () -> {
+                },
+                () -> {
+                },
+                subsystems
+        );
     }
 
     /**
@@ -146,6 +148,42 @@ public class Commands {
     }
 
     /**
+     * @return a command that places a cone at the high level
+     */
+    public static CommandBase getPlaceConeAtHighLevelCommand() {
+        return new SequentialCommandGroup(
+                getWaitForContinueCommand(),
+                COLLECTOR.getSetTargetStateCommand(CollectorConstants.CollectorState.EJECT)
+        ).alongWith(
+                ARM.getGoToArmStateCommand(ArmConstants.ArmState.HIGH_CONE, 100, 100)
+        );
+    }
+
+    /**
+     * @return a command that places a cone at the middle level
+     */
+    public static CommandBase getPlaceConeAtMiddleLevelCommand() {
+        return new SequentialCommandGroup(
+                getWaitForContinueCommand(),
+                COLLECTOR.getSetTargetStateCommand(CollectorConstants.CollectorState.EJECT)
+        ).alongWith(
+                ARM.getGoToArmStateCommand(ArmConstants.ArmState.MIDDLE_CONE, 100, 100)
+        );
+    }
+
+    /**
+     * @return a command that places a cone at the hybrid level
+     */
+    public static CommandBase getPlaceConeAtHybridLevelCommand() {
+        return new SequentialCommandGroup(
+                getWaitForContinueCommand(),
+                COLLECTOR.getSetTargetStateCommand(CollectorConstants.CollectorState.EJECT)
+        ).alongWith(
+                ARM.getGoToArmStateCommand(ArmConstants.ArmState.HYBRID_CONE, 100, 100)
+        );
+    }
+
+    /**
      * @return a command that fully shoots a cube, with all the cube shooting logic
      */
     public static CommandBase getFullCubeShootingCommand() {
@@ -165,9 +203,40 @@ public class Commands {
             return new SequentialCommandGroup(
                     ROLLER.getFullCloseCommand().until(ROLLER::isClosed),
                     driveToGridAlignmentCommand.raceWith(SIDE_SHOOTER.getSetTargetShooterAngleCommand(targetState.angle)),
+                    getWaitForContinueCommand().alongWith(SIDE_SHOOTER.getSetTargetShooterAngleCommand(targetState.angle)),
                     SIDE_SHOOTER.getSetTargetShooterStateCommand(targetState).alongWith(getArbitrarySubsystemCommand(SWERVE).asProxy())
             );
         });
+    }
+
+    /**
+     * @return a command that shoots a cube to the high level
+     */
+    public static CommandBase getShootCubeToHighLevelCommand() {
+        return new SequentialCommandGroup(
+                SIDE_SHOOTER.getSetTargetShooterAngleCommand(SideShooterConstants.SideShooterState.HIGH.angle).raceWith(getWaitForContinueCommand()),
+                SIDE_SHOOTER.getSetTargetShooterStateCommand(SideShooterConstants.SideShooterState.HIGH)
+        );
+    }
+
+    /**
+     * @return a command that shoots a cube to the middle level
+     */
+    public static CommandBase getShootCubeToMiddleLevelCommand() {
+        return new SequentialCommandGroup(
+                SIDE_SHOOTER.getSetTargetShooterAngleCommand(SideShooterConstants.SideShooterState.MIDDLE.angle).raceWith(getWaitForContinueCommand()),
+                SIDE_SHOOTER.getSetTargetShooterStateCommand(SideShooterConstants.SideShooterState.MIDDLE)
+        );
+    }
+
+    /**
+     * @return a command that shoots a cube to the hybrid level
+     */
+    public static CommandBase getShootCubeToHybridLevelCommand() {
+        return new SequentialCommandGroup(
+                SIDE_SHOOTER.getSetTargetShooterAngleCommand(SideShooterConstants.SideShooterState.HYBRID.angle).raceWith(getWaitForContinueCommand()),
+                SIDE_SHOOTER.getSetTargetShooterStateCommand(SideShooterConstants.SideShooterState.HYBRID)
+        );
     }
 
     /**
