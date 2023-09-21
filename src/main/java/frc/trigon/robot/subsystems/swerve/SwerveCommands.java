@@ -26,6 +26,16 @@ public class SwerveCommands {
     private static final PoseEstimator POSE_ESTIMATOR = RobotContainer.POSE_ESTIMATOR;
 
     /**
+     * @return a command that brakes the swerve modules and then coasts them, runs when disabled
+     */
+    public static WrapperCommand getBrakeAndCoastCommand() {
+        return new InstantCommand(() -> SWERVE.setBrake(true))
+                .andThen(new WaitCommand(SWERVE.getConstants().getBrakeTimeSeconds()))
+                .andThen(new InstantCommand(() -> SWERVE.setBrake(false)))
+                .ignoringDisable(true);
+    }
+
+    /**
      * Constructs a command that autonomously drives the robot to a target pose, in the community zone.
      * This command will avoid hitting the charge station.
      *

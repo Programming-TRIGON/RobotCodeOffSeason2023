@@ -5,6 +5,7 @@ import edu.wpi.first.wpilibj.simulation.FlywheelSim;
 import frc.trigon.robot.constants.RobotConstants;
 import frc.trigon.robot.subsystems.collector.CollectorIO;
 import frc.trigon.robot.subsystems.collector.CollectorInputsAutoLogged;
+import frc.trigon.robot.utilities.Conversions;
 
 public class SimulationCollectorIO extends CollectorIO {
     private final FlywheelSim motorSimulation = SimulationCollectorConstants.MOTOR_SIMULATION;
@@ -16,12 +17,13 @@ public class SimulationCollectorIO extends CollectorIO {
 
         inputs.statorCurrent = motorSimulation.getCurrentDrawAmps();
         inputs.appliedVoltage = inputVoltage;
-        inputs.power = inputVoltage / SimulationCollectorConstants.VOLTAGE_COMPENSATION_SATURATION;
+        inputs.power = Conversions.voltageToCompensatedPower(inputVoltage, SimulationCollectorConstants.VOLTAGE_COMPENSATION_SATURATION);
     }
 
     @Override
     protected void setTargetPower(double power) {
-        setMotorSimulationVoltage(power * SimulationCollectorConstants.VOLTAGE_COMPENSATION_SATURATION);
+        final double voltage = Conversions.compensatedPowerToVoltage(power, SimulationCollectorConstants.VOLTAGE_COMPENSATION_SATURATION);
+        setMotorSimulationVoltage(voltage);
     }
 
     @Override

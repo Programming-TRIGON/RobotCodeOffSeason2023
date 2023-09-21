@@ -25,6 +25,14 @@ public class SideShooterIO {
     }
 
     /**
+     * Sets whether the angle motor is in brake mode or not.
+     *
+     * @param brake whether the angle is in brake mode or not
+     */
+    protected void setNeutralMode(boolean brake) {
+    }
+
+    /**
      * Sets the target angle of the angle motor.
      *
      * @param angle       the target angle
@@ -34,16 +42,22 @@ public class SideShooterIO {
     }
 
     /**
-     * Sets the target power of the shooting motor.
+     * Sets the target voltage of the shooting motor.
      *
-     * @param power the target power
+     * @param voltage the target voltage
      */
-    protected void setTargetShootingPower(double power) {
+    protected void setTargetShootingPower(double voltage) {
     }
 
     /**
      * Stops the angle motor.
      */
     protected void stopAngleMotor() {
+    }
+
+    /**
+     * Stops the shooting motor.
+     */
+    protected void stopShootingMotor() {
     }
 }

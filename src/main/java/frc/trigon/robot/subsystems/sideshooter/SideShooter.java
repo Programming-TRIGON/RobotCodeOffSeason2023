@@ -14,6 +14,7 @@ import frc.trigon.robot.subsystems.sideshooter.kablamasideshooter.KablamaSideSho
 import frc.trigon.robot.subsystems.sideshooter.kablamasideshooter.KablamaSideShooterIO;
 import frc.trigon.robot.subsystems.sideshooter.simulationsideshooter.SimulationSideShooterConstants;
 import frc.trigon.robot.subsystems.sideshooter.simulationsideshooter.SimulationSideShooterIO;
+import frc.trigon.robot.utilities.CurrentWatcher;
 import org.littletonrobotics.junction.Logger;
 
 public class SideShooter extends SubsystemBase {
@@ -25,6 +26,7 @@ public class SideShooter extends SubsystemBase {
     private TrapezoidProfile angleMotorProfile = null;
     private double lastAngleMotorGenerationProfileTime;
     private Rotation2d generatedAngle = new Rotation2d();
+    private SideShooterConstants.SideShooterState targetState = null;
 
     public static SideShooter getInstance() {
         return INSTANCE;
@@ -33,6 +35,7 @@ public class SideShooter extends SubsystemBase {
     private SideShooter() {
         sideShooterIO = generateIO();
         sideShooterConstants = getConstants();
+        setupCollectionCurrentWatcher();
     }
 
     @Override
@@ -43,19 +46,40 @@ public class SideShooter extends SubsystemBase {
     }
 
     /**
+     * Sets whether the angle motor is in brake mode or not.
+     *
+     * @param brake whether the angle is in brake mode or not
+     */
+    public void setNeutralMode(boolean brake) {
+        sideShooterIO.setNeutralMode(brake);
+    }
+
+    /**
      * Constructs a command that goes to the target state's angle, and then starts applying the state's power.
      *
      * @param sideShooterState the target side shooter state
+     *                         // TODO: byOrder
      * @return the command
      */
-    public CommandBase getSetTargetShooterStateCommand(SideShooterConstants.SideShooterState sideShooterState) {
+    public CommandBase getSetTargetShooterStateCommand(SideShooterConstants.SideShooterState sideShooterState, boolean byOrder) {
         final Rotation2d targetAngle = sideShooterState.angle;
-        final double targetPower = sideShooterState.power;
+        final double targetPower = sideShooterState.voltage;
 
-        final SequentialCommandGroup setTargetShooterStateCommand = new SequentialCommandGroup(
-                getSetTargetShooterAngleCommand(targetAngle).until(() -> angleAtTarget(targetAngle)),
-                Commands.withoutRequirements(getSetTargetShooterPowerCommand(targetPower))
-                        .alongWith(Commands.withoutRequirements(getSetTargetShooterAngleCommand(targetAngle)))
+        if (byOrder) {
+            final SequentialCommandGroup setTargetShooterStateCommand = new SequentialCommandGroup(
+                    new InstantCommand(() -> targetState = sideShooterState),
+                    getSetTargetShooterAngleCommand(targetAngle).until(() -> angleAtTarget(targetAngle)),
+                    Commands.withoutRequirements(getSetTargetShooterPowerCommand(targetPower))
+                            .alongWith(Commands.withoutRequirements(getSetTargetShooterAngleCommand(targetAngle)))
+            );
+
+            return Commands.withRequirements(setTargetShooterStateCommand, this);
+        }
+
+        final ParallelCommandGroup setTargetShooterStateCommand = new ParallelCommandGroup(
+                new InstantCommand(() -> targetState = sideShooterState),
+                Commands.withoutRequirements(getSetTargetShooterPowerCommand(targetPower)),
+                Commands.withoutRequirements(getSetTargetShooterAngleCommand(targetAngle))
         );
 
         return Commands.withRequirements(setTargetShooterStateCommand, this);
@@ -103,6 +127,18 @@ public class SideShooter extends SubsystemBase {
         lastAngleMotorGenerationProfileTime = Timer.getFPGATimestamp();
     }
 
+    private void setupCollectionCurrentWatcher() {
+        new CurrentWatcher(
+                () -> sideShooterInputs.shootingMotorCurrent,
+                SideShooterConstants.COLLECTION_CURRENT_THRESHOLD,
+                SideShooterConstants.COLLECTION_TIME_THRESHOLD,
+                () -> {
+                    if (targetState == SideShooterConstants.SideShooterState.COLLECTION) getCurrentCommand().cancel();
+                    sideShooterIO.stopAngleMotor();
+                }
+        );
+    }
+
     private void setTargetAngleFromProfile() {
         if (angleMotorProfile == null) {
             sideShooterIO.stopAngleMotor();
@@ -110,7 +146,7 @@ public class SideShooter extends SubsystemBase {
         }
 
         final TrapezoidProfile.State targetState = angleMotorProfile.calculate(getAngleMotorProfileTime());
-        final double feedforward = sideShooterConstants.getAngleMotorFeedforward().calculate(targetState.position, targetState.velocity);
+        final double feedforward = sideShooterConstants.getAngleMotorFeedforward().calculate(Units.degreesToRadians(targetState.position), Units.degreesToRadians(targetState.velocity));
         final Rotation2d targetAngle = Rotation2d.fromDegrees(targetState.position);
 
         sideShooterIO.setTargetAngle(targetAngle, feedforward);

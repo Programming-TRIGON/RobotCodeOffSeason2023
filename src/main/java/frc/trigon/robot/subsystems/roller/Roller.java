@@ -9,13 +9,16 @@ import frc.trigon.robot.commands.Commands;
 import frc.trigon.robot.constants.RobotConstants;
 import frc.trigon.robot.subsystems.roller.kablamaroller.KablamaRollerIO;
 import frc.trigon.robot.subsystems.roller.simulationroller.SimulationRollerIO;
+import frc.trigon.robot.utilities.CurrentWatcher;
 import org.littletonrobotics.junction.Logger;
 
 public class Roller extends SubsystemBase {
+    // TODO: rework all the logic here
     private final static Roller INSTANCE = new Roller();
     private final RollerIO rollerIO;
     private final RollerInputsAutoLogged rollerInputs = new RollerInputsAutoLogged();
     private boolean isTargetStateClosed = false;
+    private boolean isClosed = false;
 
     public static Roller getInstance() {
         return INSTANCE;
@@ -30,6 +33,17 @@ public class Roller extends SubsystemBase {
         rollerIO.updateInputs(rollerInputs);
         Logger.getInstance().processInputs("Roller", rollerInputs);
         updateMechanism();
+        // TODO: make this readability
+        new CurrentWatcher(
+                () -> rollerInputs.angleMotorCurrent,
+                20,
+                0.2,
+                () -> {
+//                    isClosed = isTargetStateClosed;
+//                    System.out.println("closed");
+//                    rollerIO.stopAngleMotor();
+                }
+        );
     }
 
     /**
@@ -116,11 +130,12 @@ public class Roller extends SubsystemBase {
     }
 
     public boolean isOpen() {
-        return rollerInputs.angleMotorForwardLimitSwitchPressed;
+//        return rollerInputs.angleMotorForwardLimitSwitchPressed;
+        return !isClosed;
     }
 
     public boolean isClosed() {
-        return rollerInputs.angleMotorBackwardLimitSwitchPressed;
+        return isClosed;
     }
 
     private void updateMechanism() {

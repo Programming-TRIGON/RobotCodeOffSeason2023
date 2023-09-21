@@ -12,8 +12,8 @@ public class RollerConstants {
     public static final double ROLLER_LENGTH = 0.45;
     static final double
             OPENING_POWER = 0.2,
-            CLOSING_POWER = -0.5,
-            COLLECTING_POWER = -1;
+            CLOSING_POWER = -0.7,
+            COLLECTING_POWER = 0.85;
 
     static final double ROLLER_YAW = Units.degreesToRadians(90);
     private static final double

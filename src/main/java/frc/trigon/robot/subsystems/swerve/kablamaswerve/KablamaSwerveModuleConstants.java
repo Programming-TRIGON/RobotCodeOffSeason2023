@@ -14,10 +14,9 @@ import frc.trigon.robot.utilities.Conversions;
 
 public class KablamaSwerveModuleConstants {
     static final double VOLTAGE_COMPENSATION_SATURATION = 12;
-    static final double DRIVE_GEAR_RATIO = 6.12;
+    static final double DRIVE_GEAR_RATIO = 5.14;
     static final double WHEEL_DIAMETER_METERS = 0.1016;
     static final double MAX_THEORETICAL_SPEED_METERS_PER_SECOND = 4;
-    private static final double VOLTAGE_COMP_SATURATION = 12;
 
     static final int
             FRONT_LEFT_ID = 0,
@@ -131,7 +130,7 @@ public class KablamaSwerveModuleConstants {
     private void configureSteerMotor() {
         steerMotor.restoreFactoryDefaults();
         steerMotor.setInverted(STEER_MOTOR_INVERTED);
-        steerMotor.enableVoltageCompensation(VOLTAGE_COMP_SATURATION);
+        steerMotor.enableVoltageCompensation(VOLTAGE_COMPENSATION_SATURATION);
 
         steerMotor.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus0, 255); // Applied output
         steerMotor.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus1, 10); // Motor movement
@@ -139,6 +138,7 @@ public class KablamaSwerveModuleConstants {
         steerMotor.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus3, 1000); // Analog sensor
         steerMotor.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus4, 1000); // Alternate encoder
         steerMotor.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus5, 100); // Duty cycle position
+        steerMotor.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus6, 100); // Duty cycle velocity
 
         steerMotor.getPIDController().setP(STEER_MOTOR_P);
         steerMotor.getPIDController().setI(STEER_MOTOR_I);

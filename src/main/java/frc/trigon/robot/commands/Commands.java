@@ -204,7 +204,7 @@ public class Commands {
                     ROLLER.getFullCloseCommand().until(ROLLER::isClosed),
                     driveToGridAlignmentCommand.raceWith(SIDE_SHOOTER.getSetTargetShooterAngleCommand(targetState.angle)),
                     getWaitForContinueCommand().alongWith(SIDE_SHOOTER.getSetTargetShooterAngleCommand(targetState.angle)),
-                    SIDE_SHOOTER.getSetTargetShooterStateCommand(targetState).alongWith(getArbitrarySubsystemCommand(SWERVE).asProxy())
+                    SIDE_SHOOTER.getSetTargetShooterStateCommand(targetState, true).alongWith(getArbitrarySubsystemCommand(SWERVE).asProxy())
             );
         });
     }
@@ -215,7 +215,7 @@ public class Commands {
     public static CommandBase getShootCubeToHighLevelCommand() {
         return new SequentialCommandGroup(
                 SIDE_SHOOTER.getSetTargetShooterAngleCommand(SideShooterConstants.SideShooterState.HIGH.angle).raceWith(getWaitForContinueCommand()),
-                SIDE_SHOOTER.getSetTargetShooterStateCommand(SideShooterConstants.SideShooterState.HIGH)
+                SIDE_SHOOTER.getSetTargetShooterStateCommand(SideShooterConstants.SideShooterState.HIGH, true)
         );
     }
 
@@ -225,7 +225,7 @@ public class Commands {
     public static CommandBase getShootCubeToMiddleLevelCommand() {
         return new SequentialCommandGroup(
                 SIDE_SHOOTER.getSetTargetShooterAngleCommand(SideShooterConstants.SideShooterState.MIDDLE.angle).raceWith(getWaitForContinueCommand()),
-                SIDE_SHOOTER.getSetTargetShooterStateCommand(SideShooterConstants.SideShooterState.MIDDLE)
+                SIDE_SHOOTER.getSetTargetShooterStateCommand(SideShooterConstants.SideShooterState.MIDDLE, true)
         );
     }
 
@@ -235,7 +235,7 @@ public class Commands {
     public static CommandBase getShootCubeToHybridLevelCommand() {
         return new SequentialCommandGroup(
                 SIDE_SHOOTER.getSetTargetShooterAngleCommand(SideShooterConstants.SideShooterState.HYBRID.angle).raceWith(getWaitForContinueCommand()),
-                SIDE_SHOOTER.getSetTargetShooterStateCommand(SideShooterConstants.SideShooterState.HYBRID)
+                SIDE_SHOOTER.getSetTargetShooterStateCommand(SideShooterConstants.SideShooterState.HYBRID, true)
         );
     }
 
@@ -275,7 +275,7 @@ public class Commands {
     public static CommandBase getShootCubeOverChargingStationCommand() {
         return new SequentialCommandGroup(
                 CommandsConstants.TURN_TO_GRID_COMMAND.until(() -> SWERVE.atAngle(Rotation2d.fromRotations(0.5))),
-                SIDE_SHOOTER.getSetTargetShooterStateCommand(SideShooterConstants.SideShooterState.SHOOT_OVER_RAMP)
+                SIDE_SHOOTER.getSetTargetShooterStateCommand(SideShooterConstants.SideShooterState.SHOOT_OVER_RAMP, true)
         );
     }
 
@@ -285,7 +285,7 @@ public class Commands {
     public static CommandBase getNonAssistedCubeCollectionCommand() {
         return new ParallelCommandGroup(
                 ROLLER.getFullCollectionCommand(),
-                SIDE_SHOOTER.getSetTargetShooterStateCommand(SideShooterConstants.SideShooterState.COLLECTION)
+                SIDE_SHOOTER.getSetTargetShooterStateCommand(SideShooterConstants.SideShooterState.COLLECTION, false)
         );
     }
 
@@ -309,7 +309,7 @@ public class Commands {
     public static CommandBase getFullCollectionCloseCommand() {
         return new ParallelCommandGroup(
                 ROLLER.getFullCloseCommand(),
-                SIDE_SHOOTER.getSetTargetShooterStateCommand(SideShooterConstants.SideShooterState.DEFAULT)
+                SIDE_SHOOTER.getSetTargetShooterStateCommand(SideShooterConstants.SideShooterState.DEFAULT, false)
         );
     }
 

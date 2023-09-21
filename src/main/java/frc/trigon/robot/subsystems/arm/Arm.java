@@ -6,6 +6,7 @@ import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.*;
 import frc.trigon.robot.commands.Commands;
@@ -42,14 +43,14 @@ public class Arm extends SubsystemBase {
     private Arm() {
         armIO = generateIO();
         armConstants = generateConstants();
+        new Notifier(this::updateDefaultCommand).startPeriodic(0.1);
+        new Notifier(this::updateMechanism).startPeriodic(0.05);
     }
 
     @Override
     public void periodic() {
         armIO.updateInputs(armInputs);
         Logger.getInstance().processInputs("Arm", armInputs);
-        updateMechanism();
-        updateDefaultCommand();
     }
 
     /**
@@ -144,9 +145,10 @@ public class Arm extends SubsystemBase {
      * @return the command
      */
     public CommandBase getCurrentGoToArmPositionCommand(double targetElevatorPosition, Rotation2d targetAngle, double elevatorSpeedPercentage, double angleSpeedPercentage) {
-        if (targetElevatorPosition < armInputs.elevatorMotorPositionMeters) {
+        if (targetElevatorPosition < armInputs.elevatorMotorPositionRevolutions) {
+            final double startAngle = armInputs.angleMotorPositionDegrees;
             return Commands.withRequirements(new SequentialCommandGroup(
-                    getGoToElevatorPositionCommand(targetElevatorPosition, elevatorSpeedPercentage).alongWith(getGoToAngleCommand(Rotation2d.fromDegrees(armInputs.angleMotorPositionDegrees), angleSpeedPercentage)).until(this::elevatorMotorAtGoal),
+                    getGoToElevatorPositionCommand(targetElevatorPosition, elevatorSpeedPercentage).alongWith(getGoToAngleCommand(Rotation2d.fromDegrees(startAngle), angleSpeedPercentage)).until(this::elevatorMotorAtGoal),
                     getGoToAngleCommand(targetAngle, angleSpeedPercentage).alongWith(getGoToElevatorPositionCommand(targetElevatorPosition, elevatorSpeedPercentage))
             ), this);
         }
@@ -164,19 +166,19 @@ public class Arm extends SubsystemBase {
     }
 
     private void updateMechanism() {
-        ArmConstants.TARGET_ARM_LIGAMENT.setLength(generatedElevatorPosition + ArmConstants.RETRACTED_ARM_LENGTH);
+        ArmConstants.TARGET_ARM_LIGAMENT.setLength((generatedElevatorPosition * ArmConstants.THEORETICAL_METERS_PER_REVOLUTIONS) + ArmConstants.RETRACTED_ARM_LENGTH);
         ArmConstants.TARGET_ARM_LIGAMENT.setAngle(generatedAngle.getDegrees());
-        ArmConstants.ARM_LIGAMENT.setLength(armInputs.elevatorMotorPositionMeters + ArmConstants.RETRACTED_ARM_LENGTH);
+        ArmConstants.ARM_LIGAMENT.setLength((armInputs.elevatorMotorPositionRevolutions * ArmConstants.THEORETICAL_METERS_PER_REVOLUTIONS) + ArmConstants.RETRACTED_ARM_LENGTH);
         ArmConstants.ARM_LIGAMENT.setAngle(armInputs.angleMotorPositionDegrees);
 
-        Logger.getInstance().recordOutput("Arm/ArmMechanism", ArmConstants.ARM_MECHANISM);
-        Logger.getInstance().recordOutput("Arm/ArmPoses/firstElevatorLevel", getFirstElevatorLevelPose());
-        Logger.getInstance().recordOutput("Arm/ArmPoses/secondElevatorLevel", getSecondElevatorLevelPose());
-        Logger.getInstance().recordOutput("Arm/ArmPoses/thirdElevatorLevel", getThirdElevatorLevelPose());
-
-        Logger.getInstance().recordOutput("Arm/ArmPoses/targetFirstElevatorLevel", getTargetFirstElevatorLevelPose());
-        Logger.getInstance().recordOutput("Arm/ArmPoses/targetSecondElevatorLevel", getTargetSecondElevatorLevelPose());
-        Logger.getInstance().recordOutput("Arm/ArmPoses/targetThirdElevatorLevel", getTargetThirdElevatorLevelPose());
+//        Logger.getInstance().recordOutput("Arm/ArmMechanism", ArmConstants.ARM_MECHANISM);
+//        Logger.getInstance().recordOutput("Arm/ArmPoses/firstElevatorLevel", getFirstElevatorLevelPose());
+//        Logger.getInstance().recordOutput("Arm/ArmPoses/secondElevatorLevel", getSecondElevatorLevelPose());
+//        Logger.getInstance().recordOutput("Arm/ArmPoses/thirdElevatorLevel", getThirdElevatorLevelPose());
+//
+//        Logger.getInstance().recordOutput("Arm/ArmPoses/targetFirstElevatorLevel", getTargetFirstElevatorLevelPose());
+//        Logger.getInstance().recordOutput("Arm/ArmPoses/targetSecondElevatorLevel", getTargetSecondElevatorLevelPose());
+//        Logger.getInstance().recordOutput("Arm/ArmPoses/targetThirdElevatorLevel", getTargetThirdElevatorLevelPose());
     }
 
     private FunctionalCommand getGoToElevatorPositionCommand(double position, double speedPercentage) {
@@ -208,6 +210,7 @@ public class Arm extends SubsystemBase {
 
         armIO.setTargetElevatorPosition(targetState.position, feedforward);
         generatedElevatorPosition = targetState.position;
+        Logger.getInstance().recordOutput("Arm/generatedElevatorPosition", generatedElevatorPosition);
     }
 
     private void setTargetAngleFromProfile() {
@@ -217,7 +220,7 @@ public class Arm extends SubsystemBase {
         }
 
         final TrapezoidProfile.State targetState = angleMotorProfile.calculate(getAngleMotorProfileTime());
-        final double feedforward = getCurrentAngleFeedforward().calculate(targetState.position, targetState.velocity);
+        final double feedforward = getCurrentAngleFeedforward().calculate(Units.degreesToRadians(targetState.position), Units.degreesToRadians(targetState.velocity));
         final Rotation2d targetAngle = Rotation2d.fromDegrees(targetState.position);
 
         armIO.setTargetAngle(targetAngle, feedforward);
@@ -228,7 +231,7 @@ public class Arm extends SubsystemBase {
         elevatorMotorProfile = new TrapezoidProfile(
                 Conversions.scaleConstraints(ArmConstants.ELEVATOR_CONSTRAINTS, speedPercentage),
                 new TrapezoidProfile.State(targetElevatorPosition, 0),
-                new TrapezoidProfile.State(armInputs.elevatorMotorPositionMeters, armInputs.elevatorMotorVelocityMetersPerSecond)
+                new TrapezoidProfile.State(armInputs.elevatorMotorPositionRevolutions, armInputs.elevatorMotorVelocityRevolutionsPerSecond)
         );
         this.targetElevatorPosition = targetElevatorPosition;
 
@@ -263,8 +266,8 @@ public class Arm extends SubsystemBase {
     }
 
     private boolean elevatorMotorAtPosition(double position) {
-        return Math.abs(position - armInputs.elevatorMotorPositionMeters) < ArmConstants.ELEVATOR_MOTOR_POSITION_TOLERANCE &&
-                Math.abs(armInputs.elevatorMotorVelocityMetersPerSecond) < ArmConstants.ELEVATOR_MOTOR_VELOCITY_TOLERANCE;
+        return Math.abs(position - armInputs.elevatorMotorPositionRevolutions) < ArmConstants.ELEVATOR_MOTOR_POSITION_TOLERANCE &&
+                Math.abs(armInputs.elevatorMotorVelocityRevolutionsPerSecond) < ArmConstants.ELEVATOR_MOTOR_VELOCITY_TOLERANCE;
     }
 
     private boolean angleMotorAtAngle(Rotation2d angle) {
@@ -283,16 +286,17 @@ public class Arm extends SubsystemBase {
                 closestHeight = currentHeight;
                 continue;
             }
-            if (Math.abs(currentHeight - armInputs.elevatorMotorPositionMeters) < Math.abs(closestHeight - armInputs.elevatorMotorPositionMeters)) {
+            if (Math.abs(currentHeight - armInputs.elevatorMotorPositionRevolutions) < Math.abs(closestHeight - armInputs.elevatorMotorPositionRevolutions))
                 closestHeight = currentHeight;
-            }
         }
+
+        Logger.getInstance().recordOutput("Arm/closestFFHeight", closestHeight);
 
         return heightToAngleMotorFeedforwardMap.get(closestHeight);
     }
 
     private Pose3d getThirdElevatorLevelPose() {
-        final double elevatorPosition = armInputs.elevatorMotorPositionMeters;
+        final double elevatorPosition = armInputs.elevatorMotorPositionRevolutions * ArmConstants.THEORETICAL_METERS_PER_REVOLUTIONS;
         final Translation3d firstLevelToThirdLevelTranslation = new Translation3d(
                 elevatorPosition + ArmConstants.THIRD_ELEVATOR_LEVEL_X_DIFFERENCE,
                 0,
@@ -314,7 +318,7 @@ public class Arm extends SubsystemBase {
     }
 
     private Pose3d getSecondElevatorLevelPose() {
-        final double elevatorPosition = armInputs.elevatorMotorPositionMeters;
+        final double elevatorPosition = armInputs.elevatorMotorPositionRevolutions * ArmConstants.THEORETICAL_METERS_PER_REVOLUTIONS;
         final Translation3d firstLevelToSecondLevelTranslation = new Translation3d(
                 MathUtil.clamp(elevatorPosition, 0, ArmConstants.SECOND_ELEVATOR_LEVEL_EXTENDED_LENGTH) + ArmConstants.SECOND_ELEVATOR_LEVEL_X_DIFFERENCE,
                 0,

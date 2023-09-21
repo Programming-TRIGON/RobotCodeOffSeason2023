@@ -10,7 +10,7 @@ public class SimulationRollerConstants {
     static final double VOLTAGE_COMPENSATION_SATURATION = 12;
 
     private static final DCMotor
-            ANGLE_MOTOR_GEARBOX = DCMotor.getNeo550(1),
+            ANGLE_MOTOR_GEARBOX = DCMotor.getBag(1),
             COLLECTION_MOTOR_GEARBOX = DCMotor.getNeo550(1);
     private static final double
             ANGLE_MOTOR_GEAR_RATIO = 81,

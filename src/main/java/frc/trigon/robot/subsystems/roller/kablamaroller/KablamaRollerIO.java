@@ -1,26 +1,27 @@
 package frc.trigon.robot.subsystems.roller.kablamaroller;
 
+import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.SparkMaxLimitSwitch;
 import frc.trigon.robot.subsystems.roller.RollerIO;
 import frc.trigon.robot.subsystems.roller.RollerInputsAutoLogged;
+import frc.trigon.robot.utilities.Conversions;
 
 public class KablamaRollerIO extends RollerIO {
-    private final CANSparkMax
-            angleMotor = KablamaRollerConstants.ANGLE_MOTOR,
-            collectionMotor = KablamaRollerConstants.COLLECTION_MOTOR;
+    private final CANSparkMax collectionMotor = KablamaRollerConstants.COLLECTION_MOTOR;
+    private final WPI_TalonSRX angleMotor = KablamaRollerConstants.ANGLE_MOTOR;
 
     @Override
     protected void updateInputs(RollerInputsAutoLogged inputs) {
-        inputs.angleMotorCurrent = angleMotor.getOutputCurrent();
+//        inputs.angleMotorForwardLimitSwitchPressed = KablamaRollerConstants.FORWARD_ANGLE_LIMIT_SWITCH.get();
+        inputs.angleMotorBackwardLimitSwitchPressed = !KablamaRollerConstants.REVERSE_ANGLE_LIMIT_SWITCH.get();
+        inputs.angleMotorCurrent = angleMotor.getStatorCurrent();
         inputs.angleMotorAppliedVoltage = angleMotor.getBusVoltage();
-        inputs.angleMotorPower = inputs.angleMotorAppliedVoltage / KablamaRollerConstants.VOLTAGE_COMPENSATION_SATURATION;
-        inputs.angleMotorForwardLimitSwitchPressed = isForwardAngleLimitSwitchPressed();
-        inputs.angleMotorBackwardLimitSwitchPressed = isBackwardAngleLimitSwitchPressed();
+        inputs.angleMotorPower = angleMotor.getMotorOutputPercent() / 100;
 
         inputs.collectionMotorCurrent = collectionMotor.getOutputCurrent();
         inputs.collectionMotorAppliedVoltage = collectionMotor.getBusVoltage();
-        inputs.collectionMotorPower = inputs.collectionMotorAppliedVoltage / KablamaRollerConstants.VOLTAGE_COMPENSATION_SATURATION;
+        inputs.collectionMotorPower = Conversions.voltageToCompensatedPower(inputs.collectionMotorAppliedVoltage, KablamaRollerConstants.VOLTAGE_COMPENSATION_SATURATION);
     }
 
     @Override
@@ -44,10 +45,10 @@ public class KablamaRollerIO extends RollerIO {
     }
 
     private boolean isForwardAngleLimitSwitchPressed() {
-        return angleMotor.getForwardLimitSwitch(SparkMaxLimitSwitch.Type.kNormallyOpen).isPressed();
+        return angleMotor.isFwdLimitSwitchClosed() == 1;
     }
 
     private boolean isBackwardAngleLimitSwitchPressed() {
-        return angleMotor.getReverseLimitSwitch(SparkMaxLimitSwitch.Type.kNormallyOpen).isPressed();
+        return angleMotor.isRevLimitSwitchClosed() == 1;
     }
 }

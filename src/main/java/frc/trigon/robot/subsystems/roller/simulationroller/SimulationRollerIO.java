@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import frc.trigon.robot.constants.RobotConstants;
 import frc.trigon.robot.subsystems.roller.RollerIO;
 import frc.trigon.robot.subsystems.roller.RollerInputsAutoLogged;
+import frc.trigon.robot.utilities.Conversions;
 
 public class SimulationRollerIO extends RollerIO {
     private final SingleJointedArmSim angleMotorSimulation = SimulationRollerConstants.ANGLE_MOTOR_SIMULATION;
@@ -19,23 +20,25 @@ public class SimulationRollerIO extends RollerIO {
 
         inputs.angleMotorCurrent = angleMotorSimulation.getCurrentDrawAmps();
         inputs.angleMotorAppliedVoltage = angleMotorInputVoltage;
-        inputs.angleMotorPower = angleMotorInputVoltage / SimulationRollerConstants.VOLTAGE_COMPENSATION_SATURATION;
+        inputs.angleMotorPower = Conversions.voltageToCompensatedPower(angleMotorInputVoltage, SimulationRollerConstants.VOLTAGE_COMPENSATION_SATURATION);
         inputs.angleMotorForwardLimitSwitchPressed = angleMotorSimulation.hasHitUpperLimit();
         inputs.angleMotorBackwardLimitSwitchPressed = angleMotorSimulation.hasHitLowerLimit();
 
         inputs.collectionMotorCurrent = collectionMotorSimulation.getCurrentDrawAmps();
         inputs.collectionMotorAppliedVoltage = collectionMotorInputVoltage;
-        inputs.collectionMotorPower = collectionMotorInputVoltage / SimulationRollerConstants.VOLTAGE_COMPENSATION_SATURATION;
+        inputs.collectionMotorPower = Conversions.voltageToCompensatedPower(collectionMotorInputVoltage, SimulationRollerConstants.VOLTAGE_COMPENSATION_SATURATION);
     }
 
     @Override
     protected void setTargetAnglePower(double power) {
-        setAngleMotorSimulationVoltage(power * SimulationRollerConstants.VOLTAGE_COMPENSATION_SATURATION);
+        final double voltage = Conversions.compensatedPowerToVoltage(power, SimulationRollerConstants.VOLTAGE_COMPENSATION_SATURATION);
+        setAngleMotorSimulationVoltage(voltage);
     }
 
     @Override
     protected void setTargetCollectionPower(double power) {
-        setCollectionMotorSimulationVoltage(power * SimulationRollerConstants.VOLTAGE_COMPENSATION_SATURATION);
+        final double voltage = Conversions.compensatedPowerToVoltage(power, SimulationRollerConstants.VOLTAGE_COMPENSATION_SATURATION);
+        setCollectionMotorSimulationVoltage(voltage);
     }
 
     @Override

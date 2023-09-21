@@ -34,21 +34,22 @@ public class TrihardSwerveModuleIO extends SwerveModuleIO {
     @Override
     protected void updateInputs(SwerveModuleInputsAutoLogged inputs) {
         inputs.steerAngleDegrees = getAngleDegrees();
-        inputs.steerAppliedVoltage = steerDutyCycleSignal.refresh().getValue() * TrihardSwerveModuleConstants.VOLTAGE_COMPENSATION_SATURATION;
+        inputs.steerAppliedVoltage = Conversions.compensatedPowerToVoltage(steerDutyCycleSignal.refresh().getValue(), TrihardSwerveModuleConstants.VOLTAGE_COMPENSATION_SATURATION);
 
         inputs.drivePositionRevolutions = drivePositionSignal.refresh().getValue();
         inputs.driveDistanceMeters = driveMotorValueToDistance(inputs.drivePositionRevolutions);
         inputs.driveVelocityRevolutionsPerSecond = driveVelocitySignal.refresh().getValue();
         inputs.driveVelocityMetersPerSecond = driveMotorValueToDistance(inputs.driveVelocityRevolutionsPerSecond);
-        inputs.driveAppliedVoltage = driveDutyCycleSignal.refresh().getValue() * TrihardSwerveModuleConstants.VOLTAGE_COMPENSATION_SATURATION;
+        inputs.driveAppliedVoltage = Conversions.compensatedPowerToVoltage(driveDutyCycleSignal.refresh().getValue(), TrihardSwerveModuleConstants.VOLTAGE_COMPENSATION_SATURATION);
     }
 
     @Override
     protected void setTargetOpenLoopVelocity(double velocity) {
         final double power = velocity / TrihardSwerveModuleConstants.MAX_THEORETICAL_SPEED_METERS_PER_SECOND;
+        final double voltage = Conversions.compensatedPowerToVoltage(power, TrihardSwerveModuleConstants.VOLTAGE_COMPENSATION_SATURATION);
         final VoltageOut request = new VoltageOut(
-                power * TrihardSwerveModuleConstants.VOLTAGE_COMPENSATION_SATURATION,
-                driveMotor.getDeviceID() == 1 || driveMotor.getDeviceID() == 2,
+                voltage,
+                TrihardSwerveModuleConstants.DRIVE_MOTOR_FOC,
                 false
         );
         driveMotor.setControl(request);

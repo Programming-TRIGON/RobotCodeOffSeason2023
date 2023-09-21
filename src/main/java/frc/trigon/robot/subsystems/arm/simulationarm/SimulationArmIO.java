@@ -27,10 +27,8 @@ public class SimulationArmIO extends ArmIO {
         inputs.angleMotorCurrent = angleSimulation.getCurrentDrawAmps();
         inputs.angleMotorAppliedVoltage = angleAppliedVoltage;
 
-        inputs.elevatorMotorVelocityMetersPerSecond = elevatorSimulation.getVelocityMetersPerSecond();
-        inputs.elevatorMotorPositionMeters = elevatorSimulation.getPositionMeters() - SimulationArmConstants.RETRACTED_ARM_LENGTH;
-        inputs.elevatorMotorPositionRevolutions = Conversions.distanceToRevolutions(inputs.elevatorMotorPositionMeters, ArmConstants.ELEVATOR_METERS_PER_REVOLUTION);
-        inputs.elevatorMotorVelocityRevolutionsPerSecond = Conversions.distanceToRevolutions(elevatorSimulation.getVelocityMetersPerSecond(), ArmConstants.ELEVATOR_METERS_PER_REVOLUTION);
+        inputs.elevatorMotorPositionRevolutions = Conversions.distanceToRevolutions(elevatorSimulation.getPositionMeters() - SimulationArmConstants.RETRACTED_ARM_LENGTH, ArmConstants.THEORETICAL_METERS_PER_REVOLUTIONS);
+        inputs.elevatorMotorVelocityRevolutionsPerSecond = Conversions.distanceToRevolutions(elevatorSimulation.getVelocityMetersPerSecond(), ArmConstants.THEORETICAL_METERS_PER_REVOLUTIONS);
         inputs.elevatorMotorCurrent = elevatorSimulation.getCurrentDrawAmps();
         inputs.elevatorMotorAppliedVoltage = elevatorAppliedVoltage;
 

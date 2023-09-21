@@ -17,7 +17,7 @@ public abstract class ArmConstants {
     public static final Rotation2d DEFAULT_ARM_ANGLE = Rotation2d.fromDegrees(50);
     public static final double RETRACTED_ARM_LENGTH = 0.65;
     public static final double MAX_ARM_LENGTH = 1.7;
-    public static final double ELEVATOR_METERS_PER_REVOLUTION = 0.1885;
+    public static final double THEORETICAL_METERS_PER_REVOLUTIONS = 0.1256;
 
     static final double
             ARM_ROOT_HEIGHT = 0.36,
@@ -32,15 +32,15 @@ public abstract class ArmConstants {
 
     static final double
             ELEVATOR_MOTOR_POSITION_TOLERANCE = 0.1,
-            ANGLE_MOTOR_ANGLE_TOLERANCE = 1,
+            ANGLE_MOTOR_ANGLE_TOLERANCE = 30,
             ELEVATOR_MOTOR_VELOCITY_TOLERANCE = 0.1,
-            ANGLE_MOTOR_VELOCITY_TOLERANCE = 10;
+            ANGLE_MOTOR_VELOCITY_TOLERANCE = 30;
 
     private static final double
-            MAX_ANGLE_VELOCITY = 700,
-            MAX_ANGLE_ACCELERATION = 700,
-            MAX_ELEVATOR_VELOCITY = 7,
-            MAX_ELEVATOR_ACCELERATION = 7;
+            MAX_ANGLE_VELOCITY = 500,
+            MAX_ANGLE_ACCELERATION = 500,
+            MAX_ELEVATOR_VELOCITY = 10,
+            MAX_ELEVATOR_ACCELERATION = 10;
     static final TrapezoidProfile.Constraints
             ANGLE_CONSTRAINTS = new TrapezoidProfile.Constraints(
                     MAX_ANGLE_VELOCITY, MAX_ANGLE_ACCELERATION
@@ -68,11 +68,11 @@ public abstract class ArmConstants {
 
     public enum ArmState {
         DEFAULT(0, DEFAULT_ARM_ANGLE),
-        HIGH_CONE(1, Rotation2d.fromDegrees(30)),
-        MIDDLE_CONE(0.3, Rotation2d.fromDegrees(30)),
+        HIGH_CONE(6.683350, Rotation2d.fromDegrees(31.816407)),
+        MIDDLE_CONE(3.5, Rotation2d.fromDegrees(29.179688)),
         HYBRID_CONE(0, Rotation2d.fromDegrees(0)),
-        DOUBLE_SUBSTATION(0.2, Rotation2d.fromDegrees(46.5)),
-        STANDING_CONE_COLLECTION(0, Rotation2d.fromDegrees(-6));
+        DOUBLE_SUBSTATION(3, Rotation2d.fromDegrees(46.5)),
+        STANDING_CONE_COLLECTION(0, Rotation2d.fromDegrees(-2));
 
         ArmState(double elevatorPosition, Rotation2d angle) {
             this.elevatorPosition = elevatorPosition;

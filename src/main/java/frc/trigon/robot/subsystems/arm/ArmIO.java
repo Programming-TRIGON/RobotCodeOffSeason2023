@@ -12,9 +12,7 @@ public class ArmIO {
         public double angleMotorAppliedVoltage = 0;
 
         public double elevatorMotorPositionRevolutions = 0;
-        public double elevatorMotorPositionMeters = 0;
         public double elevatorMotorVelocityRevolutionsPerSecond = 0;
-        public double elevatorMotorVelocityMetersPerSecond = 0;
         public double elevatorMotorCurrent = 0;
         public double elevatorMotorAppliedVoltage = 0;
     }

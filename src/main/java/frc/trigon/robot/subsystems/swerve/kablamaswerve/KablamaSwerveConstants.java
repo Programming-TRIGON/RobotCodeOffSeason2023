@@ -26,7 +26,7 @@ public class KablamaSwerveConstants extends SwerveConstants {
             DRIVE_NEUTRAL_DEADBAND = 0.1,
             ROTATION_NEUTRAL_DEADBAND = 0;
     static final double
-            SIDE_LENGTH_METERS = 0.5,
+            SIDE_LENGTH_METERS = 0.4857,
             DISTANCE_FROM_CENTER_OF_BASE = SIDE_LENGTH_METERS / 2;
     private static final Translation2d[] LOCATIONS = {
             KablamaSwerveModuleConstants.KablamaSwerveModules.fromId(0).location,

@@ -26,7 +26,7 @@ public class SimulationSideShooterIO extends SideShooterIO {
 
         inputs.shootingMotorCurrent = shootingMotorSimulation.getCurrentDrawAmps();
         inputs.shootingMotorAppliedVoltage = shootingMotorInputVoltage;
-        inputs.shootingMotorPower = inputs.shootingMotorAppliedVoltage / SimulationSideShooterConstants.VOLTAGE_COMPENSATION_SATURATION;
+        inputs.shootingMotorPower = inputs.shootingMotorAppliedVoltage / SimulationSideShooterConstants.MAX_VOLTAGE;
     }
 
     @Override
@@ -39,8 +39,8 @@ public class SimulationSideShooterIO extends SideShooterIO {
     }
 
     @Override
-    protected void setTargetShootingPower(double power) {
-        setShootingMotorSimulationVoltage(power * SimulationSideShooterConstants.VOLTAGE_COMPENSATION_SATURATION);
+    protected void setTargetShootingPower(double voltage) {
+        setShootingMotorSimulationVoltage(voltage);
     }
 
     @Override
@@ -48,11 +48,16 @@ public class SimulationSideShooterIO extends SideShooterIO {
         setAngleMotorSimulationVoltage(0);
     }
 
+    @Override
+    protected void stopShootingMotor() {
+        setShootingMotorSimulationVoltage(0);
+    }
+
     private void setAngleMotorSimulationVoltage(double voltage) {
         angleMotorInputVoltage = MathUtil.clamp(
                 voltage,
-                -SimulationSideShooterConstants.VOLTAGE_COMPENSATION_SATURATION,
-                SimulationSideShooterConstants.VOLTAGE_COMPENSATION_SATURATION
+                -SimulationSideShooterConstants.MAX_VOLTAGE,
+                SimulationSideShooterConstants.MAX_VOLTAGE
         );
 
         angleMotorSimulation.setInputVoltage(angleMotorInputVoltage);
@@ -61,8 +66,8 @@ public class SimulationSideShooterIO extends SideShooterIO {
     private void setShootingMotorSimulationVoltage(double voltage) {
         shootingMotorInputVoltage = MathUtil.clamp(
                 voltage,
-                -SimulationSideShooterConstants.VOLTAGE_COMPENSATION_SATURATION,
-                SimulationSideShooterConstants.VOLTAGE_COMPENSATION_SATURATION
+                -SimulationSideShooterConstants.MAX_VOLTAGE,
+                SimulationSideShooterConstants.MAX_VOLTAGE
         );
 
         shootingMotorSimulation.setInputVoltage(shootingMotorInputVoltage);

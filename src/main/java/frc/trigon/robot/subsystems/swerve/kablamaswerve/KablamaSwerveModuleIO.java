@@ -2,6 +2,8 @@ package frc.trigon.robot.subsystems.swerve.kablamaswerve;
 
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
+import com.ctre.phoenix6.controls.CoastOut;
+import com.ctre.phoenix6.controls.StaticBrake;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -42,13 +44,13 @@ public class KablamaSwerveModuleIO extends SwerveModuleIO {
         inputs.driveDistanceMeters = Conversions.revolutionsToDistance(inputs.drivePositionRevolutions, KablamaSwerveModuleConstants.WHEEL_DIAMETER_METERS);
         inputs.driveVelocityRevolutionsPerSecond = velocitySignal.refresh().getValue();
         inputs.driveVelocityMetersPerSecond = Conversions.revolutionsToDistance(inputs.driveVelocityRevolutionsPerSecond, KablamaSwerveModuleConstants.WHEEL_DIAMETER_METERS);
-        inputs.driveAppliedVoltage = dutyCycleSignal.refresh().getValue() * KablamaSwerveModuleConstants.VOLTAGE_COMPENSATION_SATURATION;
+        inputs.driveAppliedVoltage = Conversions.compensatedPowerToVoltage(dutyCycleSignal.refresh().getValue(), KablamaSwerveModuleConstants.VOLTAGE_COMPENSATION_SATURATION);
     }
 
     @Override
     protected void setTargetOpenLoopVelocity(double velocity) {
         double power = velocity / KablamaSwerveModuleConstants.MAX_THEORETICAL_SPEED_METERS_PER_SECOND;
-        double voltage = power * KablamaSwerveModuleConstants.VOLTAGE_COMPENSATION_SATURATION;
+        double voltage = Conversions.compensatedPowerToVoltage(power, KablamaSwerveModuleConstants.VOLTAGE_COMPENSATION_SATURATION);
         final VoltageOut request = new VoltageOut(
                 voltage, KablamaSwerveModuleConstants.DRIVE_MOTOR_FOC, false
         );

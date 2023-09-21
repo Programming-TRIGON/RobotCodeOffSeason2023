@@ -1,21 +1,22 @@
 package frc.trigon.robot.subsystems.arm.kablamaarm;
 
 import com.revrobotics.CANSparkMax;
-import com.revrobotics.SparkMaxAbsoluteEncoder;
 import com.revrobotics.SparkMaxPIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
-import frc.trigon.robot.subsystems.arm.ArmConstants;
+import edu.wpi.first.math.util.Units;
 import frc.trigon.robot.subsystems.arm.ArmIO;
 import frc.trigon.robot.subsystems.arm.ArmInputsAutoLogged;
-import frc.trigon.robot.utilities.Conversions;
+import frc.trigon.robot.utilities.SRXMagEncoder;
+import org.littletonrobotics.junction.Logger;
 
 public class KablamaArmIO extends ArmIO {
     private final CANSparkMax
             angleMotor = KablamaArmConstants.MASTER_ANGLE_MOTOR,
             elevatorMotor = KablamaArmConstants.MASTER_ELEVATOR_MOTOR;
-    private final SparkMaxAbsoluteEncoder
+    private final SRXMagEncoder
             angleEncoder = KablamaArmConstants.ANGLE_ENCODER,
             elevatorEncoder = KablamaArmConstants.ELEVATOR_ENCODER;
+    private ArmInputsAutoLogged lastInputs = new ArmInputsAutoLogged();
 
     @Override
     protected void updateInputs(ArmInputsAutoLogged inputs) {
@@ -25,11 +26,11 @@ public class KablamaArmIO extends ArmIO {
         inputs.angleMotorAppliedVoltage = angleMotor.getBusVoltage();
 
         inputs.elevatorMotorPositionRevolutions = elevatorEncoder.getPosition();
-        inputs.elevatorMotorPositionMeters = Conversions.revolutionsToDistance(inputs.elevatorMotorPositionRevolutions, ArmConstants.ELEVATOR_METERS_PER_REVOLUTION);
         inputs.elevatorMotorVelocityRevolutionsPerSecond = elevatorEncoder.getVelocity();
-        inputs.elevatorMotorVelocityMetersPerSecond = Conversions.revolutionsToDistance(inputs.elevatorMotorVelocityRevolutionsPerSecond, ArmConstants.ELEVATOR_METERS_PER_REVOLUTION);
         inputs.elevatorMotorCurrent = elevatorMotor.getOutputCurrent();
         inputs.elevatorMotorAppliedVoltage = elevatorMotor.getBusVoltage();
+
+        lastInputs = inputs;
     }
 
     @Override
@@ -37,14 +38,19 @@ public class KablamaArmIO extends ArmIO {
         final CANSparkMax.IdleMode idleMode = brake ? CANSparkMax.IdleMode.kBrake : CANSparkMax.IdleMode.kCoast;
 
         angleMotor.setIdleMode(idleMode);
+        KablamaArmConstants.FOLLOWER_ANGLE_MOTOR.setIdleMode(idleMode);
         elevatorMotor.setIdleMode(idleMode);
+        KablamaArmConstants.FOLLOWER_ELEVATOR_MOTOR.setIdleMode(idleMode);
     }
 
     @Override
     protected void setTargetAngle(Rotation2d angle, double feedforward) {
+        final double pidOutput = KablamaArmConstants.ANGLE_PID_CONTROLLER.calculate(Units.degreesToRadians(lastInputs.angleMotorPositionDegrees), angle.getRadians());
+        Logger.getInstance().recordOutput("pidOut", pidOutput);
+        Logger.getInstance().recordOutput("ff", feedforward);
         angleMotor.getPIDController().setReference(
-                angle.getDegrees(),
-                CANSparkMax.ControlType.kPosition,
+                pidOutput,
+                CANSparkMax.ControlType.kVoltage,
                 0,
                 feedforward,
                 SparkMaxPIDController.ArbFFUnits.kVoltage
@@ -53,10 +59,10 @@ public class KablamaArmIO extends ArmIO {
 
     @Override
     protected void setTargetElevatorPosition(double position, double feedforward) {
-        final double motorRevolutions = Conversions.distanceToRevolutions(position, ArmConstants.ELEVATOR_METERS_PER_REVOLUTION);
+        final double pidOutput = KablamaArmConstants.ELEVATOR_PID_CONTROLLER.calculate(lastInputs.elevatorMotorPositionRevolutions, position);
         elevatorMotor.getPIDController().setReference(
-                motorRevolutions,
-                CANSparkMax.ControlType.kPosition,
+                pidOutput,
+                CANSparkMax.ControlType.kVoltage,
                 0,
                 feedforward,
                 SparkMaxPIDController.ArbFFUnits.kVoltage

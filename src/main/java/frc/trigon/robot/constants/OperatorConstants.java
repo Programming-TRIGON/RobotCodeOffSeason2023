@@ -1,5 +1,7 @@
 package frc.trigon.robot.constants;
 
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.trigon.robot.components.KeyboardController;
 import frc.trigon.robot.components.XboxController;
@@ -45,5 +47,7 @@ public class OperatorConstants {
             SHOOT_CUBE_TO_HYBRID_LEVEL_TRIGGER = OPERATOR_CONTROLLER.n(),
             PLACE_CONE_AT_HIGH_LEVEL_TRIGGER = OPERATOR_CONTROLLER.u(),
             PLACE_CONE_AT_MIDDLE_LEVEL_TRIGGER = OPERATOR_CONTROLLER.j(),
-            PLACE_CONE_AT_HYBRID_LEVEL_TRIGGER = OPERATOR_CONTROLLER.m();
+            PLACE_CONE_AT_HYBRID_LEVEL_TRIGGER = OPERATOR_CONTROLLER.m(),
+            TOGGLE_BRAKE_MODE_TRIGGER = OPERATOR_CONTROLLER.g().or(RobotController::getUserButton),
+            EJECT_TRIGGER = OPERATOR_CONTROLLER.backtick();
 }

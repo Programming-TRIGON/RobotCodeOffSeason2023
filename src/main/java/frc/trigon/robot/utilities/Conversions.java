@@ -11,7 +11,7 @@ public class Conversions {
             SEC_PER_MIN = 60;
 
     /**
-     * Converts ticks from a Mag Encoder to revolutions
+     * Converts ticks from a Mag Encoder to revolutions.
      *
      * @param magTicks ticks from a Mag Encoder
      * @return revolutions
@@ -21,7 +21,7 @@ public class Conversions {
     }
 
     /**
-     * Converts revolutions to Mag Encoder ticks
+     * Converts revolutions to Mag Encoder ticks.
      *
      * @param revolutions revolutions
      * @return Mag Encoder ticks
@@ -31,7 +31,7 @@ public class Conversions {
     }
 
     /**
-     * Converts falcon ticks to revolutions
+     * Converts falcon ticks to revolutions.
      *
      * @param ticks falcon ticks
      * @return revolutions
@@ -41,7 +41,7 @@ public class Conversions {
     }
 
     /**
-     * Converts revolutions to falcon ticks
+     * Converts revolutions to falcon ticks.
      *
      * @param revolutions revolutions
      * @return falcon ticks
@@ -51,7 +51,7 @@ public class Conversions {
     }
 
     /**
-     * Converts degrees to revolutions
+     * Converts degrees to revolutions.
      *
      * @param degrees degrees
      * @return revolutions
@@ -61,7 +61,7 @@ public class Conversions {
     }
 
     /**
-     * Converts revolutions to degrees
+     * Converts revolutions to degrees.
      *
      * @param revolutions revolutions
      * @return degrees
@@ -71,7 +71,7 @@ public class Conversions {
     }
 
     /**
-     * Converts ticks from a Mag Encoder to degrees
+     * Converts ticks from a Mag Encoder to degrees.
      *
      * @param magTicks ticks from a Mag Encoder
      * @return degrees
@@ -81,7 +81,7 @@ public class Conversions {
     }
 
     /**
-     * Converts degrees to Mag Encoder ticks
+     * Converts degrees to Mag Encoder ticks.
      *
      * @param degrees degrees
      * @return Mag Encoder ticks
@@ -91,7 +91,7 @@ public class Conversions {
     }
 
     /**
-     * Converts falcon ticks to degrees
+     * Converts falcon ticks to degrees.
      *
      * @param ticks falcon ticks
      * @return degrees
@@ -101,7 +101,7 @@ public class Conversions {
     }
 
     /**
-     * Converts degrees to falcon ticks
+     * Converts degrees to falcon ticks.
      *
      * @param degrees degrees
      * @return falcon ticks
@@ -159,7 +159,7 @@ public class Conversions {
     }
 
     /**
-     * Converts a frequency from per 100ms to per second
+     * Converts a frequency from per 100ms to per second.
      *
      * @param frequency the frequency per 100ms
      * @return the frequency per second
@@ -169,7 +169,7 @@ public class Conversions {
     }
 
     /**
-     * Converts a frequency from per second to per 100ms
+     * Converts a frequency from per second to per 100ms.
      *
      * @param frequency the frequency per second
      * @return the frequency per 100ms
@@ -179,7 +179,7 @@ public class Conversions {
     }
 
     /**
-     * Converts a frequency from per second to per minute
+     * Converts a frequency from per second to per minute.
      *
      * @param frequency the frequency per second
      * @return the frequency per minute
@@ -189,7 +189,7 @@ public class Conversions {
     }
 
     /**
-     * Converts a frequency from per minute to per second
+     * Converts a frequency from per minute to per second.
      *
      * @param frequency the frequency per minute
      * @return the frequency per second
@@ -199,7 +199,7 @@ public class Conversions {
     }
 
     /**
-     * Converts a frequency from per 100ms to per minute
+     * Converts a frequency from per 100ms to per minute.
      *
      * @param frequency the frequency per 100ms
      * @return the frequency per minute
@@ -209,7 +209,7 @@ public class Conversions {
     }
 
     /**
-     * Converts a frequency from per minute to per 100ms
+     * Converts a frequency from per minute to per 100ms.
      *
      * @param frequency the frequency per minute
      * @return the frequency per 100ms
@@ -218,10 +218,24 @@ public class Conversions {
         return perSecondToPerHundredMs(frequency) / SEC_PER_MIN;
     }
 
+    /**
+     * Converts revolutions to distance.
+     *
+     * @param revolutions   the revolutions
+     * @param wheelDiameter the wheel diameter
+     * @return the distance
+     */
     public static double revolutionsToDistance(double revolutions, double wheelDiameter) {
         return revolutions * wheelDiameter * Math.PI;
     }
 
+    /**
+     * Converts distance to revolutions.
+     *
+     * @param distance      the distance
+     * @param wheelDiameter the wheel diameter
+     * @return the revolutions
+     */
     public static double distanceToRevolutions(double distance, double wheelDiameter) {
         return distance / (wheelDiameter * Math.PI);
     }
@@ -240,7 +254,20 @@ public class Conversions {
     }
 
     /**
-     * Scales a TrapezoidProfile.Constraints object by a given scale factor.
+     * Converts a target output percentage output to voltage when voltage compensation is enabled.
+     * The voltage compensation saturation determines what voltage represents 100% output.
+     * The compensated power is the voltage represented by a percentage of the saturation voltage.
+     *
+     * @param power      the target percentage output
+     * @param saturation the configured saturation which represents 100% output
+     * @return the percentage output to achieve the target voltage
+     */
+    public static double compensatedPowerToVoltage(double power, double saturation) {
+        return power * saturation;
+    }
+
+    /**
+     * Scales a TrapezoidProfile.Constraints object by a given percentage.
      *
      * @param constraints the constraints to scale
      * @param percentage  the percentage of speed

@@ -9,13 +9,13 @@ import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import frc.trigon.robot.subsystems.sideshooter.SideShooterConstants;
 
 public class SimulationSideShooterConstants extends SideShooterConstants {
-    static final double VOLTAGE_COMPENSATION_SATURATION = 12;
+    static final double MAX_VOLTAGE = 12;
 
     private static final DCMotor
-            ANGLE_MOTOR_GEARBOX = DCMotor.getNEO(1),
+            ANGLE_MOTOR_GEARBOX = DCMotor.getNeo550(1),
             SHOOTING_MOTOR_GEARBOX = DCMotor.getBag(1);
     private static final double
-            ANGLE_MOTOR_GEAR_RATIO = 123.79,
+            ANGLE_MOTOR_GEAR_RATIO = 270,
             SHOOTING_MOTOR_GEAR_RATIO = 6.66;
     private static final double SHOOTING_MOTOR_MOMENT_OF_INERTIA = 0.0032;
     private static final double SIDE_SHOOTER_MASS = 4;

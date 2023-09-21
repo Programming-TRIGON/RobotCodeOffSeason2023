@@ -459,8 +459,8 @@ public class Swerve extends SubsystemBase {
 
     private SwerveConstants generateConstants() {
         switch (RobotConstants.ROBOT_TYPE) {
-            case KABLAMA:
-                return new TrihardSwerveConstants();
+//            case KABLAMA:
+//                return new TrihardSwerveConstants();
             case TRIHARD:
                 return new KablamaSwerveConstants();
             default:
@@ -486,8 +486,8 @@ public class Swerve extends SubsystemBase {
             return new SwerveIO();
 
         switch (RobotConstants.ROBOT_TYPE) {
-            case KABLAMA:
-                return new KablamaSwerveIO();
+//            case KABLAMA:
+//                return new KablamaSwerveIO();
             case TRIHARD:
                 return new TrihardSwerveIO();
             default:

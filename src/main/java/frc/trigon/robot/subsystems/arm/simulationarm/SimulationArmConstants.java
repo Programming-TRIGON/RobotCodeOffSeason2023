@@ -29,8 +29,8 @@ public class SimulationArmConstants extends ArmConstants {
             ELEVATOR_SIMULATE_GRAVITY
     );
 
-    private static final DCMotor ANGLE_MOTORS = DCMotor.getNEO(3);
-    private static final double ANGLE_GEAR_RATIO = 97.4;
+    private static final DCMotor ANGLE_MOTORS = DCMotor.getNEO(2);
+    private static final double ANGLE_GEAR_RATIO = 95.2;
     private static final Rotation2d
             MIN_ANGLE = Rotation2d.fromDegrees(-45),
             MAX_ANGLE = Rotation2d.fromDegrees(180);

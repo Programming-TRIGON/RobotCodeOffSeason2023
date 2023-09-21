@@ -35,7 +35,7 @@ public class CommandsConstants {
 
     public static final CommandBase
             GO_TO_DEFAULT_ARM_STATE_COMMAND = ARM.getCurrentGoToArmPositionCommand(ArmConstants.ArmState.DEFAULT.elevatorPosition, ArmConstants.ArmState.DEFAULT.angle, 100, 100),
-            GO_TO_DEFAULT_SIDE_SHOOTER_STATE_COMMAND = SIDE_SHOOTER.getSetTargetShooterStateCommand(SideShooterConstants.SideShooterState.DEFAULT),
+            GO_TO_DEFAULT_SIDE_SHOOTER_STATE_COMMAND = SIDE_SHOOTER.getSetTargetShooterStateCommand(SideShooterConstants.SideShooterState.DEFAULT, false),
             STOP_COLLECTOR_COMMAND = COLLECTOR.getSetTargetStateCommand(CollectorConstants.CollectorState.STOP),
             FIELD_RELATIVE_DRIVE_COMMAND = SwerveCommands.getOpenLoopFieldRelativeDriveCommand(
                     () -> DRIVER_CONTROLLER.getLeftY() / OperatorConstants.STICKS_SPEED_DIVIDER / calculateShiftModeValue(),
@@ -67,22 +67,24 @@ public class CommandsConstants {
                     () -> Rotation2d.fromRotations(0.5),
                     false
             ),
-            ASSISTED_CUBE_COLLECTION = new AssistedCubeCollectionCommand(
-                    CameraConstants.CUBE_DETECTION_CAMERA::getCubeYaw,
-                    CameraConstants.CUBE_DETECTION_CAMERA::hasTargets
-            ),
-            ASSISTED_CUBE_COLLECTION_FOR_SIMULATION = new AssistedCubeCollectionCommand(
+//            ASSISTED_CUBE_COLLECTION_COMMAND = new AssistedCubeCollectionCommand(
+//                    CameraConstants.CUBE_DETECTION_CAMERA::getCubeYaw,
+//                    CameraConstants.CUBE_DETECTION_CAMERA::hasTargets
+//            ),
+            ASSISTED_CUBE_COLLECTION_FOR_SIMULATION_COMMAND = new AssistedCubeCollectionCommand(
                     CommandsConstants::calculateSimulationLimelightCubePosition,
                     CommandsConstants::doesSimulationLimelightSeeCube
             ),
             RESET_HEADING_COMMAND = new InstantCommand(() -> POSE_ESTIMATOR.resetPose(changeHeading(POSE_ESTIMATOR.getCurrentPose(), new Rotation2d()))),
-            SET_GRID_NUMBER_TO_1 = new InstantCommand(() -> GRID_NUMBER.set(AllianceUtilities.isBlueAlliance() ? 1 : 3)).ignoringDisable(true),
-            SET_GRID_NUMBER_TO_2 = new InstantCommand(() -> GRID_NUMBER.set(2)).ignoringDisable(true),
-            SET_GRID_NUMBER_TO_3 = new InstantCommand(() -> GRID_NUMBER.set(AllianceUtilities.isBlueAlliance() ? 3 : 1)).ignoringDisable(true),
-            SET_COLUMN_TO_LEFT = new InstantCommand(() -> IS_LEFT_COLUMN.set(AllianceUtilities.isBlueAlliance())).ignoringDisable(true),
-            SET_COLUMN_TO_RIGHT = new InstantCommand(() -> IS_LEFT_COLUMN.set(!AllianceUtilities.isBlueAlliance())).ignoringDisable(true),
-            SET_LEVEL_TO_HIGH = new InstantCommand(() -> IS_HIGH_LEVEL.set(true)).ignoringDisable(true),
-            SET_LEVEL_TO_MIDDLE = new InstantCommand(() -> IS_HIGH_LEVEL.set(false)).ignoringDisable(true);
+            SET_GRID_NUMBER_TO_1_COMMAND = new InstantCommand(() -> GRID_NUMBER.set(AllianceUtilities.isBlueAlliance() ? 1 : 3)).ignoringDisable(true),
+            SET_GRID_NUMBER_TO_2_COMMAND = new InstantCommand(() -> GRID_NUMBER.set(2)).ignoringDisable(true),
+            SET_GRID_NUMBER_TO_3_COMMAND = new InstantCommand(() -> GRID_NUMBER.set(AllianceUtilities.isBlueAlliance() ? 3 : 1)).ignoringDisable(true),
+            SET_COLUMN_TO_LEFT_COMMAND = new InstantCommand(() -> IS_LEFT_COLUMN.set(AllianceUtilities.isBlueAlliance())).ignoringDisable(true),
+            SET_COLUMN_TO_RIGHT_COMMAND = new InstantCommand(() -> IS_LEFT_COLUMN.set(!AllianceUtilities.isBlueAlliance())).ignoringDisable(true),
+            SET_LEVEL_TO_HIGH_COMMAND = new InstantCommand(() -> IS_HIGH_LEVEL.set(true)).ignoringDisable(true),
+            SET_LEVEL_TO_MIDDLE_COMMAND = new InstantCommand(() -> IS_HIGH_LEVEL.set(false)).ignoringDisable(true),
+            COAST_COMMAND = new InstantCommand(() -> {ARM.setNeutralMode(false); SIDE_SHOOTER.setNeutralMode(false);}).ignoringDisable(true),
+            BRAKE_COMMAND = new InstantCommand(() -> {ARM.setNeutralMode(true); SIDE_SHOOTER.setNeutralMode(true);}).ignoringDisable(true);
 
     /**
      * @return the shift mode value to be applied to the robot's speed, from the right trigger axis
