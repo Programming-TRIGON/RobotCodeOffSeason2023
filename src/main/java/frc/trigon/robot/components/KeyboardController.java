@@ -1,354 +1,424 @@
 package frc.trigon.robot.components;
 
-import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.trigon.robot.Robot;
+import org.littletonrobotics.junction.networktables.LoggedDashboardBoolean;
 
-public class KeyboardController extends CommandGenericHID {
+public class KeyboardController {
+    private final LoggedDashboardBoolean
+            esc, f1, f2, f3, f4, f5, f6, f7, f8, f9, f10,
+            f11, f12, del, backtick, one, two, three, four,
+            five, six, seven, eight, nine, zero, minus, equals,
+            backspace, tab, q, w, e, r, t, y, u, i, o, p, a, s,
+            d, f, g, h, j, k, l, semicolon, apostrophe, leftShift,
+            z, x, c, v, b, n, m, comma, period, forwardSlash,
+            rightShift, leftCtrl, leftAlt, rightAlt, rightCtrl,
+            left, right, up, down, numpad0, numpad1, numpad2,
+            numpad3, numpad4, numpad5, numpad6, numpad7, numpad8,
+            numpad9;
+
     /**
      * Construct an instance of a device.
-     *
-     * @param port The port index on the Driver Station that the device is plugged into.
      */
-    public KeyboardController(int port) {
-        super(port);
+    public KeyboardController() {
+        esc = new LoggedDashboardBoolean("keyboard/esc", false);
+        f1 = new LoggedDashboardBoolean("keyboard/f1", false);
+        f2 = new LoggedDashboardBoolean("keyboard/f2", false);
+        f3 = new LoggedDashboardBoolean("keyboard/f3", false);
+        f4 = new LoggedDashboardBoolean("keyboard/f4", false);
+        f5 = new LoggedDashboardBoolean("keyboard/f5", false);
+        f6 = new LoggedDashboardBoolean("keyboard/f6", false);
+        f7 = new LoggedDashboardBoolean("keyboard/f7", false);
+        f8 = new LoggedDashboardBoolean("keyboard/f8", false);
+        f9 = new LoggedDashboardBoolean("keyboard/f9", false);
+        f10 = new LoggedDashboardBoolean("keyboard/f10", false);
+        f11 = new LoggedDashboardBoolean("keyboard/f11", false);
+        f12 = new LoggedDashboardBoolean("keyboard/f12", false);
+        del = new LoggedDashboardBoolean("keyboard/del", false);
+        backtick = new LoggedDashboardBoolean("keyboard/backtick", false);
+        one = new LoggedDashboardBoolean("keyboard/one", false);
+        two = new LoggedDashboardBoolean("keyboard/two", false);
+        three = new LoggedDashboardBoolean("keyboard/three", false);
+        four = new LoggedDashboardBoolean("keyboard/four", false);
+        five = new LoggedDashboardBoolean("keyboard/five", false);
+        six = new LoggedDashboardBoolean("keyboard/six", false);
+        seven = new LoggedDashboardBoolean("keyboard/seven", false);
+        eight = new LoggedDashboardBoolean("keyboard/eight", false);
+        nine = new LoggedDashboardBoolean("keyboard/nine", false);
+        zero = new LoggedDashboardBoolean("keyboard/zero", false);
+        minus = new LoggedDashboardBoolean("keyboard/minus", false);
+        equals = new LoggedDashboardBoolean("keyboard/equals", false);
+        backspace = new LoggedDashboardBoolean("keyboard/backspace", false);
+        tab = new LoggedDashboardBoolean("keyboard/tab", false);
+        q = new LoggedDashboardBoolean("keyboard/q", false);
+        w = new LoggedDashboardBoolean("keyboard/w", false);
+        e = new LoggedDashboardBoolean("keyboard/e", false);
+        r = new LoggedDashboardBoolean("keyboard/r", false);
+        t = new LoggedDashboardBoolean("keyboard/t", false);
+        y = new LoggedDashboardBoolean("keyboard/y", false);
+        u = new LoggedDashboardBoolean("keyboard/u", false);
+        i = new LoggedDashboardBoolean("keyboard/i", false);
+        o = new LoggedDashboardBoolean("keyboard/o", false);
+        p = new LoggedDashboardBoolean("keyboard/p", false);
+        a = new LoggedDashboardBoolean("keyboard/a", false);
+        s = new LoggedDashboardBoolean("keyboard/s", false);
+        d = new LoggedDashboardBoolean("keyboard/d", false);
+        f = new LoggedDashboardBoolean("keyboard/f", false);
+        g = new LoggedDashboardBoolean("keyboard/g", false);
+        h = new LoggedDashboardBoolean("keyboard/h", false);
+        j = new LoggedDashboardBoolean("keyboard/j", false);
+        k = new LoggedDashboardBoolean("keyboard/k", false);
+        l = new LoggedDashboardBoolean("keyboard/l", false);
+        semicolon = new LoggedDashboardBoolean("keyboard/semicolon", false);
+        apostrophe = new LoggedDashboardBoolean("keyboard/apostrophe", false);
+        leftShift = new LoggedDashboardBoolean("keyboard/leftShift", false);
+        z = new LoggedDashboardBoolean("keyboard/z", false);
+        x = new LoggedDashboardBoolean("keyboard/x", false);
+        c = new LoggedDashboardBoolean("keyboard/c", false);
+        v = new LoggedDashboardBoolean("keyboard/v", false);
+        b = new LoggedDashboardBoolean("keyboard/b", false);
+        n = new LoggedDashboardBoolean("keyboard/n", false);
+        m = new LoggedDashboardBoolean("keyboard/m", false);
+        comma = new LoggedDashboardBoolean("keyboard/comma", false);
+        period = new LoggedDashboardBoolean("keyboard/period", false);
+        forwardSlash = new LoggedDashboardBoolean("keyboard/forwardSlash", false);
+        rightShift = new LoggedDashboardBoolean("keyboard/rightShift", false);
+        leftCtrl = new LoggedDashboardBoolean("keyboard/leftCtrl", false);
+        leftAlt = new LoggedDashboardBoolean("keyboard/leftAlt", false);
+        rightAlt = new LoggedDashboardBoolean("keyboard/rightAlt", false);
+        rightCtrl = new LoggedDashboardBoolean("keyboard/rightCtrl", false);
+        left = new LoggedDashboardBoolean("keyboard/left", false);
+        right = new LoggedDashboardBoolean("keyboard/right", false);
+        up = new LoggedDashboardBoolean("keyboard/up", false);
+        down = new LoggedDashboardBoolean("keyboard/down", false);
+        numpad0 = new LoggedDashboardBoolean("keyboard/numpad0", false);
+        numpad1 = new LoggedDashboardBoolean("keyboard/numpad1", false);
+        numpad2 = new LoggedDashboardBoolean("keyboard/numpad2", false);
+        numpad3 = new LoggedDashboardBoolean("keyboard/numpad3", false);
+        numpad4 = new LoggedDashboardBoolean("keyboard/numpad4", false);
+        numpad5 = new LoggedDashboardBoolean("keyboard/numpad5", false);
+        numpad6 = new LoggedDashboardBoolean("keyboard/numpad6", false);
+        numpad7 = new LoggedDashboardBoolean("keyboard/numpad7", false);
+        numpad8 = new LoggedDashboardBoolean("keyboard/numpad8", false);
+        numpad9 = new LoggedDashboardBoolean("keyboard/numpad9", false);
     }
 
     public Trigger esc() {
-        return button(1);
+        return new Trigger(esc::get);
     }
 
     public Trigger f1() {
-        return button(2);
+        return new Trigger(f1::get);
     }
 
     public Trigger f2() {
-        return button(3);
+        return new Trigger(f2::get);
     }
 
     public Trigger f3() {
-        return button(4);
+        return new Trigger(f3::get);
     }
 
     public Trigger f4() {
-        return button(5);
+        return new Trigger(f4::get);
     }
 
     public Trigger f5() {
-        return button(6);
+        return new Trigger(f5::get);
     }
 
     public Trigger f6() {
-        return button(7);
+        return new Trigger(f6::get);
     }
 
     public Trigger f7() {
-        return button(8);
+        return new Trigger(f7::get);
     }
 
     public Trigger f8() {
-        return button(9);
+        return new Trigger(f8::get);
     }
 
     public Trigger f9() {
-        return button(10);
+        return new Trigger(f9::get);
     }
 
     public Trigger f10() {
-        return button(11);
+        return new Trigger(f10::get);
     }
 
     public Trigger f11() {
-        return button(12);
+        return new Trigger(f11::get);
     }
 
     public Trigger f12() {
-        return button(13);
+        return new Trigger(f12::get);
     }
 
     public Trigger del() {
-        return button(14);
+        return new Trigger(del::get);
     }
 
     public Trigger backtick() {
-        return button(15);
+        return new Trigger(backtick::get);
     }
 
     public Trigger one() {
-        return button(16);
+        return new Trigger(one::get);
     }
 
     public Trigger two() {
-        return button(17);
+        return new Trigger(two::get);
     }
 
     public Trigger three() {
-        return button(18);
+        return new Trigger(three::get);
     }
 
     public Trigger four() {
-        return button(19);
+        return new Trigger(four::get);
     }
 
     public Trigger five() {
-        return button(20);
+        return new Trigger(five::get);
     }
 
     public Trigger six() {
-        return button(21);
+        return new Trigger(six::get);
     }
 
     public Trigger seven() {
-        return button(22);
+        return new Trigger(seven::get);
     }
 
     public Trigger eight() {
-        return button(23);
+        return new Trigger(eight::get);
     }
 
     public Trigger nine() {
-        return button(24);
+        return new Trigger(nine::get);
     }
 
     public Trigger zero() {
-        return button(25);
+        return new Trigger(zero::get);
     }
 
     public Trigger minus() {
-        return button(26);
+        return new Trigger(minus::get);
     }
 
     public Trigger equals() {
-        return button(27);
+        return new Trigger(equals::get);
     }
 
     public Trigger backspace() {
-        return button(28);
+        return new Trigger(backspace::get);
     }
 
     public Trigger tab() {
-        return button(29);
+        return new Trigger(tab::get);
     }
 
     public Trigger q() {
-        return button(30);
+        return new Trigger(q::get);
     }
 
     public Trigger w() {
-        return button(31);
+        return new Trigger(w::get);
     }
 
     public Trigger e() {
-        return button(32);
+        return new Trigger(e::get);
     }
 
     public Trigger r() {
-        return getButtonFromBitOfAxis(0, 0);
+        return new Trigger(r::get);
     }
 
     public Trigger t() {
-        return getButtonFromBitOfAxis(1, 0);
+        return new Trigger(t::get);
     }
 
     public Trigger y() {
-        return getButtonFromBitOfAxis(2, 0);
+        return new Trigger(y::get);
     }
 
     public Trigger u() {
-        return getButtonFromBitOfAxis(3, 0);
+        return new Trigger(u::get);
     }
 
     public Trigger i() {
-        return getButtonFromBitOfAxis(4, 0);
+        return new Trigger(i::get);
     }
 
     public Trigger o() {
-        return getButtonFromBitOfAxis(5, 0);
+        return new Trigger(o::get);
     }
 
     public Trigger p() {
-        return getButtonFromBitOfAxis(6, 0);
+        return new Trigger(p::get);
     }
 
     public Trigger a() {
-        return getButtonFromBitOfAxis(7, 0);
+        return new Trigger(a::get);
     }
 
     public Trigger s() {
-        return getButtonFromBitOfAxis(0, 1);
+        return new Trigger(s::get);
     }
 
     public Trigger d() {
-        return getButtonFromBitOfAxis(1, 1);
+        return new Trigger(d::get);
     }
 
     public Trigger f() {
-        return getButtonFromBitOfAxis(2, 1);
+        return new Trigger(f::get);
     }
 
     public Trigger g() {
-        return getButtonFromBitOfAxis(3, 1);
+        return new Trigger(g::get);
     }
 
     public Trigger h() {
-        return getButtonFromBitOfAxis(4, 1);
+        return new Trigger(h::get);
     }
 
     public Trigger j() {
-        return getButtonFromBitOfAxis(5, 1);
+        return new Trigger(j::get);
     }
 
     public Trigger k() {
-        return getButtonFromBitOfAxis(6, 1);
+        return new Trigger(k::get);
     }
 
     public Trigger l() {
-        return getButtonFromBitOfAxis(7, 1);
+        return new Trigger(l::get);
     }
 
     public Trigger semicolon() {
-        return getButtonFromBitOfAxis(0, 2);
+        return new Trigger(semicolon::get);
     }
 
     public Trigger apostrophe() {
-        return getButtonFromBitOfAxis(1, 2);
+        return new Trigger(apostrophe::get);
     }
 
     public Trigger leftShift() {
-        return getButtonFromBitOfAxis(2, 2);
+        return new Trigger(leftShift::get);
     }
 
     public Trigger z() {
-        return getButtonFromBitOfAxis(3, 2);
+        return new Trigger(z::get);
     }
 
     public Trigger x() {
-        return getButtonFromBitOfAxis(4, 2);
+        return new Trigger(x::get);
     }
 
     public Trigger c() {
-        return getButtonFromBitOfAxis(5, 2);
+        return new Trigger(c::get);
     }
 
     public Trigger v() {
-        return getButtonFromBitOfAxis(6, 2);
+        return new Trigger(v::get);
     }
 
     public Trigger b() {
-        return getButtonFromBitOfAxis(7, 2);
+        return new Trigger(b::get);
     }
 
     public Trigger n() {
-        return getButtonFromBitOfAxis(0, 3);
+        return new Trigger(n::get);
     }
 
     public Trigger m() {
-        return getButtonFromBitOfAxis(1, 3);
+        return new Trigger(m::get);
     }
 
     public Trigger comma() {
-        return getButtonFromBitOfAxis(2, 3);
+        return new Trigger(comma::get);
     }
 
     public Trigger period() {
-        return getButtonFromBitOfAxis(3, 3);
+        return new Trigger(period::get);
     }
 
     public Trigger forwardSlash() {
-        return getButtonFromBitOfAxis(4, 3);
+        return new Trigger(forwardSlash::get);
     }
 
     public Trigger rightShift() {
-        return getButtonFromBitOfAxis(5, 3);
+        return new Trigger(rightShift::get);
     }
 
     public Trigger leftCtrl() {
-        return getButtonFromBitOfAxis(6, 3);
+        return new Trigger(leftCtrl::get);
     }
 
     public Trigger leftAlt() {
-        return getButtonFromBitOfAxis(7, 3);
+        return new Trigger(leftAlt::get);
     }
 
     public Trigger rightAlt() {
-        return getButtonFromBitOfAxis(0, 4);
+        return new Trigger(rightAlt::get);
     }
 
     public Trigger rightCtrl() {
-        return getButtonFromBitOfAxis(1, 4);
+        return new Trigger(rightCtrl::get);
     }
 
     public Trigger left() {
-        return getButtonFromBitOfAxis(2, 4);
+        return new Trigger(left::get);
     }
 
     public Trigger right() {
-        return getButtonFromBitOfAxis(3, 4);
+        return new Trigger(right::get);
     }
 
     public Trigger up() {
-        return getButtonFromBitOfAxis(4, 4);
+        return new Trigger(up::get);
     }
 
     public Trigger down() {
-        return getButtonFromBitOfAxis(5, 4);
+        return new Trigger(down::get);
     }
 
     public Trigger numpad0() {
-        return getButtonFromBitOfAxis(6, 4);
+        return new Trigger(numpad0::get);
     }
 
     public Trigger numpad1() {
-        return getButtonFromBitOfAxis(7, 4);
+        return new Trigger(numpad1::get);
     }
 
     public Trigger numpad2() {
-        return getButtonFromBitOfAxis(0, 5);
+        return new Trigger(numpad2::get);
     }
 
     public Trigger numpad3() {
-        return getButtonFromBitOfAxis(1, 5);
+        return new Trigger(numpad3::get);
     }
 
     public Trigger numpad4() {
-        return getButtonFromBitOfAxis(2, 5);
+        return new Trigger(numpad4::get);
     }
 
     public Trigger numpad5() {
-        return getButtonFromBitOfAxis(3, 5);
+        return new Trigger(numpad5::get);
     }
 
     public Trigger numpad6() {
-        return getButtonFromBitOfAxis(4, 5);
+        return new Trigger(numpad6::get);
     }
 
     public Trigger numpad7() {
-        return getButtonFromBitOfAxis(5, 5);
+        return new Trigger(numpad7::get);
     }
 
     public Trigger numpad8() {
-        return getButtonFromBitOfAxis(6, 5);
+        return new Trigger(numpad8::get);
     }
 
     public Trigger numpad9() {
-        return getButtonFromBitOfAxis(7, 5);
-    }
-
-    private Trigger getButtonFromBitOfAxis(int bit, int axis) {
-        return new Trigger(() -> getBitsFromAxis(axis)[bit]);
-    }
-
-    private boolean[] getBitsFromAxis(int axis) {
-        boolean[] bits = new boolean[8];
-        double rawValue = (getRawAxis(axis) + 1) / 2 * 256;
-        int value = (int) (
-                Robot.IS_REAL ?
-                        Math.ceil(rawValue) : Math.round(rawValue)
-        );
-        for (int i = 0; i < bits.length; i++) {
-            bits[i] = value % 2 == 1;
-            value /= 2;
-        }
-        return bits;
+        return new Trigger(numpad9::get);
     }
 }
