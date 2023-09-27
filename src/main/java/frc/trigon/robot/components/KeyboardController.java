@@ -1,28 +1,20 @@
 package frc.trigon.robot.components;
 
-import edu.wpi.first.networktables.NetworkTable;
-import edu.wpi.first.networktables.NetworkTableEntry;
-import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.trigon.robot.Robot;
 import org.littletonrobotics.junction.networktables.LoggedDashboardBoolean;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class KeyboardController {
     private final LoggedDashboardBoolean
-        esc, f1, f2, f3, f4, f5, f6, f7, f8, f9, f10,
-        f11, f12, del, backtick, one, two, three, four,
-        five, six, seven, eight, nine, zero, minus, equals,
-        backspace, tab, q, w, e, r, t, y, u, i, o, p, a, s,
-        d, f, g, h, j, k, l, semicolon, apostrophe, leftShift,
-        z, x, c, v, b, n, m, comma, period, forwardSlash,
-        rightShift, leftCtrl, leftAlt, rightAlt, rightCtrl,
-        left, right, up, down, numpad0, numpad1, numpad2,
-        numpad3, numpad4, numpad5, numpad6, numpad7, numpad8,
-        numpad9;
+            esc, f1, f2, f3, f4, f5, f6, f7, f8, f9, f10,
+            f11, f12, del, backtick, one, two, three, four,
+            five, six, seven, eight, nine, zero, minus, equals,
+            backspace, tab, q, w, e, r, t, y, u, i, o, p, a, s,
+            d, f, g, h, j, k, l, semicolon, apostrophe, leftShift,
+            z, x, c, v, b, n, m, comma, period, forwardSlash,
+            rightShift, leftCtrl, leftAlt, rightAlt, rightCtrl,
+            left, right, up, down, numpad0, numpad1, numpad2,
+            numpad3, numpad4, numpad5, numpad6, numpad7, numpad8,
+            numpad9;
 
     /**
      * Construct an instance of a device.
