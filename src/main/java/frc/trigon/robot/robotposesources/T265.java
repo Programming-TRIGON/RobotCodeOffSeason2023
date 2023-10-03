@@ -12,6 +12,7 @@ public class T265 extends RobotPoseSourceIO {
     private static final short CONFIDENCE_THRESHOLD = 2;
     private final String name;
     private final NetworkTableEntry jsonDump;
+    private final Logger logger = Logger.getInstance();
 
     protected T265(String name) {
         this.name = name;
@@ -61,7 +62,7 @@ public class T265 extends RobotPoseSourceIO {
         final T265JsonDump jsonDump = getJsonDump();
 
         try {
-            Logger.getInstance().recordOutput(name + "/confidence", jsonDump.confidence);
+            logger.recordOutput(name + "/confidence", jsonDump.confidence);
             return jsonDump.confidence >= CONFIDENCE_THRESHOLD && jsonDump.translation.length == 3 && jsonDump.rotation.length == 4;
         } catch (NullPointerException e) {
             return false;

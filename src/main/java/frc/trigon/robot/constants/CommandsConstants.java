@@ -3,21 +3,26 @@ package frc.trigon.robot.constants;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ProxyCommand;
 import frc.trigon.robot.RobotContainer;
-import frc.trigon.robot.commands.AssistedCubeCollectionCommand;
+import frc.trigon.robot.subsystems.swerve.CubeAlignmentCommand;
 import frc.trigon.robot.components.XboxController;
 import frc.trigon.robot.subsystems.arm.Arm;
-import frc.trigon.robot.subsystems.arm.ArmConstants;
 import frc.trigon.robot.subsystems.collector.Collector;
 import frc.trigon.robot.subsystems.collector.CollectorConstants;
+import frc.trigon.robot.subsystems.leds.ledcommands.MovingColorLedCommand;
+import frc.trigon.robot.subsystems.leds.ledcommands.StaticColorLedCommand;
 import frc.trigon.robot.subsystems.poseestimator.PoseEstimator;
 import frc.trigon.robot.subsystems.sideshooter.SideShooter;
 import frc.trigon.robot.subsystems.sideshooter.SideShooterConstants;
 import frc.trigon.robot.subsystems.swerve.SwerveCommands;
 import frc.trigon.robot.utilities.AllianceUtilities;
 import frc.trigon.robot.utilities.Maths;
+import org.littletonrobotics.junction.networktables.LoggedDashboardNumber;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -33,11 +38,20 @@ public class CommandsConstants {
     private static final PoseEstimator POSE_ESTIMATOR = RobotContainer.POSE_ESTIMATOR;
     private static final XboxController DRIVER_CONTROLLER = OperatorConstants.DRIVER_CONTROLLER;
 
+    private static final LoggedDashboardNumber
+            ELEVATOR_POSITION_DASHBOARD_NUMBER = new LoggedDashboardNumber("armElevatorPosition"),
+            ANGLE_DEGREES_DASHBOARD_NUMBER = new LoggedDashboardNumber("armAngleDegrees");
+
     public static final CommandBase
-            GO_TO_DEFAULT_ARM_STATE_COMMAND = ARM.getCurrentGoToArmPositionCommand(ArmConstants.ArmState.DEFAULT.elevatorPosition, ArmConstants.ArmState.DEFAULT.angle, 100, 100),
             GO_TO_DEFAULT_SIDE_SHOOTER_STATE_COMMAND = SIDE_SHOOTER.getSetTargetShooterStateCommand(SideShooterConstants.SideShooterState.DEFAULT, false),
-            STOP_COLLECTOR_COMMAND = COLLECTOR.getSetTargetStateCommand(CollectorConstants.CollectorState.STOP),
-            FIELD_RELATIVE_DRIVE_COMMAND = SwerveCommands.getOpenLoopFieldRelativeDriveCommand(
+            HOLD_COLLECTOR_COMMAND = COLLECTOR.getSetTargetStateCommand(CollectorConstants.CollectorState.HOLD),
+            FIELD_RELATIVE_DRIVE_COMMAND = SwerveCommands.getClosedLoopFieldRelativeDriveCommand(
+                    () -> DRIVER_CONTROLLER.getLeftY() / OperatorConstants.STICKS_SPEED_DIVIDER / calculateShiftModeValue(),
+                    () -> DRIVER_CONTROLLER.getLeftX() / OperatorConstants.STICKS_SPEED_DIVIDER / calculateShiftModeValue(),
+                    () -> DRIVER_CONTROLLER.getRightX() / OperatorConstants.STICKS_SPEED_DIVIDER / calculateShiftModeValue(),
+                    true
+            ),
+            SHOOTER_RELATIVE_DRIVE_COMMAND = SwerveCommands.getOpenLoopShooterRelativeDriveCommand(
                     () -> DRIVER_CONTROLLER.getLeftY() / OperatorConstants.STICKS_SPEED_DIVIDER / calculateShiftModeValue(),
                     () -> DRIVER_CONTROLLER.getLeftX() / OperatorConstants.STICKS_SPEED_DIVIDER / calculateShiftModeValue(),
                     () -> DRIVER_CONTROLLER.getRightX() / OperatorConstants.STICKS_SPEED_DIVIDER / calculateShiftModeValue(),
@@ -55,23 +69,17 @@ public class CommandsConstants {
                     () -> Rotation2d.fromDegrees(90),
                     true
             ),
-            SHOOTER_RELATIVE_DRIVE_COMMAND = SwerveCommands.getOpenLoopShooterRelativeDriveCommand(
-                    () -> DRIVER_CONTROLLER.getLeftY() / OperatorConstants.STICKS_SPEED_DIVIDER / calculateShiftModeValue(),
-                    () -> DRIVER_CONTROLLER.getLeftX() / OperatorConstants.STICKS_SPEED_DIVIDER / calculateShiftModeValue(),
-                    () -> DRIVER_CONTROLLER.getRightX() / OperatorConstants.STICKS_SPEED_DIVIDER / calculateShiftModeValue(),
-                    true
-            ),
             TURN_TO_GRID_COMMAND = SwerveCommands.getOpenLoopFieldRelativeDriveCommand(
                     () -> 0,
                     () -> 0,
                     () -> Rotation2d.fromRotations(0.5),
-                    false
+                    true
             ),
-//            ASSISTED_CUBE_COLLECTION_COMMAND = new AssistedCubeCollectionCommand(
-//                    CameraConstants.CUBE_DETECTION_CAMERA::getCubeYaw,
-//                    CameraConstants.CUBE_DETECTION_CAMERA::hasTargets
-//            ),
-            ASSISTED_CUBE_COLLECTION_FOR_SIMULATION_COMMAND = new AssistedCubeCollectionCommand(
+            ASSISTED_CUBE_COLLECTION_COMMAND = new CubeAlignmentCommand(
+                    CameraConstants.CUBE_DETECTION_CAMERA::getCubeYaw,
+                    CameraConstants.CUBE_DETECTION_CAMERA::hasTargets
+            ),
+            ASSISTED_CUBE_COLLECTION_FOR_SIMULATION_COMMAND = new CubeAlignmentCommand(
                     CommandsConstants::calculateSimulationLimelightCubePosition,
                     CommandsConstants::doesSimulationLimelightSeeCube
             ),
@@ -83,16 +91,28 @@ public class CommandsConstants {
             SET_COLUMN_TO_RIGHT_COMMAND = new InstantCommand(() -> IS_LEFT_COLUMN.set(!AllianceUtilities.isBlueAlliance())).ignoringDisable(true),
             SET_LEVEL_TO_HIGH_COMMAND = new InstantCommand(() -> IS_HIGH_LEVEL.set(true)).ignoringDisable(true),
             SET_LEVEL_TO_MIDDLE_COMMAND = new InstantCommand(() -> IS_HIGH_LEVEL.set(false)).ignoringDisable(true),
-            COAST_COMMAND = new InstantCommand(() -> {ARM.setNeutralMode(false); SIDE_SHOOTER.setNeutralMode(false);}).ignoringDisable(true),
-            BRAKE_COMMAND = new InstantCommand(() -> {ARM.setNeutralMode(true); SIDE_SHOOTER.setNeutralMode(true);}).ignoringDisable(true);
+            YELLOW_STATIC_COLOR_COMMAND = new StaticColorLedCommand(Color.kYellow),
+            PURPLE_STATIC_COLOR_COMMAND = new StaticColorLedCommand(Color.kPurple),
+            BLUE_LIGHT_SABER_COMMAND = new MovingColorLedCommand(Color.kBlue, new Color(0, 0, Color.kBlue.blue * 0.2), 0.02, 10),
+            RED_LIGHT_SABER_COMMAND = new MovingColorLedCommand(Color.kRed, new Color(Color.kRed.red * 0.2, 0, 0), 0.02, 10),
+            GO_TO_DASHBOARD_ARM_POSITION_COMMAND = new ProxyCommand(() -> ARM.getGoToArmPositionCommand(ELEVATOR_POSITION_DASHBOARD_NUMBER.get(), Rotation2d.fromDegrees(ANGLE_DEGREES_DASHBOARD_NUMBER.get()))),
+            EJECT_COMMAND = COLLECTOR.getSetTargetStateCommand(CollectorConstants.CollectorState.EJECT),
+            COLLECT_COMMAND = COLLECTOR.getSetTargetStateCommand(CollectorConstants.CollectorState.COLLECT),
+            SELF_RELATIVE_DRIVE_FROM_DPAD_COMMAND = SwerveCommands.getOpenLoopSelfRelativeDriveCommand(
+                    () -> Math.cos(Units.degreesToRadians(DRIVER_CONTROLLER.getPov())) / OperatorConstants.POV_DIVIDER / calculateShiftModeValue(),
+                    () -> Math.sin(Units.degreesToRadians(-DRIVER_CONTROLLER.getPov())) / OperatorConstants.POV_DIVIDER / calculateShiftModeValue(),
+                    () -> 0,
+                    true
+            ),
+            STATIC_WHITE_COLOR_COMMAND = new StaticColorLedCommand(Color.kWhite);
 
     /**
      * @return the shift mode value to be applied to the robot's speed, from the right trigger axis
      */
     public static double calculateShiftModeValue() {
-        final double squaredShiftModeValue = Math.pow(DRIVER_CONTROLLER.getRightTriggerAxis(), 2);
+        final double shiftModeValue = DRIVER_CONTROLLER.getRightTriggerAxis();
 
-        return 1 - squaredShiftModeValue * OperatorConstants.MINIMUM_SHIFT_VALUE_COEFFICIENT;
+        return 1 - shiftModeValue * OperatorConstants.MINIMUM_SHIFT_VALUE_COEFFICIENT;
     }
 
     private static double calculateSimulationLimelightCubePosition() {

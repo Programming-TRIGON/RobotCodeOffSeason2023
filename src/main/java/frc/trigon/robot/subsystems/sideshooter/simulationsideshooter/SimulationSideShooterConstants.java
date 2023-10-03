@@ -13,7 +13,7 @@ public class SimulationSideShooterConstants extends SideShooterConstants {
 
     private static final DCMotor
             ANGLE_MOTOR_GEARBOX = DCMotor.getNeo550(1),
-            SHOOTING_MOTOR_GEARBOX = DCMotor.getBag(1);
+            SHOOTING_MOTOR_GEARBOX = DCMotor.getFalcon500(1);
     private static final double
             ANGLE_MOTOR_GEAR_RATIO = 270,
             SHOOTING_MOTOR_GEAR_RATIO = 6.66;

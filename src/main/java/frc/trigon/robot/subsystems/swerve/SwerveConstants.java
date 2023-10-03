@@ -2,6 +2,7 @@ package frc.trigon.robot.subsystems.swerve;
 
 import com.pathplanner.lib.auto.PIDConstants;
 import com.pathplanner.lib.commands.PPSwerveControllerCommand;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -18,6 +19,11 @@ public abstract class SwerveConstants {
     }
 
     /**
+     * @return the rotation pid controller
+     */
+    protected abstract PIDController getRotationController();
+
+    /**
      * @return the swerve's x-axis profiled pid controller
      */
     protected abstract ProfiledPIDController getProfiledYAxisController();
@@ -25,7 +31,7 @@ public abstract class SwerveConstants {
     /**
      * @return the swerve's profiled pid controller for rotation
      */
-    protected abstract ProfiledPIDController getRotationController();
+    protected abstract ProfiledPIDController getProfiledRotationController();
 
     /**
      * @return the swerve's robot side length in meters, (not including the bumpers)

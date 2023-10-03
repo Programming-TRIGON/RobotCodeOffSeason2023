@@ -11,6 +11,7 @@ public class CubeDetectionCamera extends SubsystemBase {
     private final CubeDetectionCameraInputsAutoLogged cubeDetectionCameraInputs = new CubeDetectionCameraInputsAutoLogged();
     private final CubeDetectionCameraIO cubeDetectionCameraIO;
     private final String hostname;
+    private final Logger logger = Logger.getInstance();
 
     /**
      * Constructs a new cube detection camera.
@@ -25,8 +26,8 @@ public class CubeDetectionCamera extends SubsystemBase {
     @Override
     public void periodic() {
         cubeDetectionCameraIO.updateInputs(cubeDetectionCameraInputs);
-        Logger.getInstance().processInputs(hostname, cubeDetectionCameraInputs);
-        Logger.getInstance().recordOutput(hostname + "/gamePiecePosition", getCubeYaw());
+        logger.processInputs(hostname, cubeDetectionCameraInputs);
+        logger.recordOutput(hostname + "/gamePiecePosition", getCubeYaw());
     }
 
     /**
@@ -47,6 +48,6 @@ public class CubeDetectionCamera extends SubsystemBase {
         if (!Robot.IS_REAL)
             return new CubeDetectionCameraIO();
 
-        return new PhotonCubeDetectionCameraIO(hostname);
+        return new LimelightDetectionCameraIO(hostname);
     }
 }

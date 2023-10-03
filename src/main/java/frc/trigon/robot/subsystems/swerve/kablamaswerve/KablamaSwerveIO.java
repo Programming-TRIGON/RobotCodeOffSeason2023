@@ -11,7 +11,10 @@ public class KablamaSwerveIO extends SwerveIO {
     @Override
     protected void updateInputs(SwerveInputsAutoLogged inputs) {
         inputs.gyroYawDegrees = KablamaSwerveConstants.YAW_SIGNAL.refresh().getValue();
-        inputs.gyroPitchDegrees = KablamaSwerveConstants.PITCH_SIGNAL.refresh().getValue();
+        inputs.gyroPitchDegrees = -KablamaSwerveConstants.PITCH_SIGNAL.refresh().getValue();
+        inputs.gyroRollDegrees = KablamaSwerveConstants.ROLL_SIGNAL.refresh().getValue();
+        inputs.gyroPitchVelocity = -KablamaSwerveConstants.PITCH_VELOCITY_SIGNAL.refresh().getValue();
+        inputs.gyroRollVelocity = KablamaSwerveConstants.ROLL_VELOCITY_SIGNAL.refresh().getValue();
         inputs.accelerationX = KablamaSwerveConstants.X_ACCELERATION_SIGNAL.refresh().getValue();
         inputs.accelerationY = KablamaSwerveConstants.Y_ACCELERATION_SIGNAL.refresh().getValue();
         inputs.accelerationZ = KablamaSwerveConstants.Z_ACCELERATION_SIGNAL.refresh().getValue();

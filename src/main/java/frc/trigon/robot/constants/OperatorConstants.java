@@ -1,6 +1,5 @@
 package frc.trigon.robot.constants;
 
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.trigon.robot.components.KeyboardController;
@@ -9,14 +8,16 @@ import frc.trigon.robot.components.XboxController;
 public class OperatorConstants {
     private static final int
             DRIVER_CONTROLLER_PORT = 0;
-    private static final int DRIVER_CONTROLLER_EXPONENT = 2;
+    private static final int DRIVER_CONTROLLER_EXPONENT = 1;
     private static final double DRIVER_CONTROLLER_DEADBAND = 0.1;
     public static final XboxController DRIVER_CONTROLLER = new XboxController(
             DRIVER_CONTROLLER_PORT, DRIVER_CONTROLLER_EXPONENT, DRIVER_CONTROLLER_DEADBAND
     );
     public static final KeyboardController OPERATOR_CONTROLLER = new KeyboardController();
 
-    public static final double STICKS_SPEED_DIVIDER = 1;
+    public static final double
+            POV_DIVIDER = 2,
+            STICKS_SPEED_DIVIDER = 1;
     private static final double MINIMUM_SHIFT_VALUE = 0.18;
     public static final double MINIMUM_SHIFT_VALUE_COEFFICIENT = 1 - (1 / MINIMUM_SHIFT_VALUE);
 
@@ -32,8 +33,8 @@ public class OperatorConstants {
             RESET_HEADING_TRIGGER = DRIVER_CONTROLLER.y(),
             PRELOAD_CURRENT_MATCH_START_AUTO_TRIGGER = OPERATOR_CONTROLLER.p(),
             TOGGLE_FIELD_AND_SHOOTER_RELATIVE_DRIVE_TRIGGER = DRIVER_CONTROLLER.b(),
-            MANUAL_DRIVE_WITH_TURN_TO_COMMUNITY_TRIGGER = DRIVER_CONTROLLER.x(),
-            MANUAL_DRIVE_WITH_TURN_TO_SHOOTING_ANGLE_TRIGGER = DRIVER_CONTROLLER.a(),
+            MANUAL_DRIVE_WITH_TURN_TO_COMMUNITY_TRIGGER = DRIVER_CONTROLLER.a(),
+            MANUAL_DRIVE_WITH_TURN_TO_SHOOTING_ANGLE_TRIGGER = DRIVER_CONTROLLER.x(),
             STANDING_CONE_COLLECTION_TRIGGER = DRIVER_CONTROLLER.rightBumper(),
             NON_ASSISTED_CUBE_COLLECTION_TRIGGER = DRIVER_CONTROLLER.leftTrigger(),
             ASSISTED_CUBE_COLLECTION_TRIGGER = OPERATOR_CONTROLLER.a(),
@@ -48,5 +49,17 @@ public class OperatorConstants {
             PLACE_CONE_AT_MIDDLE_LEVEL_TRIGGER = OPERATOR_CONTROLLER.j(),
             PLACE_CONE_AT_HYBRID_LEVEL_TRIGGER = OPERATOR_CONTROLLER.m(),
             TOGGLE_BRAKE_MODE_TRIGGER = OPERATOR_CONTROLLER.g().or(RobotController::getUserButton),
-            EJECT_TRIGGER = OPERATOR_CONTROLLER.backtick();
+            EJECT_TRIGGER = OPERATOR_CONTROLLER.backtick(),
+            YELLOW_STATIC_COLOR_TRIGGER = OPERATOR_CONTROLLER.numpad3(),
+            PURPLE_STATIC_COLOR_TRIGGER = OPERATOR_CONTROLLER.numpad1(),
+            GO_TO_DASHBOARD_ARM_POSITION_TRIGGER = OPERATOR_CONTROLLER.f7(),
+            COLLECT_TRIGGER = OPERATOR_CONTROLLER.q(),
+            SECOND_CONTINUE_TRIGGER = OPERATOR_CONTROLLER.r(),
+            COLLECT_FROM_SUBSTATION_TRIGGER = OPERATOR_CONTROLLER.e(),
+            SHOOT_OVER_RAMP_TRIGGER = OPERATOR_CONTROLLER.w(),
+            INCREMENT_ANGLE_TRIGGER = OPERATOR_CONTROLLER.left(),
+            DECREMENT_ANGLE_TRIGGER = OPERATOR_CONTROLLER.right(),
+            INCREMENT_ELEVATOR_POSITION_TRIGGER = OPERATOR_CONTROLLER.up(),
+            DECREMENT_ELEVATOR_POSITION_TRIGGER = OPERATOR_CONTROLLER.down(),
+            DRIVE_FROM_DPAD_TRIGGER = new Trigger(() -> DRIVER_CONTROLLER.getPov() != -1);
 }

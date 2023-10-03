@@ -5,12 +5,15 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.trigon.robot.constants.CommandsConstants;
 import frc.trigon.robot.robotposesources.PoseSourceConstants;
 import frc.trigon.robot.robotposesources.RelativeRobotPoseSource;
 import frc.trigon.robot.robotposesources.RobotPoseSource;
+import frc.trigon.robot.subsystems.leds.Leds;
 import frc.trigon.robot.subsystems.swerve.Swerve;
 import frc.trigon.robot.utilities.AllianceUtilities;
 import org.littletonrobotics.junction.Logger;
@@ -33,6 +36,7 @@ public class PoseEstimator extends SubsystemBase {
     private final Field2d field = new Field2d();
     private final List<RobotPoseSource> robotPoseSources = new ArrayList<>();
     private DriverStation.Alliance lastAlliance = DriverStation.getAlliance();
+    private final Logger logger = Logger.getInstance();
 
     private PoseEstimator() {
         swerveDrivePoseEstimator = new SwerveDrivePoseEstimator(
@@ -54,11 +58,14 @@ public class PoseEstimator extends SubsystemBase {
     @Override
     public void periodic() {
         updatePoseEstimator();
-        if (didAllianceChange())
+        if (didAllianceChange()) {
             updateFieldWidget();
+            Leds.getInstance().getDefaultCommand().cancel();
+            Leds.getInstance().setDefaultCommand(AllianceUtilities.isBlueAlliance() ? CommandsConstants.BLUE_LIGHT_SABER_COMMAND : CommandsConstants.RED_LIGHT_SABER_COMMAND);
+        }
 
         SmartDashboard.putData("field", field);
-        Logger.getInstance().recordOutput("robotPosition", getCurrentPose());
+        logger.recordOutput("robotPosition", getCurrentPose());
     }
 
     /**
@@ -113,13 +120,6 @@ public class PoseEstimator extends SubsystemBase {
     private void updateFieldWidget() {
         putAprilTagsOnFieldWidget();
         lastAlliance = DriverStation.getAlliance();
-    }
-
-    private Rotation2d getSwerveAllianceHeading() {
-        if (AllianceUtilities.isBlueAlliance())
-            return swerve.getHeading();
-
-        return swerve.getHeading().plus(Rotation2d.fromRotations(0.5));
     }
 
     private boolean didAllianceChange() {

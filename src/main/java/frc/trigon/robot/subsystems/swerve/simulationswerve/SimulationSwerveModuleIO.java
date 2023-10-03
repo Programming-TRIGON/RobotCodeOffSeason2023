@@ -28,12 +28,12 @@ public class SimulationSwerveModuleIO extends SwerveModuleIO {
         driveMotor.update(RobotConstants.PERIODIC_TIME_SECONDS);
 
         inputs.steerAngleDegrees = Conversions.revolutionsToDegrees(steerMotor.getAngularPositionRotations());
-        inputs.steerAppliedVoltage = steerAppliedVoltage;
+//        inputs.steerAppliedOutput = Conversions.voltageToCompensatedPower(steerAppliedVoltage, SimulationSwerveModuleConstants.MAX_MOTOR_VOLTAGE);
         inputs.drivePositionRevolutions = driveMotor.getAngularPositionRotations();
         inputs.driveDistanceMeters = Conversions.revolutionsToDistance(inputs.drivePositionRevolutions, SimulationSwerveModuleConstants.WHEEL_DIAMETER_METERS);
         inputs.driveVelocityRevolutionsPerSecond = Units.radiansToRotations(driveMotor.getAngularVelocityRadPerSec());
         inputs.driveVelocityMetersPerSecond = Conversions.revolutionsToDistance(inputs.driveVelocityRevolutionsPerSecond, SimulationSwerveModuleConstants.WHEEL_DIAMETER_METERS);
-        inputs.driveAppliedVoltage = driveAppliedVoltage;
+//        inputs.driveAppliedVoltage = driveAppliedVoltage;
 
         lastInputs = inputs;
     }

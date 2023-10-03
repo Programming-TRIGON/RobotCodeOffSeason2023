@@ -1,13 +1,18 @@
 package frc.trigon.robot.subsystems.arm.kablamaarm;
 
+import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.configs.CANcoderConfiguration;
+import com.ctre.phoenix6.hardware.CANcoder;
+import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.wpilibj.Notifier;
 import frc.trigon.robot.constants.RobotConstants;
 import frc.trigon.robot.subsystems.arm.ArmConstants;
-import frc.trigon.robot.subsystems.collector.kablamacollector.KablamaCollectorConstants;
+import frc.trigon.robot.utilities.Conversions;
 import frc.trigon.robot.utilities.SRXMagEncoder;
 
 import java.util.HashMap;
@@ -18,24 +23,26 @@ public class KablamaArmConstants extends ArmConstants {
 
     private static final int
             MASTER_ANGLE_MOTOR_ID = 7,
-            FOLLOWER_ANGLE_MOTOR_ID = 8;
+            FOLLOWER_ANGLE_MOTOR_ID = 8,
+            ANGLE_ENCODER_ID = 1;
     private static final boolean
             MASTER_ANGLE_MOTOR_INVERTED = false,
             FOLLOWER_ANGLE_MOTOR_INVERTED = false;
     private static final double
-            ANGLE_MOTOR_P = 8,
-            ANGLE_MOTOR_I = 1.5,
+            ANGLE_MOTOR_P = 8.5,
+            ANGLE_MOTOR_I = 0,
             ANGLE_MOTOR_D = 0;
     static final PIDController ANGLE_PID_CONTROLLER = new PIDController(
             ANGLE_MOTOR_P, ANGLE_MOTOR_I, ANGLE_MOTOR_D
     );
     private static final CANSparkMax.IdleMode ANGLE_MOTOR_DEFAULT_NEUTRAL_MODE = CANSparkMax.IdleMode.kBrake;
-    private static final int ANGLE_CURRENT_LIMIT = 30;
-    static final double ANGLE_ENCODER_OFFSET = -19.335938;
+    private static final int ANGLE_CURRENT_LIMIT = 70;
+    // fully backwards: 102.480469
+    static final double ANGLE_ENCODER_OFFSET = Conversions.degreesToRevolutions(135.791016 + 90 + 2 + 5);
     static final CANSparkMax
             MASTER_ANGLE_MOTOR = new CANSparkMax(MASTER_ANGLE_MOTOR_ID, CANSparkMaxLowLevel.MotorType.kBrushless),
             FOLLOWER_ANGLE_MOTOR = new CANSparkMax(FOLLOWER_ANGLE_MOTOR_ID, CANSparkMaxLowLevel.MotorType.kBrushless);
-    static final SRXMagEncoder ANGLE_ENCODER = new SRXMagEncoder(KablamaCollectorConstants.MOTOR);
+    static final CANcoder ANGLE_ENCODER = new CANcoder(ANGLE_ENCODER_ID);
 
     private static final int
             MASTER_ELEVATOR_MOTOR_ID = 5,
@@ -46,15 +53,15 @@ public class KablamaArmConstants extends ArmConstants {
             FOLLOWER_ELEVATOR_MOTOR_INVERTED = true,
             ELEVATOR_ENCODER_PHASE = true;
     private static final double
-            ELEVATOR_MOTOR_P = 2,
+            ELEVATOR_MOTOR_P = 6,
             ELEVATOR_MOTOR_I = 0,
             ELEVATOR_MOTOR_D = 0;
     static final PIDController ELEVATOR_PID_CONTROLLER = new PIDController(
             ELEVATOR_MOTOR_P, ELEVATOR_MOTOR_I, ELEVATOR_MOTOR_D
     );
     private static final CANSparkMax.IdleMode ELEVATOR_MOTOR_DEFAULT_NEUTRAL_MODE = CANSparkMax.IdleMode.kBrake;
-    private static final double ELEVATOR_ENCODER_OFFSET = 0.038330;
-    private static final int ELEVATOR_CURRENT_LIMIT = 30;
+    private static final double ELEVATOR_ENCODER_OFFSET = 0;
+    private static final int ELEVATOR_CURRENT_LIMIT = 25;
     static final CANSparkMax
             MASTER_ELEVATOR_MOTOR = new CANSparkMax(MASTER_ELEVATOR_MOTOR_ID, CANSparkMaxLowLevel.MotorType.kBrushless),
             FOLLOWER_ELEVATOR_MOTOR = new CANSparkMax(FOLLOWER_ELEVATOR_MOTOR_ID, CANSparkMaxLowLevel.MotorType.kBrushless);
@@ -69,18 +76,18 @@ public class KablamaArmConstants extends ArmConstants {
             ELEVATOR_MOTOR_KS, ELEVATOR_MOTOR_KG, ELEVATOR_MOTOR_KV, ELEVATOR_MOTOR_KA
     );
     private static final double
-            CLOSED_ANGLE_MOTOR_KS = 0.12854,
-            CLOSED_ANGLE_MOTOR_KV = 0.92886,
-            CLOSED_ANGLE_MOTOR_KA = 0.05869,
-            CLOSED_ANGLE_MOTOR_KG = 0.47416,
-            FULLY_OPEN_ANGLE_MOTOR_KS = 0.3,
-            FULLY_OPEN_ANGLE_MOTOR_KV = 2,
+            CLOSED_ANGLE_MOTOR_KS = 0.58835,
+            CLOSED_ANGLE_MOTOR_KV = 0.74627,
+            CLOSED_ANGLE_MOTOR_KA = 0.37502,
+            CLOSED_ANGLE_MOTOR_KG = 0.92056,
+            FULLY_OPEN_ANGLE_MOTOR_KS = 2.4,
+            FULLY_OPEN_ANGLE_MOTOR_KV = 2.2,
             FULLY_OPEN_ANGLE_MOTOR_KA = 0,
-            FULLY_OPEN_ANGLE_MOTOR_KG = 2,
-            HALF_OPEN_ANGLE_MOTOR_KS = 0.18,
-            HALF_OPEN_ANGLE_MOTOR_KV = 1.2,
+            FULLY_OPEN_ANGLE_MOTOR_KG = 2.4, // 1.63
+            HALF_OPEN_ANGLE_MOTOR_KS = 2.1,
+            HALF_OPEN_ANGLE_MOTOR_KV = 2.2,
             HALF_OPEN_ANGLE_MOTOR_KA = 0,
-            HALF_OPEN_ANGLE_MOTOR_KG = 0.7;
+            HALF_OPEN_ANGLE_MOTOR_KG = 1.6; // 1.18
     private static final ArmFeedforward
             CLOSED_ANGLE_MOTOR_FEEDFORWARD = new ArmFeedforward(
                     CLOSED_ANGLE_MOTOR_KS, CLOSED_ANGLE_MOTOR_KG,
@@ -94,35 +101,24 @@ public class KablamaArmConstants extends ArmConstants {
                     HALF_OPEN_ANGLE_MOTOR_KS, HALF_OPEN_ANGLE_MOTOR_KG,
                     HALF_OPEN_ANGLE_MOTOR_KV, HALF_OPEN_ANGLE_MOTOR_KA
             );
+    private static final double
+            FULLY_OPEN_REVOLUTIONS = 6.5,
+            HALF_OPEN_REVOLUTIONS = 3.5;
     private static final HashMap<Double, ArmFeedforward> HEIGHT_TO_ANGLE_MOTOR_FEEDFORWARD_MAP = new HashMap<>();
 
-    private static final int
-            ANGLE_LIMIT_SWITCH_CHANNEL = 1,
-            FORWARD_ELEVATOR_LIMIT_SWITCH_CHANNEL = 2,
-            REVERSE_ELEVATOR_LIMIT_SWITCH_CHANNEL = 3;
-    //    private static final DigitalInput
-//            ANGLE_LIMIT_SWITCH = new DigitalInput(ANGLE_LIMIT_SWITCH_CHANNEL),
-//            FORWARD_ELEVATOR_LIMIT_SWITCH = new DigitalInput(FORWARD_ELEVATOR_LIMIT_SWITCH_CHANNEL),
-//            REVERSE_ELEVATOR_LIMIT_SWITCH = new DigitalInput(REVERSE_ELEVATOR_LIMIT_SWITCH_CHANNEL);
-    private static final double
-            ANGLE_LIMIT_SWITCH_PRESSED_POSITION = 0,
-            FORWARD_ELEVATOR_LIMIT_SWITCH_PRESSED_POSITION = 0,
-            REVERSE_ELEVATOR_LIMIT_SWITCH_PRESSED_POSITION = 0;
-    private static final double LIMIT_SWITCH_WATCHER_TIME_THRESHOLD = 0.5990;
-    private static final float ANGLE_MOTOR_FORWARD_SOFT_LIMIT = 100;
-
+    static StatusSignal<Double> ANGLE_POSITION_SIGNAL, ANGLE_VELOCITY_SIGNAL;
 
     static {
         HEIGHT_TO_ANGLE_MOTOR_FEEDFORWARD_MAP.put(0.0, CLOSED_ANGLE_MOTOR_FEEDFORWARD);
-        HEIGHT_TO_ANGLE_MOTOR_FEEDFORWARD_MAP.put(6.683350, FULLY_OPEN_ANGLE_MOTOR_FEEDFORWARD);
-        HEIGHT_TO_ANGLE_MOTOR_FEEDFORWARD_MAP.put(3.5, HALF_OPEN_ANGLE_MOTOR_FEEDFORWARD);
+        HEIGHT_TO_ANGLE_MOTOR_FEEDFORWARD_MAP.put(FULLY_OPEN_REVOLUTIONS, FULLY_OPEN_ANGLE_MOTOR_FEEDFORWARD);
+        HEIGHT_TO_ANGLE_MOTOR_FEEDFORWARD_MAP.put(HALF_OPEN_REVOLUTIONS, HALF_OPEN_ANGLE_MOTOR_FEEDFORWARD);
+        HEIGHT_TO_ANGLE_MOTOR_FEEDFORWARD_MAP.put(0.5, CLOSED_ANGLE_MOTOR_FEEDFORWARD);
         ANGLE_PID_CONTROLLER.enableContinuousInput(-180, 180);
 
         if (!RobotConstants.IS_REPLAY) {
             configureEncoders();
             configureElevatorMotor();
             configureAngleMotor();
-            configureLimitSwitchWatchers();
         }
     }
 
@@ -146,40 +142,27 @@ public class KablamaArmConstants extends ArmConstants {
         MASTER_ANGLE_MOTOR.setInverted(MASTER_ANGLE_MOTOR_INVERTED);
         FOLLOWER_ANGLE_MOTOR.setInverted(FOLLOWER_ANGLE_MOTOR_INVERTED);
 
-//        MASTER_ANGLE_MOTOR.getPIDController().setP(ANGLE_MOTOR_P);
-//        MASTER_ANGLE_MOTOR.getPIDController().setI(ANGLE_MOTOR_I);
-//        MASTER_ANGLE_MOTOR.getPIDController().setD(ANGLE_MOTOR_D);
-//        MASTER_ANGLE_MOTOR.getPIDController().setPositionPIDWrappingEnabled(true);
-//
-//        ANGLE_ENCODER.setPositionConversionFactor(360);
-//        ANGLE_ENCODER.setVelocityConversionFactor(360);
-//        MASTER_ANGLE_MOTOR.getPIDController().setFeedbackDevice(ANGLE_ENCODER);
-
         MASTER_ANGLE_MOTOR.setIdleMode(ANGLE_MOTOR_DEFAULT_NEUTRAL_MODE);
         FOLLOWER_ANGLE_MOTOR.setIdleMode(ANGLE_MOTOR_DEFAULT_NEUTRAL_MODE);
 
         MASTER_ANGLE_MOTOR.setSmartCurrentLimit(ANGLE_CURRENT_LIMIT);
         FOLLOWER_ANGLE_MOTOR.setSmartCurrentLimit(ANGLE_CURRENT_LIMIT);
 
-        MASTER_ANGLE_MOTOR.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus0,20); // Applied output
-        MASTER_ANGLE_MOTOR.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus1, 20); // Motor movement
-        FOLLOWER_ANGLE_MOTOR.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus0,150); // Applied output
-        FOLLOWER_ANGLE_MOTOR.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus1, 150); // Motor movement
+        MASTER_ANGLE_MOTOR.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus0,255); // Applied output
+        MASTER_ANGLE_MOTOR.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus1, 255); // Motor movement
+        FOLLOWER_ANGLE_MOTOR.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus0,10000); // Applied output
+        FOLLOWER_ANGLE_MOTOR.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus1, 10000); // Motor movement
         for (CANSparkMax currentAngleMotor : List.of(MASTER_ANGLE_MOTOR, FOLLOWER_ANGLE_MOTOR)) {
-            currentAngleMotor.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus2, 1000); // Motor position
-            currentAngleMotor.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus3, 1000); // Analog sensor
-            currentAngleMotor.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus4, 1000); // Alternate encoder
-            currentAngleMotor.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus5, 1000); // Duty cycle position
-            currentAngleMotor.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus6, 1000); // Duty cycle velocity
+            currentAngleMotor.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus2, 10000); // Motor position
+            currentAngleMotor.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus3, 10000); // Analog sensor
+            currentAngleMotor.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus4, 10000); // Alternate encoder
+            currentAngleMotor.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus5, 10000); // Duty cycle position
+            currentAngleMotor.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus6, 10000); // Duty cycle velocity
         }
 
-//        MASTER_ANGLE_MOTOR.setSoftLimit(CANSparkMax.SoftLimitDirection.kReverse, (float) ANGLE_LIMIT_SWITCH_PRESSED_POSITION);
-//        MASTER_ANGLE_MOTOR.setSoftLimit(CANSparkMax.SoftLimitDirection.kForward, ANGLE_MOTOR_FORWARD_SOFT_LIMIT);
+//        FOLLOWER_ANGLE_MOTOR.follow(MASTER_ANGLE_MOTOR);
 
-        FOLLOWER_ANGLE_MOTOR.follow(MASTER_ANGLE_MOTOR);
-
-        MASTER_ANGLE_MOTOR.burnFlash();
-        FOLLOWER_ANGLE_MOTOR.burnFlash();
+        new Notifier(() -> {MASTER_ANGLE_MOTOR.burnFlash(); FOLLOWER_ANGLE_MOTOR.burnFlash();}).startSingle(0.03);
     }
 
     private static void configureElevatorMotor() {
@@ -190,13 +173,7 @@ public class KablamaArmConstants extends ArmConstants {
         FOLLOWER_ELEVATOR_MOTOR.enableVoltageCompensation(VOLTAGE_COMPENSATION_SATURATION);
 
         MASTER_ELEVATOR_MOTOR.setInverted(MASTER_ELEVATOR_MOTOR_INVERTED);
-
-//        MASTER_ELEVATOR_MOTOR.getPIDController().setP(ELEVATOR_MOTOR_P);
-//        MASTER_ELEVATOR_MOTOR.getPIDController().setI(ELEVATOR_MOTOR_I);
-//        MASTER_ELEVATOR_MOTOR.getPIDController().setD(ELEVATOR_MOTOR_D);
-//        MASTER_ELEVATOR_MOTOR.getPIDController().setPositionPIDWrappingEnabled(true);
-//
-//        MASTER_ELEVATOR_MOTOR.getPIDController().setFeedbackDevice(ELEVATOR_ENCODER);
+        FOLLOWER_ELEVATOR_MOTOR.setInverted(FOLLOWER_ELEVATOR_MOTOR_INVERTED);
 
         MASTER_ELEVATOR_MOTOR.setIdleMode(ELEVATOR_MOTOR_DEFAULT_NEUTRAL_MODE);
         FOLLOWER_ELEVATOR_MOTOR.setIdleMode(ELEVATOR_MOTOR_DEFAULT_NEUTRAL_MODE);
@@ -204,25 +181,21 @@ public class KablamaArmConstants extends ArmConstants {
         MASTER_ELEVATOR_MOTOR.setSmartCurrentLimit(ELEVATOR_CURRENT_LIMIT);
         FOLLOWER_ELEVATOR_MOTOR.setSmartCurrentLimit(ELEVATOR_CURRENT_LIMIT);
 
-        MASTER_ELEVATOR_MOTOR.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus0, 20); // Applied output
-        MASTER_ELEVATOR_MOTOR.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus1, 20); // Motor movement
-        FOLLOWER_ELEVATOR_MOTOR.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus0, 150); // Applied output
-        FOLLOWER_ELEVATOR_MOTOR.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus1, 150); // Motor movement
+        MASTER_ELEVATOR_MOTOR.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus0, 255); // Applied output
+        MASTER_ELEVATOR_MOTOR.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus1, 255); // Motor movement
+        FOLLOWER_ELEVATOR_MOTOR.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus0, 100000); // Applied output
+        FOLLOWER_ELEVATOR_MOTOR.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus1, 100000); // Motor movement
         for (CANSparkMax currentElevatorMotor : List.of(MASTER_ELEVATOR_MOTOR, FOLLOWER_ELEVATOR_MOTOR)) {
-            currentElevatorMotor.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus2, 1000); // Motor position
-            currentElevatorMotor.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus3, 1000); // Analog sensor
-            currentElevatorMotor.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus4, 1000); // Alternate encoder
-            currentElevatorMotor.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus5, 1000); // Duty cycle position
-            currentElevatorMotor.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus6, 1000); // Duty cycle velocity
+            currentElevatorMotor.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus2, 10000); // Motor position
+            currentElevatorMotor.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus3, 10000); // Analog sensor
+            currentElevatorMotor.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus4, 10000); // Alternate encoder
+            currentElevatorMotor.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus5, 10000); // Duty cycle position
+            currentElevatorMotor.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus6, 10000); // Duty cycle velocity
         }
 
-//        MASTER_ELEVATOR_MOTOR.setSoftLimit(CANSparkMax.SoftLimitDirection.kReverse, (float) REVERSE_ELEVATOR_LIMIT_SWITCH_PRESSED_POSITION);
-//        MASTER_ELEVATOR_MOTOR.setSoftLimit(CANSparkMax.SoftLimitDirection.kForward, (float) FORWARD_ELEVATOR_LIMIT_SWITCH_PRESSED_POSITION);
+//        FOLLOWER_ELEVATOR_MOTOR.follow(MASTER_ELEVATOR_MOTOR, FOLLOWER_ELEVATOR_MOTOR_INVERTS_MASTER);
 
-        FOLLOWER_ELEVATOR_MOTOR.follow(MASTER_ELEVATOR_MOTOR, FOLLOWER_ELEVATOR_MOTOR_INVERTED);
-
-        MASTER_ELEVATOR_MOTOR.burnFlash();
-        FOLLOWER_ELEVATOR_MOTOR.burnFlash();
+        new Notifier(() -> {MASTER_ELEVATOR_MOTOR.burnFlash(); FOLLOWER_ELEVATOR_MOTOR.burnFlash();}).startSingle(0.03);
     }
 
     private static void configureEncoders() {
@@ -232,39 +205,16 @@ public class KablamaArmConstants extends ArmConstants {
         ELEVATOR_ENCODER.setVelocityScale(1);
         ELEVATOR_ENCODER.setOffset(ELEVATOR_ENCODER_OFFSET);
 
-        ANGLE_ENCODER.setVelocityScale(360);
-        ANGLE_ENCODER.setPositionScale(360);
-        ANGLE_ENCODER.setOffset(ANGLE_ENCODER_OFFSET);
-        ANGLE_ENCODER.enableContinuousPosition(-180, 180);
-    }
+        final CANcoderConfiguration configuration = new CANcoderConfiguration();
 
-    private static void configureLimitSwitchWatchers() {
-//        new LimitSwitchWatcher(
-////                ANGLE_LIMIT_SWITCH::get,
-//                () -> false,
-//                LIMIT_SWITCH_WATCHER_TIME_THRESHOLD,
-//                true,
-//                () -> ANGLE_ENCODER.setSelectedSensorPosition(ANGLE_LIMIT_SWITCH_PRESSED_POSITION)
-//        );
-//        new LimitSwitchWatcher(
-////                FORWARD_ELEVATOR_LIMIT_SWITCH::get,
-//                () -> false,
-//                LIMIT_SWITCH_WATCHER_TIME_THRESHOLD,
-//                true,
-//                () -> {
-//                    if (DriverStation.isEnabled())
-//                        ELEVATOR_ENCODER.setSelectedSensorPosition(FORWARD_ELEVATOR_LIMIT_SWITCH_PRESSED_POSITION);
-//                }
-//        );
-//        new LimitSwitchWatcher(
-////                REVERSE_ELEVATOR_LIMIT_SWITCH::get,
-//                () -> false,
-//                LIMIT_SWITCH_WATCHER_TIME_THRESHOLD,
-//                true,
-//                () -> {
-//                    if (DriverStation.isEnabled())
-//                        ELEVATOR_ENCODER.setSelectedSensorPosition(REVERSE_ELEVATOR_LIMIT_SWITCH_PRESSED_POSITION);
-//                }
-//        );
+        configuration.MagnetSensor.MagnetOffset = ANGLE_ENCODER_OFFSET;
+        configuration.MagnetSensor.AbsoluteSensorRange = AbsoluteSensorRangeValue.Signed_PlusMinusHalf;
+
+        ANGLE_ENCODER.getConfigurator().apply(configuration);
+
+        ANGLE_VELOCITY_SIGNAL = ANGLE_ENCODER.getVelocity();
+        ANGLE_POSITION_SIGNAL = ANGLE_ENCODER.getAbsolutePosition();
+        ANGLE_VELOCITY_SIGNAL.setUpdateFrequency(50);
+        ANGLE_POSITION_SIGNAL.setUpdateFrequency(100);
     }
 }

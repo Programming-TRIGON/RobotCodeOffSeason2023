@@ -6,13 +6,13 @@ public class RollerIO {
     @AutoLog
     protected static class RollerInputs {
         public double angleMotorCurrent = 0;
-        public double angleMotorAppliedVoltage = 0;
+//        public double angleMotorAppliedVoltage = 0;
         public double angleMotorPower = 0;
         public boolean angleMotorForwardLimitSwitchPressed = false;
-        public boolean angleMotorBackwardLimitSwitchPressed = false;
+        public boolean angleMotorReverseLimitSwitchPressed = false;
 
         public double collectionMotorCurrent = 0;
-        public double collectionMotorAppliedVoltage = 0;
+//        public double collectionMotorAppliedVoltage = 0;
         public double collectionMotorPower = 0;
     }
 

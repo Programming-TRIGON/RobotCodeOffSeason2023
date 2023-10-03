@@ -11,6 +11,7 @@ import org.littletonrobotics.junction.Logger;
 public class RobotPoseSource extends SubsystemBase {
     protected final String name;
     private final RobotPoseSourceInputsAutoLogged robotPoseSourceInputs = new RobotPoseSourceInputsAutoLogged();
+    private final Logger logger = Logger.getInstance();
     private Transform3d cameraToRobotCenter;
     private RobotPoseSourceIO robotPoseSourceIO;
     private double lastUpdatedTimestamp;
@@ -45,7 +46,7 @@ public class RobotPoseSource extends SubsystemBase {
     @Override
     public void periodic() {
         robotPoseSourceIO.updateInputs(robotPoseSourceInputs);
-        Logger.getInstance().processInputs(name, robotPoseSourceInputs);
+        logger.processInputs(name, robotPoseSourceInputs);
     }
 
     /**

@@ -9,11 +9,11 @@ public class SideShooterIO {
         public double angleMotorPositionDegrees = 0;
         public double angleMotorVelocityDegreesPerSecond = 0;
         public double angleMotorCurrent = 0;
-        public double angleMotorAppliedVoltage = 0;
+//        public double angleMotorAppliedVoltage = 0;
 
         public double shootingMotorCurrent = 0;
         public double shootingMotorAppliedVoltage = 0;
-        public double shootingMotorPower = 0;
+//        public double shootingMotorPower = 0;
     }
 
     /**

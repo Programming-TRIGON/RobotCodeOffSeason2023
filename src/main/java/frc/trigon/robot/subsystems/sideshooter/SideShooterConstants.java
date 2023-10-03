@@ -28,15 +28,15 @@ public abstract class SideShooterConstants {
     );
 
     private static final double
-            MAX_ANGLE_VELOCITY = 900,
-            MAX_ANGLE_ACCELERATION = 700;
+            MAX_ANGLE_VELOCITY = 600,
+            MAX_ANGLE_ACCELERATION = 500;
     static final TrapezoidProfile.Constraints ANGLE_CONSTRAINTS = new TrapezoidProfile.Constraints(
             MAX_ANGLE_VELOCITY, MAX_ANGLE_ACCELERATION
     );
     static final double ANGLE_TOLERANCE_DEGREES = 2;
 
     static final double COLLECTION_CURRENT_THRESHOLD = 25;
-    static final double COLLECTION_TIME_THRESHOLD = 0.1;
+    static final double COLLECTION_TIME_THRESHOLD = 0.2;
 
     /**
      * @return the angle motor feedforward
@@ -45,12 +45,14 @@ public abstract class SideShooterConstants {
 
     public enum SideShooterState {
         DEFAULT(Rotation2d.fromDegrees(90), 0),
-        HIGH(Rotation2d.fromDegrees(60), 10),
-        MIDDLE(Rotation2d.fromDegrees(50), 14),
-        HYBRID(Rotation2d.fromDegrees(0), 3),
-        HYBRID_FROM_AFAR(Rotation2d.fromDegrees(30), 3),
+        HIGH(Rotation2d.fromDegrees(53), 5.3),
+        MIDDLE(Rotation2d.fromDegrees(60), 4.1),
+        HYBRID(Rotation2d.fromDegrees(10), 4),
+        HIGH_FROM_AFAR(Rotation2d.fromDegrees(45), 16),
+        MIDDLE_FROM_AFAR(Rotation2d.fromDegrees(30), 13),
+        HYBRID_FROM_AFAR(Rotation2d.fromDegrees(20), 12),
         COLLECTION(Rotation2d.fromDegrees(0), -3.5),
-        SHOOT_OVER_RAMP(Rotation2d.fromDegrees(30), 3);
+        SHOOT_OVER_RAMP(Rotation2d.fromDegrees(40), 16);
 
         public final Rotation2d angle;
         public final double voltage;

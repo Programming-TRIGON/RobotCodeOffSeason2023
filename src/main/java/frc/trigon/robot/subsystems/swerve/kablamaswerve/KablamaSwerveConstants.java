@@ -4,6 +4,7 @@ import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.hardware.Pigeon2;
 import com.pathplanner.lib.auto.PIDConstants;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -24,7 +25,7 @@ public class KablamaSwerveConstants extends SwerveConstants {
             MAX_ROTATIONAL_SPEED_RADIANS_PER_SECOND = 12.03;
     private static final double
             DRIVE_NEUTRAL_DEADBAND = 0.1,
-            ROTATION_NEUTRAL_DEADBAND = 0;
+            ROTATION_NEUTRAL_DEADBAND = 0.1;
     static final double
             SIDE_LENGTH_METERS = 0.4857,
             DISTANCE_FROM_CENTER_OF_BASE = SIDE_LENGTH_METERS / 2;
@@ -42,23 +43,29 @@ public class KablamaSwerveConstants extends SwerveConstants {
     };
     private static final SwerveDriveKinematics KINEMATICS = new SwerveDriveKinematics(LOCATIONS);
     private static final PIDConstants
-            TRANSLATION_PID_CONSTANTS = new PIDConstants(12, 0, 0),
-            ROTATION_PID_CONSTANTS = new PIDConstants(15, 0, 0),
-            AUTO_ROTATION_PID_CONSTANTS = new PIDConstants(15, 0, 0);
+            TRANSLATION_PID_CONSTANTS = new PIDConstants(13, 0, 0),
+            ROTATION_PID_CONSTANTS = new PIDConstants(3, 0, 0),
+            AUTO_ROTATION_PID_CONSTANTS = new PIDConstants(6, 0, 0);
+//            AUTO_ROTATION_PID_CONSTANTS = new PIDConstants(3,0,0);
     private static final int PIGEON_ID = 0;
     static final Pigeon2 GYRO = new Pigeon2(PIGEON_ID);
+    private static final double DEGREES_TOLERANCE = 2;
     private static final TrapezoidProfile.Constraints
             ROTATION_CONSTRAINTS = new TrapezoidProfile.Constraints(
                     720,
-                    720
+                    1200
             ),
             TRANSLATION_CONSTRAINTS = new TrapezoidProfile.Constraints(
                     3,
                     3
             );
 
+    private static final PIDController ROTATION_PID_CONTROLLER = new PIDController(
+            3, 0, 0
+    );
+
     private static final ProfiledPIDController
-            ROTATION_CONTROLLER = new ProfiledPIDController(
+            PROFILED_PID_CONTROLLER = new ProfiledPIDController(
                     ROTATION_PID_CONSTANTS.kP,
                     ROTATION_PID_CONSTANTS.kI,
                     ROTATION_PID_CONSTANTS.kD,
@@ -76,10 +83,13 @@ public class KablamaSwerveConstants extends SwerveConstants {
             TRANSLATION_VELOCITY_TOLERANCE = 0.05,
             ROTATION_VELOCITY_TOLERANCE = 0.05;
 
-    static StatusSignal<Double> YAW_SIGNAL, PITCH_SIGNAL, X_ACCELERATION_SIGNAL, Y_ACCELERATION_SIGNAL, Z_ACCELERATION_SIGNAL;
+    static StatusSignal<Double> YAW_SIGNAL, PITCH_SIGNAL, ROLL_SIGNAL, PITCH_VELOCITY_SIGNAL, ROLL_VELOCITY_SIGNAL, X_ACCELERATION_SIGNAL, Y_ACCELERATION_SIGNAL, Z_ACCELERATION_SIGNAL;
 
     static {
-        ROTATION_CONTROLLER.enableContinuousInput(-180, 180);
+        PROFILED_PID_CONTROLLER.enableContinuousInput(-180, 180);
+        ROTATION_PID_CONTROLLER.enableContinuousInput(-180, 180);
+        PROFILED_PID_CONTROLLER.setTolerance(DEGREES_TOLERANCE);
+        PROFILED_PID_CONTROLLER.setIntegratorRange(-30, 30);
 
         if (!RobotConstants.IS_REPLAY)
             configureGyro();
@@ -90,15 +100,28 @@ public class KablamaSwerveConstants extends SwerveConstants {
 
         YAW_SIGNAL = GYRO.getYaw();
         PITCH_SIGNAL = GYRO.getPitch();
+        ROLL_SIGNAL = GYRO.getRoll();
         X_ACCELERATION_SIGNAL = GYRO.getAccelerationX();
         Y_ACCELERATION_SIGNAL = GYRO.getAccelerationY();
         Z_ACCELERATION_SIGNAL = GYRO.getAccelerationZ();
+        PITCH_VELOCITY_SIGNAL = GYRO.getAngularVelocityX();
+        ROLL_VELOCITY_SIGNAL = GYRO.getAngularVelocityY();
 
-        YAW_SIGNAL.setUpdateFrequency(200);
-        PITCH_SIGNAL.setUpdateFrequency(100);
-        X_ACCELERATION_SIGNAL.setUpdateFrequency(50);
-        Y_ACCELERATION_SIGNAL.setUpdateFrequency(50);
-        Z_ACCELERATION_SIGNAL.setUpdateFrequency(50);
+        YAW_SIGNAL.setUpdateFrequency(100);
+        PITCH_SIGNAL.setUpdateFrequency(30);
+        ROLL_SIGNAL.setUpdateFrequency(30);
+        PITCH_VELOCITY_SIGNAL.setUpdateFrequency(30);
+        ROLL_VELOCITY_SIGNAL.setUpdateFrequency(30);
+        X_ACCELERATION_SIGNAL.setUpdateFrequency(10);
+        Y_ACCELERATION_SIGNAL.setUpdateFrequency(4);
+        Z_ACCELERATION_SIGNAL.setUpdateFrequency(4);
+
+        GYRO.getAngularVelocityX().setUpdateFrequency(4);
+        GYRO.getAngularVelocityY().setUpdateFrequency(4);
+        GYRO.getAngularVelocityZ().setUpdateFrequency(4);
+        GYRO.getGravityVectorX().setUpdateFrequency(4);
+        GYRO.getGravityVectorY().setUpdateFrequency(4);
+        GYRO.getGravityVectorZ().setUpdateFrequency(4);
     }
 
     @Override
@@ -152,13 +175,18 @@ public class KablamaSwerveConstants extends SwerveConstants {
     }
 
     @Override
+    protected PIDController getRotationController() {
+        return ROTATION_PID_CONTROLLER;
+    }
+
+    @Override
     protected ProfiledPIDController getProfiledYAxisController() {
         return PROFILED_Y_AXIS_CONTROLLER;
     }
 
     @Override
-    public ProfiledPIDController getRotationController() {
-        return ROTATION_CONTROLLER;
+    public ProfiledPIDController getProfiledRotationController() {
+        return PROFILED_PID_CONTROLLER;
     }
 
     @Override

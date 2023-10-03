@@ -15,8 +15,8 @@ public class SimulationCollectorIO extends CollectorIO {
     protected void updateInputs(CollectorInputsAutoLogged inputs) {
         motorSimulation.update(RobotConstants.PERIODIC_TIME_SECONDS);
 
-        inputs.statorCurrent = motorSimulation.getCurrentDrawAmps();
-        inputs.appliedVoltage = inputVoltage;
+        inputs.current = motorSimulation.getCurrentDrawAmps();
+//        inputs.appliedVoltage = inputVoltage;
         inputs.power = Conversions.voltageToCompensatedPower(inputVoltage, SimulationCollectorConstants.VOLTAGE_COMPENSATION_SATURATION);
     }
 

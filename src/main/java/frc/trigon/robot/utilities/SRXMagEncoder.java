@@ -5,6 +5,7 @@ import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import edu.wpi.first.math.MathUtil;
 
+// TODO: javadocs
 public class SRXMagEncoder {
     private final WPI_TalonSRX magEncoder;
     private double offset = 0;

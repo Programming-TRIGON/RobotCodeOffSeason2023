@@ -5,6 +5,7 @@ import com.pathplanner.lib.PathPlannerTrajectory;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.*;
 import frc.trigon.robot.RobotContainer;
 import frc.trigon.robot.constants.AutonomousConstants;
@@ -15,6 +16,8 @@ import frc.trigon.robot.subsystems.arm.Arm;
 import frc.trigon.robot.subsystems.arm.ArmConstants;
 import frc.trigon.robot.subsystems.collector.Collector;
 import frc.trigon.robot.subsystems.collector.CollectorConstants;
+import frc.trigon.robot.subsystems.leds.Leds;
+import frc.trigon.robot.subsystems.leds.ledcommands.StaticColorLedCommand;
 import frc.trigon.robot.subsystems.poseestimator.PoseEstimator;
 import frc.trigon.robot.subsystems.roller.Roller;
 import frc.trigon.robot.subsystems.sideshooter.SideShooter;
@@ -70,7 +73,7 @@ public class Commands {
             final Pose2d initialAlliancePose = new Pose2d(
                     initialPose.getX(),
                     AllianceUtilities.isBlueAlliance() ? initialPose.getY() : FieldConstants.FIELD_WIDTH_METERS - initialPose.getY(),
-                    initialPose.getRotation()
+                    AllianceUtilities.isBlueAlliance() ? initialPose.getRotation() : initialPose.getRotation().plus(Rotation2d.fromDegrees(180))
             );
 
             POSE_ESTIMATOR.resetPose(initialAlliancePose);
@@ -121,6 +124,40 @@ public class Commands {
         );
     }
 
+    public static CommandBase getToggleBrakeAndCoastCommand() {
+        return new ProxyCommand(() -> {
+            if (DriverStation.isEnabled())
+                return new InstantCommand();
+
+            if (ARM.isBraking()) {
+                return new InstantCommand(() -> {
+                    ARM.setNeutralMode(false);
+                    SIDE_SHOOTER.setNeutralMode(false);
+                    CommandsConstants.STATIC_WHITE_COLOR_COMMAND.schedule();
+                }).ignoringDisable(true);
+            }
+
+            return new InstantCommand(() -> {
+                ARM.setNeutralMode(true);
+                SIDE_SHOOTER.setNeutralMode(true);
+                CommandsConstants.STATIC_WHITE_COLOR_COMMAND.cancel();
+            }).ignoringDisable(true);
+        });
+    }
+
+    public static CommandBase getCollectFromSubstationCommand() {
+        return new ParallelCommandGroup(
+                ARM.getGoToArmStateCommand(ArmConstants.ArmState.DOUBLE_SUBSTATION, 100, 100),
+                COLLECTOR.getSetTargetStateCommand(CollectorConstants.CollectorState.COLLECT),
+                SwerveCommands.getOpenLoopFieldRelativeDriveCommand(
+                        () -> OperatorConstants.DRIVER_CONTROLLER.getLeftY() / OperatorConstants.STICKS_SPEED_DIVIDER / CommandsConstants.calculateShiftModeValue(),
+                        () -> OperatorConstants.DRIVER_CONTROLLER.getLeftX() / OperatorConstants.STICKS_SPEED_DIVIDER / CommandsConstants.calculateShiftModeValue(),
+                        () -> Rotation2d.fromDegrees(0),
+                        false
+                )
+        ).finallyDo((interrupted) -> CommandsConstants.YELLOW_STATIC_COLOR_COMMAND.cancel());
+    }
+
     /**
      * @return a command that fully places a cone, with all the cone placing logic
      */
@@ -153,7 +190,8 @@ public class Commands {
     public static CommandBase getPlaceConeAtHighLevelCommand() {
         return new SequentialCommandGroup(
                 getWaitForContinueCommand(),
-                COLLECTOR.getSetTargetStateCommand(CollectorConstants.CollectorState.EJECT)
+                COLLECTOR.getSetTargetStateCommand(CollectorConstants.CollectorState.EJECT).until(OperatorConstants.SECOND_CONTINUE_TRIGGER),
+                COLLECTOR.getSetTargetStateCommand(CollectorConstants.CollectorState.COLLECT)
         ).alongWith(
                 ARM.getGoToArmStateCommand(ArmConstants.ArmState.HIGH_CONE, 100, 100)
         );
@@ -165,7 +203,8 @@ public class Commands {
     public static CommandBase getPlaceConeAtMiddleLevelCommand() {
         return new SequentialCommandGroup(
                 getWaitForContinueCommand(),
-                COLLECTOR.getSetTargetStateCommand(CollectorConstants.CollectorState.EJECT)
+                COLLECTOR.getSetTargetStateCommand(CollectorConstants.CollectorState.EJECT).until(OperatorConstants.SECOND_CONTINUE_TRIGGER),
+                COLLECTOR.getSetTargetStateCommand(CollectorConstants.CollectorState.COLLECT)
         ).alongWith(
                 ARM.getGoToArmStateCommand(ArmConstants.ArmState.MIDDLE_CONE, 100, 100)
         );
@@ -214,7 +253,7 @@ public class Commands {
      */
     public static CommandBase getShootCubeToHighLevelCommand() {
         return new SequentialCommandGroup(
-                SIDE_SHOOTER.getSetTargetShooterAngleCommand(SideShooterConstants.SideShooterState.HIGH.angle).raceWith(getWaitForContinueCommand()),
+//                SIDE_SHOOTER.getSetTargetShooterAngleCommand(SideShooterConstants.SideShooterState.HIGH.angle).until(OperatorConstants.CONTINUE_TRIGGER.and(() -> SIDE_SHOOTER.atAngle(SideShooterConstants.SideShooterState.HIGH.angle))),
                 SIDE_SHOOTER.getSetTargetShooterStateCommand(SideShooterConstants.SideShooterState.HIGH, true)
         );
     }
@@ -224,7 +263,7 @@ public class Commands {
      */
     public static CommandBase getShootCubeToMiddleLevelCommand() {
         return new SequentialCommandGroup(
-                SIDE_SHOOTER.getSetTargetShooterAngleCommand(SideShooterConstants.SideShooterState.MIDDLE.angle).raceWith(getWaitForContinueCommand()),
+//                SIDE_SHOOTER.getSetTargetShooterAngleCommand(SideShooterConstants.SideShooterState.MIDDLE.angle).until(OperatorConstants.CONTINUE_TRIGGER.and(() -> SIDE_SHOOTER.atAngle(SideShooterConstants.SideShooterState.MIDDLE.angle))),
                 SIDE_SHOOTER.getSetTargetShooterStateCommand(SideShooterConstants.SideShooterState.MIDDLE, true)
         );
     }
@@ -234,7 +273,7 @@ public class Commands {
      */
     public static CommandBase getShootCubeToHybridLevelCommand() {
         return new SequentialCommandGroup(
-                SIDE_SHOOTER.getSetTargetShooterAngleCommand(SideShooterConstants.SideShooterState.HYBRID.angle).raceWith(getWaitForContinueCommand()),
+//                SIDE_SHOOTER.getSetTargetShooterAngleCommand(SideShooterConstants.SideShooterState.HYBRID.angle).until(OperatorConstants.CONTINUE_TRIGGER.and(() -> SIDE_SHOOTER.atAngle(SideShooterConstants.SideShooterState.HYBRID.angle))),
                 SIDE_SHOOTER.getSetTargetShooterStateCommand(SideShooterConstants.SideShooterState.HYBRID, true)
         );
     }
@@ -286,7 +325,7 @@ public class Commands {
         return new ParallelCommandGroup(
                 ROLLER.getFullCollectionCommand(),
                 SIDE_SHOOTER.getSetTargetShooterStateCommand(SideShooterConstants.SideShooterState.COLLECTION, false)
-        );
+        ).finallyDo((interrupted) -> CommandsConstants.PURPLE_STATIC_COLOR_COMMAND.cancel());
     }
 
     /**

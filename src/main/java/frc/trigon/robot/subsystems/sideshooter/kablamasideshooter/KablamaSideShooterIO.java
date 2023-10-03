@@ -8,25 +8,26 @@ import edu.wpi.first.math.util.Units;
 import frc.trigon.robot.subsystems.sideshooter.SideShooterIO;
 import frc.trigon.robot.subsystems.sideshooter.SideShooterInputsAutoLogged;
 import frc.trigon.robot.utilities.Conversions;
-import frc.trigon.robot.utilities.SRXMagEncoder;
+import org.littletonrobotics.junction.Logger;
+
 
 public class KablamaSideShooterIO extends SideShooterIO {
     private final TalonFX shootingMotor = KablamaSideShooterConstants.SHOOTING_MOTOR;
     private final CANSparkMax angleMotor = KablamaSideShooterConstants.ANGLE_MOTOR;
-    private final SRXMagEncoder angleEncoder = KablamaSideShooterConstants.ANGLE_ENCODER;
+    private final SparkMaxPIDController anglePIDController = angleMotor.getPIDController();
 
     private SideShooterInputsAutoLogged lastInputs = new SideShooterInputsAutoLogged();
 
     @Override
     protected void updateInputs(SideShooterInputsAutoLogged inputs) {
-        inputs.angleMotorPositionDegrees = angleEncoder.getPosition();
-        inputs.angleMotorVelocityDegreesPerSecond = angleEncoder.getVelocity();
+        inputs.angleMotorPositionDegrees = Conversions.revolutionsToDegrees(KablamaSideShooterConstants.ANGLE_POSITION_SIGNAL.refresh().getValue());
+        inputs.angleMotorVelocityDegreesPerSecond = Conversions.revolutionsToDegrees(KablamaSideShooterConstants.ANGLE_VELOCITY_SIGNAL.refresh().getValue());
         inputs.angleMotorCurrent = angleMotor.getOutputCurrent();
-        inputs.angleMotorAppliedVoltage = angleMotor.getBusVoltage();
+//        inputs.angleMotorAppliedVoltage = angleMotor.getBusVoltage();
 
-        inputs.shootingMotorCurrent = KablamaSideShooterConstants.STATOR_CURRENT_SIGNAL.refresh().getValue();
-        inputs.shootingMotorPower = KablamaSideShooterConstants.MOTOR_OUTPUT_PERCENT_SIGNAL.refresh().getValue();
-        inputs.shootingMotorAppliedVoltage = Conversions.compensatedPowerToVoltage(inputs.shootingMotorPower, KablamaSideShooterConstants.VOLTAGE_COMPENSATION_SATURATION);
+        inputs.shootingMotorCurrent = KablamaSideShooterConstants.SHOOTING_STATOR_CURRENT_SIGNAL.refresh().getValue();
+//        inputs.shootingMotorPower = KablamaSideShooterConstants.SHOOTING_MOTOR_OUTPUT_PERCENT_SIGNAL.refresh().getValue();
+        inputs.shootingMotorAppliedVoltage = Conversions.compensatedPowerToVoltage(KablamaSideShooterConstants.SHOOTING_MOTOR_OUTPUT_PERCENT_SIGNAL.refresh().getValue(), KablamaSideShooterConstants.VOLTAGE_COMPENSATION_SATURATION);
 
         lastInputs = inputs;
     }
@@ -40,12 +41,9 @@ public class KablamaSideShooterIO extends SideShooterIO {
     @Override
     protected void setTargetAngle(Rotation2d angle, double feedforward) {
         final double pidOutput = KablamaSideShooterConstants.ANGLE_PID_CONTROLLER.calculate(Units.degreesToRadians(lastInputs.angleMotorPositionDegrees), angle.getRadians());
-        angleMotor.getPIDController().setReference(
-                pidOutput,
-                CANSparkMax.ControlType.kVoltage,
-                0,
-                feedforward,
-                SparkMaxPIDController.ArbFFUnits.kVoltage
+        anglePIDController.setReference(
+                pidOutput + feedforward,
+                CANSparkMax.ControlType.kVoltage
         );
     }
 

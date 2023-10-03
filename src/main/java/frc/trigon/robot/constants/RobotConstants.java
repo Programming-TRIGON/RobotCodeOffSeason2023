@@ -8,7 +8,7 @@ public class RobotConstants {
     public static final double PERIODIC_TIME_SECONDS = 0.02;
 
     public enum RobotType {
-        KABLAMA(FilesHandler.DEPLOY_PATH + "logs/"),
+        KABLAMA("/media/sda1/logs/"),
         TRIHARD(FilesHandler.DEPLOY_PATH + "logs/"),
         SIMULATION(FilesHandler.DEPLOY_PATH + "logs/");
 

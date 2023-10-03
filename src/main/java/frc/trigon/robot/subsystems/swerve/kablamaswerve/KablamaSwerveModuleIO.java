@@ -1,26 +1,26 @@
 package frc.trigon.robot.subsystems.swerve.kablamaswerve;
 
 import com.ctre.phoenix6.StatusSignal;
-import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.controls.CoastOut;
 import com.ctre.phoenix6.controls.StaticBrake;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.SparkMaxAbsoluteEncoder;
+import com.revrobotics.SparkMaxPIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import frc.trigon.robot.subsystems.swerve.SwerveModuleIO;
 import frc.trigon.robot.subsystems.swerve.SwerveModuleInputsAutoLogged;
 import frc.trigon.robot.utilities.Conversions;
+import org.littletonrobotics.junction.Logger;
 
 public class KablamaSwerveModuleIO extends SwerveModuleIO {
     private final TalonFX driveMotor;
     private final CANSparkMax steerMotor;
     private final SparkMaxAbsoluteEncoder steerEncoder;
-
-    private final StatusSignal<Double> positionSignal, velocitySignal, dutyCycleSignal;
+    private final SparkMaxPIDController steerPIDController;
+    private final StatusSignal<Double> positionSignal, velocitySignal;
 
     KablamaSwerveModuleIO(KablamaSwerveModuleConstants.KablamaSwerveModules module) {
         super(module.name());
@@ -28,23 +28,24 @@ public class KablamaSwerveModuleIO extends SwerveModuleIO {
 
         this.steerMotor = moduleConstants.steerMotor;
         this.driveMotor = moduleConstants.driveMotor;
+        steerPIDController = steerMotor.getPIDController();
         steerEncoder = steerMotor.getAbsoluteEncoder(SparkMaxAbsoluteEncoder.Type.kDutyCycle);
 
         positionSignal = driveMotor.getPosition();
         velocitySignal = driveMotor.getVelocity();
-        dutyCycleSignal = driveMotor.getDutyCycle();
     }
 
     @Override
     protected void updateInputs(SwerveModuleInputsAutoLogged inputs) {
         inputs.steerAngleDegrees = steerEncoder.getPosition();
-        inputs.steerAppliedVoltage = steerMotor.getBusVoltage();
+        inputs.steerCurrent = steerMotor.getOutputCurrent();
+//        inputs.steerAppliedOutput = steerMotor.getAppliedOutput();
 
-        inputs.drivePositionRevolutions = positionSignal.refresh().getValue();
+        inputs.drivePositionRevolutions = Conversions.motorToSystem(positionSignal.refresh().getValue(), KablamaSwerveModuleConstants.DRIVE_GEAR_RATIO);
         inputs.driveDistanceMeters = Conversions.revolutionsToDistance(inputs.drivePositionRevolutions, KablamaSwerveModuleConstants.WHEEL_DIAMETER_METERS);
-        inputs.driveVelocityRevolutionsPerSecond = velocitySignal.refresh().getValue();
+        inputs.driveVelocityRevolutionsPerSecond = Conversions.motorToSystem(velocitySignal.refresh().getValue(), KablamaSwerveModuleConstants.DRIVE_GEAR_RATIO);
         inputs.driveVelocityMetersPerSecond = Conversions.revolutionsToDistance(inputs.driveVelocityRevolutionsPerSecond, KablamaSwerveModuleConstants.WHEEL_DIAMETER_METERS);
-        inputs.driveAppliedVoltage = Conversions.compensatedPowerToVoltage(dutyCycleSignal.refresh().getValue(), KablamaSwerveModuleConstants.VOLTAGE_COMPENSATION_SATURATION);
+//        inputs.driveAppliedVoltage = Conversions.compensatedPowerToVoltage(dutyCycleSignal.refresh().getValue(), KablamaSwerveModuleConstants.VOLTAGE_COMPENSATION_SATURATION);
     }
 
     @Override
@@ -68,12 +69,14 @@ public class KablamaSwerveModuleIO extends SwerveModuleIO {
                 feedforward, 0, false
         );
 
+        Logger.getInstance().recordOutput(getLoggingPath() + "targetVelocity", velocity);
+
         driveMotor.setControl(velocityVoltage);
     }
 
     @Override
     protected void setTargetAngle(Rotation2d angle) {
-        steerMotor.getPIDController().setReference(angle.getDegrees(), CANSparkMax.ControlType.kPosition);
+        steerPIDController.setReference(angle.getDegrees(), CANSparkMax.ControlType.kPosition);
     }
 
     @Override
@@ -84,10 +87,13 @@ public class KablamaSwerveModuleIO extends SwerveModuleIO {
 
     @Override
     protected void setBrake(boolean brake) {
-        final MotorOutputConfigs driveMotorOutputConfig = new MotorOutputConfigs();
+//        final MotorOutputConfigs driveMotorOutputConfig = new MotorOutputConfigs();
+//
+//        driveMotor.getConfigurator().refresh(driveMotorOutputConfig);
+//        driveMotorOutputConfig.NeutralMode = brake ? NeutralModeValue.Brake : NeutralModeValue.Coast;
+//        driveMotor.getConfigurator().apply(driveMotorOutputConfig);
+        driveMotor.setControl(brake ? new StaticBrake() : new CoastOut());
 
-        driveMotor.getConfigurator().refresh(driveMotorOutputConfig);
-        driveMotorOutputConfig.NeutralMode = brake ? NeutralModeValue.Brake : NeutralModeValue.Coast;
-        driveMotor.getConfigurator().apply(driveMotorOutputConfig);
+        steerMotor.setIdleMode(brake ? CANSparkMax.IdleMode.kBrake : CANSparkMax.IdleMode.kCoast);
     }
 }

@@ -16,6 +16,7 @@ public class SimulationArmIO extends ArmIO {
     private final SingleJointedArmSim angleSimulation = SimulationArmConstants.ANGLE_SIMULATION;
 
     private double elevatorAppliedVoltage, angleAppliedVoltage;
+    private ArmInputsAutoLogged lastInputs = new ArmInputsAutoLogged();
 
     @Override
     protected void updateInputs(ArmInputsAutoLogged inputs) {
@@ -25,13 +26,14 @@ public class SimulationArmIO extends ArmIO {
         inputs.angleMotorPositionDegrees = getAngle().getDegrees();
         inputs.angleMotorVelocityDegreesPerSecond = Units.radiansToDegrees(angleSimulation.getVelocityRadPerSec());
         inputs.angleMotorCurrent = angleSimulation.getCurrentDrawAmps();
-        inputs.angleMotorAppliedVoltage = angleAppliedVoltage;
+//        inputs.angleMotorAppliedVoltage = angleAppliedVoltage;
 
-        inputs.elevatorMotorPositionRevolutions = Conversions.distanceToRevolutions(elevatorSimulation.getPositionMeters() - SimulationArmConstants.RETRACTED_ARM_LENGTH, ArmConstants.THEORETICAL_METERS_PER_REVOLUTIONS);
-        inputs.elevatorMotorVelocityRevolutionsPerSecond = Conversions.distanceToRevolutions(elevatorSimulation.getVelocityMetersPerSecond(), ArmConstants.THEORETICAL_METERS_PER_REVOLUTIONS);
+        inputs.elevatorMotorPositionRevolutions = (elevatorSimulation.getPositionMeters() - SimulationArmConstants.RETRACTED_ARM_LENGTH) / ArmConstants.THEORETICAL_METERS_PER_REVOLUTIONS;
+        inputs.elevatorMotorVelocityRevolutionsPerSecond = elevatorSimulation.getVelocityMetersPerSecond() / ArmConstants.THEORETICAL_METERS_PER_REVOLUTIONS;
         inputs.elevatorMotorCurrent = elevatorSimulation.getCurrentDrawAmps();
-        inputs.elevatorMotorAppliedVoltage = elevatorAppliedVoltage;
+//        inputs.elevatorMotorAppliedVoltage = elevatorAppliedVoltage;
 
+        lastInputs = inputs;
     }
 
     @Override
@@ -42,8 +44,7 @@ public class SimulationArmIO extends ArmIO {
 
     @Override
     protected void setTargetElevatorPosition(double position, double feedforward) {
-        position = position + SimulationArmConstants.RETRACTED_ARM_LENGTH;
-        final double pidOutput = SimulationArmConstants.ELEVATOR_PID_CONTROLLER.calculate(elevatorSimulation.getPositionMeters(), position);
+        final double pidOutput = SimulationArmConstants.ELEVATOR_PID_CONTROLLER.calculate(lastInputs.elevatorMotorPositionRevolutions, position);
         setElevatorSimulationVoltage(pidOutput + feedforward);
     }
 

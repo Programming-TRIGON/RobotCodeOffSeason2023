@@ -34,13 +34,13 @@ public class TrihardSwerveModuleIO extends SwerveModuleIO {
     @Override
     protected void updateInputs(SwerveModuleInputsAutoLogged inputs) {
         inputs.steerAngleDegrees = getAngleDegrees();
-        inputs.steerAppliedVoltage = Conversions.compensatedPowerToVoltage(steerDutyCycleSignal.refresh().getValue(), TrihardSwerveModuleConstants.VOLTAGE_COMPENSATION_SATURATION);
+//        inputs.steerAppliedOutput = steerDutyCycleSignal.refresh().getValue();
 
         inputs.drivePositionRevolutions = drivePositionSignal.refresh().getValue();
         inputs.driveDistanceMeters = driveMotorValueToDistance(inputs.drivePositionRevolutions);
         inputs.driveVelocityRevolutionsPerSecond = driveVelocitySignal.refresh().getValue();
         inputs.driveVelocityMetersPerSecond = driveMotorValueToDistance(inputs.driveVelocityRevolutionsPerSecond);
-        inputs.driveAppliedVoltage = Conversions.compensatedPowerToVoltage(driveDutyCycleSignal.refresh().getValue(), TrihardSwerveModuleConstants.VOLTAGE_COMPENSATION_SATURATION);
+//        inputs.driveAppliedVoltage = Conversions.compensatedPowerToVoltage(driveDutyCycleSignal.refresh().getValue(), TrihardSwerveModuleConstants.VOLTAGE_COMPENSATION_SATURATION);
     }
 
     @Override

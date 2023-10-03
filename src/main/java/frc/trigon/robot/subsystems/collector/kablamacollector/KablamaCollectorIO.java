@@ -9,8 +9,8 @@ public class KablamaCollectorIO extends CollectorIO {
 
     @Override
     protected void updateInputs(CollectorInputsAutoLogged inputs) {
-        inputs.statorCurrent = motor.getStatorCurrent();
-        inputs.appliedVoltage = motor.getMotorOutputVoltage();
+        inputs.current = motor.getSupplyCurrent();
+//        inputs.appliedVoltage = motor.getMotorOutputVoltage();
         inputs.power = motor.getMotorOutputPercent() / 100;
     }
 

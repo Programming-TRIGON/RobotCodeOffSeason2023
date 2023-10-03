@@ -8,6 +8,9 @@ public class SwerveIO {
     protected static class SwerveInputs {
         public double gyroYawDegrees = 0;
         public double gyroPitchDegrees = 0;
+        public double gyroRollDegrees = 0;
+        public double gyroPitchVelocity = 0;
+        public double gyroRollVelocity = 0;
         public double accelerationX = 0;
         public double accelerationY = 0;
         public double accelerationZ = 0;

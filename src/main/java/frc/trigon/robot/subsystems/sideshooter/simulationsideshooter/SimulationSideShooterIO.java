@@ -22,11 +22,11 @@ public class SimulationSideShooterIO extends SideShooterIO {
         inputs.angleMotorPositionDegrees = Units.radiansToDegrees(angleMotorSimulation.getAngleRads());
         inputs.angleMotorVelocityDegreesPerSecond = Units.radiansToDegrees(angleMotorSimulation.getVelocityRadPerSec());
         inputs.angleMotorCurrent = angleMotorSimulation.getCurrentDrawAmps();
-        inputs.angleMotorAppliedVoltage = angleMotorInputVoltage;
+//        inputs.angleMotorAppliedVoltage = angleMotorInputVoltage;
 
         inputs.shootingMotorCurrent = shootingMotorSimulation.getCurrentDrawAmps();
         inputs.shootingMotorAppliedVoltage = shootingMotorInputVoltage;
-        inputs.shootingMotorPower = inputs.shootingMotorAppliedVoltage / SimulationSideShooterConstants.MAX_VOLTAGE;
+//        inputs.shootingMotorPower = inputs.shootingMotorAppliedVoltage / SimulationSideShooterConstants.MAX_VOLTAGE;
     }
 
     @Override

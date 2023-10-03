@@ -6,12 +6,14 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.trigon.robot.constants.RobotConstants;
 import frc.trigon.robot.subsystems.collector.kablamacollector.KablamaCollectorIO;
 import frc.trigon.robot.subsystems.collector.simulationcollector.SimulationCollectorIO;
+import frc.trigon.robot.utilities.CurrentWatcher;
 import org.littletonrobotics.junction.Logger;
 
 public class Collector extends SubsystemBase {
     private final static Collector INSTANCE = new Collector();
     private final CollectorIO collectorIO;
     private final CollectorInputsAutoLogged collectorInputs = new CollectorInputsAutoLogged();
+    private final Logger logger = Logger.getInstance();
 
     public static Collector getInstance() {
         return INSTANCE;
@@ -19,13 +21,18 @@ public class Collector extends SubsystemBase {
 
     private Collector() {
         collectorIO = generateIO();
+        new CurrentWatcher(
+                () -> collectorInputs.current,
+                10,
+                0.2,
+                collectorIO::stop
+        );
     }
 
     @Override
     public void periodic() {
         collectorIO.updateInputs(collectorInputs);
-        Logger.getInstance().processInputs("Collector", collectorInputs);
-        Logger.getInstance().recordOutput("Collector/currentCommand", getCurrentCommand() == null ? "null" : getCurrentCommand().getName());
+        logger.processInputs("Collector", collectorInputs);
     }
 
     /**

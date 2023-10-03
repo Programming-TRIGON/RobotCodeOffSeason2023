@@ -1,4 +1,14 @@
 {
+  "HALProvider": {
+    "Addressable LEDs": {
+      "0": {
+        "columns": 72
+      },
+      "window": {
+        "visible": true
+      }
+    }
+  },
   "NTProvider": {
     "types": {
       "/AdvantageKit/RealOutputs/Arm/ArmMechanism": "Mechanism2d",
@@ -22,6 +32,16 @@
           "visible": true
         }
       },
+      "/AdvantageKit/RealOutputs/Roller/RollerMechanism": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/AdvantageKit/RealOutputs/SideShooter/SideShooterMechanism": {
+        "window": {
+          "visible": true
+        }
+      },
       "/SmartDashboard/autoChooser": {
         "window": {
           "visible": true
@@ -35,8 +55,20 @@
     }
   },
   "NetworkTables": {
+    "Persistent Values": {
+      "open": false
+    },
     "transitory": {
       "AdvantageKit": {
+        "RealOutputs": {
+          "Arm": {
+            "open": true
+          },
+          "open": true
+        },
+        "SideShooter": {
+          "open": true
+        },
         "Swerve": {
           "FRONT_LEFT": {
             "open": true
@@ -44,6 +76,21 @@
           "open": true
         },
         "open": true
+      },
+      "SmartDashboard": {
+        "open": true
+      }
+    }
+  },
+  "Plot": {
+    "Plot <0>": {
+      "plots": [
+        {
+          "height": 332
+        }
+      ],
+      "window": {
+        "visible": false
       }
     }
   }

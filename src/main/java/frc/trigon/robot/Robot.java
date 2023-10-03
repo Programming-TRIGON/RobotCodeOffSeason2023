@@ -6,12 +6,14 @@
 package frc.trigon.robot;
 
 import com.pathplanner.lib.server.PathPlannerServer;
-import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.trigon.robot.constants.BuildConstants;
+import frc.trigon.robot.constants.CommandsConstants;
 import frc.trigon.robot.constants.RobotConstants;
+import frc.trigon.robot.subsystems.arm.Arm;
+import frc.trigon.robot.subsystems.leds.Leds;
+import frc.trigon.robot.subsystems.sideshooter.SideShooter;
 import frc.trigon.robot.subsystems.swerve.SwerveCommands;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
@@ -23,6 +25,7 @@ import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 public class Robot extends LoggedRobot {
     public static final boolean IS_REAL = Robot.isReal();
     private final Logger logger = Logger.getInstance();
+    private final CommandScheduler commandScheduler = CommandScheduler.getInstance();
     private Command autonomousCommand;
     private RobotContainer robotContainer;
 
@@ -31,32 +34,13 @@ public class Robot extends LoggedRobot {
         configLogger();
         recordBuild();
         robotContainer = new RobotContainer();
-        DriverStation.silenceJoystickConnectionWarning(true);
 
         PathPlannerServer.startServer(5811);
     }
 
-//    DigitalInput
-//            zero = new DigitalInput(0),
-//            one = new DigitalInput(1),
-//            two = new DigitalInput(2),
-//            three = new DigitalInput(3),
-//            four = new DigitalInput(4),
-////            five = new DigitalInput(5),
-//            six = new DigitalInput(6),
-//            seven = new DigitalInput(7);
-
     @Override
     public void robotPeriodic() {
-        CommandScheduler.getInstance().run();
-//        Logger.getInstance().recordOutput("zero", zero.get());
-//        Logger.getInstance().recordOutput("one", one.get());
-//        Logger.getInstance().recordOutput("two", two.get());
-//        Logger.getInstance().recordOutput("three", three.get());
-//        Logger.getInstance().recordOutput("four", four.get());
-////        Logger.getInstance().recordOutput("five", five.get());
-//        Logger.getInstance().recordOutput("six", six.get());
-//        Logger.getInstance().recordOutput("seven", seven.get());
+        commandScheduler.run();
     }
 
     @Override
@@ -82,6 +66,10 @@ public class Robot extends LoggedRobot {
 
     @Override
     public void teleopInit() {
+        Arm.getInstance().setNeutralMode(true);
+        SideShooter.getInstance().setNeutralMode(true);
+        CommandsConstants.STATIC_WHITE_COLOR_COMMAND.cancel();
+
         if (autonomousCommand != null)
             autonomousCommand.cancel();
     }

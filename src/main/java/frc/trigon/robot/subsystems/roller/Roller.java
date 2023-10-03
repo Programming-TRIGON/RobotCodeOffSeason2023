@@ -5,20 +5,21 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.*;
+import frc.trigon.robot.Robot;
+import frc.trigon.robot.RobotContainer;
 import frc.trigon.robot.commands.Commands;
 import frc.trigon.robot.constants.RobotConstants;
+import frc.trigon.robot.subsystems.arm.ArmConstants;
 import frc.trigon.robot.subsystems.roller.kablamaroller.KablamaRollerIO;
 import frc.trigon.robot.subsystems.roller.simulationroller.SimulationRollerIO;
-import frc.trigon.robot.utilities.CurrentWatcher;
 import org.littletonrobotics.junction.Logger;
 
 public class Roller extends SubsystemBase {
-    // TODO: rework all the logic here
     private final static Roller INSTANCE = new Roller();
     private final RollerIO rollerIO;
     private final RollerInputsAutoLogged rollerInputs = new RollerInputsAutoLogged();
+    private final Logger logger = Logger.getInstance();
     private boolean isTargetStateClosed = false;
-    private boolean isClosed = false;
 
     public static Roller getInstance() {
         return INSTANCE;
@@ -31,19 +32,8 @@ public class Roller extends SubsystemBase {
     @Override
     public void periodic() {
         rollerIO.updateInputs(rollerInputs);
-        Logger.getInstance().processInputs("Roller", rollerInputs);
+        logger.processInputs("Roller", rollerInputs);
         updateMechanism();
-        // TODO: make this readability
-        new CurrentWatcher(
-                () -> rollerInputs.angleMotorCurrent,
-                20,
-                0.2,
-                () -> {
-//                    isClosed = isTargetStateClosed;
-//                    System.out.println("closed");
-//                    rollerIO.stopAngleMotor();
-                }
-        );
     }
 
     /**
@@ -63,8 +53,9 @@ public class Roller extends SubsystemBase {
      */
     public CommandBase getFullCollectionCommand() {
         final SequentialCommandGroup fullCollectionCommand = new SequentialCommandGroup(
-                getOpenCommand().until(this::isOpen),
-                getStartCollectingCommand()
+                getWaitForArmCloseCommand(),
+                getOpenCommand().withTimeout(0.5).alongWith(getStartCollectingCommand())
+//                getOpenCommand().until(this::isOpen),
         );
 
         return Commands.withRequirements(fullCollectionCommand, this);
@@ -73,7 +64,7 @@ public class Roller extends SubsystemBase {
     /**
      * @return a command that applies the collection power
      */
-    public StartEndCommand getStartCollectingCommand() {
+    private StartEndCommand getStartCollectingCommand() {
         return new StartEndCommand(
                 this::startCollecting,
                 () -> {
@@ -85,20 +76,20 @@ public class Roller extends SubsystemBase {
     /**
      * @return a command that stops the collection motor
      */
-    public InstantCommand getStopCollectingCommand() {
+    private InstantCommand getStopCollectingCommand() {
         return new InstantCommand(rollerIO::stopCollectionMotor, this);
     }
 
     /**
      * @return a command that closes the roller
      */
-    public FunctionalCommand getCloseCommand() {
+    private FunctionalCommand getCloseCommand() {
         return new FunctionalCommand(
                 () -> {
                 },
                 this::close,
                 (interrupted) -> rollerIO.stopAngleMotor(),
-                this::isClosed,
+                () -> false,
                 this
         );
     }
@@ -106,13 +97,17 @@ public class Roller extends SubsystemBase {
     /**
      * @return a command that opens the roller
      */
-    public FunctionalCommand getOpenCommand() {
+    private FunctionalCommand getOpenCommand() {
         return new FunctionalCommand(
                 this::open,
                 this::open,
                 (interrupted) -> rollerIO.stopAngleMotor(),
-                this::isOpen
+                () -> false
         );
+    }
+
+    private CommandBase getWaitForArmCloseCommand() {
+        return new WaitUntilCommand(() -> RobotContainer.ARM.atState(ArmConstants.ArmState.DEFAULT));
     }
 
     private void startCollecting() {
@@ -121,7 +116,10 @@ public class Roller extends SubsystemBase {
 
     private void close() {
         isTargetStateClosed = true;
-        rollerIO.setTargetAnglePower(RollerConstants.CLOSING_POWER);
+        if (isClosed())
+            rollerIO.setTargetAnglePower(RollerConstants.STAYING_CLOSED_POWER);
+        else
+            rollerIO.setTargetAnglePower(RollerConstants.CLOSING_POWER);
     }
 
     private void open() {
@@ -130,21 +128,22 @@ public class Roller extends SubsystemBase {
     }
 
     public boolean isOpen() {
-//        return rollerInputs.angleMotorForwardLimitSwitchPressed;
-        return !isClosed;
+        return rollerInputs.angleMotorForwardLimitSwitchPressed;
     }
 
     public boolean isClosed() {
-        return isClosed;
+        return rollerInputs.angleMotorReverseLimitSwitchPressed;
     }
 
     private void updateMechanism() {
         RollerConstants.TARGET_ROLLER_LIGAMENT.setAngle(isTargetStateClosed ? 90 : 0);
         RollerConstants.ROLLER_LIGAMENT.setAngle(isClosed() ? 90 : 0);
 
-        Logger.getInstance().recordOutput("Roller/RollerMechanism", RollerConstants.ROLLER_MECHANISM);
-        Logger.getInstance().recordOutput("Roller/RollerPoses/rollerPose", getRollerPose());
-        Logger.getInstance().recordOutput("Roller/RollerPoses/targetRollerPose", getTargetRollerPose());
+        logger.recordOutput("Roller/RollerMechanism", RollerConstants.ROLLER_MECHANISM);
+        if (!Robot.IS_REAL) {
+            logger.recordOutput("Roller/RollerPoses/rollerPose", getRollerPose());
+            logger.recordOutput("Roller/RollerPoses/targetRollerPose", getTargetRollerPose());
+        }
     }
 
     private Pose3d getRollerPose() {

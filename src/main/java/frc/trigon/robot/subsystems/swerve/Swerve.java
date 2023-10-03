@@ -8,10 +8,12 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.trigon.robot.RobotContainer;
 import frc.trigon.robot.constants.FieldConstants;
 import frc.trigon.robot.constants.RobotConstants;
+import frc.trigon.robot.subsystems.poseestimator.PoseEstimator;
 import frc.trigon.robot.subsystems.swerve.kablamaswerve.KablamaSwerveConstants;
 import frc.trigon.robot.subsystems.swerve.kablamaswerve.KablamaSwerveIO;
 import frc.trigon.robot.subsystems.swerve.simulationswerve.SimulationSwerveConstants;
@@ -28,6 +30,9 @@ public class Swerve extends SubsystemBase {
     private final SwerveIO swerveIO;
     private final SwerveModuleIO[] modulesIO;
     private final SwerveConstants constants;
+    private final Logger logger = Logger.getInstance();
+    private final Notifier updateLastAngleNotifier = new Notifier(() -> lastAngle = RobotContainer.POSE_ESTIMATOR.getCurrentPose().getRotation());
+    Rotation2d lastAngle = new Rotation2d();
     Pose2d profiledTargetPose = null;
 
     public static Swerve getInstance() {
@@ -43,7 +48,7 @@ public class Swerve extends SubsystemBase {
     @Override
     public void periodic() {
         swerveIO.updateInputs(swerveInputs);
-        Logger.getInstance().processInputs("Swerve", swerveInputs);
+        logger.processInputs("Swerve", swerveInputs);
 
         for (SwerveModuleIO currentModule : modulesIO)
             currentModule.periodic();
@@ -103,13 +108,35 @@ public class Swerve extends SubsystemBase {
      */
     public void setHeading(Rotation2d heading) {
         swerveIO.setHeading(heading);
+        lastAngle = AllianceUtilities.isBlueAlliance() ? heading : heading.minus(Rotation2d.fromRotations(0.5));
     }
 
     /**
-     * @return the pitch of the swerve, in degrees
+     * @return the pitch of the swerve
      */
-    public double getPitch() {
-        return swerveInputs.gyroPitchDegrees;
+    public Rotation2d getPitch() {
+        return Rotation2d.fromDegrees(swerveInputs.gyroPitchDegrees);
+    }
+
+    /**
+     * @return the roll of the swerve
+     */
+    public Rotation2d getRoll() {
+        return Rotation2d.fromDegrees(swerveInputs.gyroRollDegrees);
+    }
+
+    /**
+     * @return the pitch velocity of the swerve
+     */
+    public Rotation2d getPitchVelocity() {
+        return Rotation2d.fromDegrees(swerveInputs.gyroPitchVelocity);
+    }
+
+    /**
+     * @return the roll velocity of the swerve
+     */
+    public Rotation2d getRollVelocity() {
+        return Rotation2d.fromDegrees(swerveInputs.gyroRollVelocity);
     }
 
     /**
@@ -158,17 +185,17 @@ public class Swerve extends SubsystemBase {
                 right = new SwerveModuleState(0, Rotation2d.fromDegrees(-45)),
                 left = new SwerveModuleState(0, Rotation2d.fromDegrees(45));
 
-        modulesIO[0].setTargetState(right);
-        modulesIO[1].setTargetState(left);
-        modulesIO[2].setTargetState(left);
-        modulesIO[3].setTargetState(right);
+        modulesIO[0].setTargetState(left);
+        modulesIO[1].setTargetState(right);
+        modulesIO[2].setTargetState(right);
+        modulesIO[3].setTargetState(left);
     }
 
     /**
      * Drives the x-axis of the swerve with the given power, relative to the field's frame of reference.
      * This will also lock the y-axis and angle.
      *
-     * @param xPower     the target x power
+     * @param xPower     the x power
      * @param yAxisLock  the y position to lock the robot to
      * @param angleLock  the angle to lock the robot to
      * @param rateLimitX whether to rate limit the x-axis (no need for y-axis since it's locked)
@@ -177,18 +204,18 @@ public class Swerve extends SubsystemBase {
         yAxisLock = AllianceUtilities.isBlueAlliance() ? yAxisLock : FieldConstants.FIELD_WIDTH_METERS - yAxisLock;
         angleLock = AllianceUtilities.isBlueAlliance() ? angleLock : angleLock.unaryMinus();
 
-        constants.getRotationController().setGoal(angleLock.getDegrees());
+        constants.getProfiledRotationController().setGoal(angleLock.getDegrees());
         constants.getProfiledYAxisController().setGoal(yAxisLock);
 
         final Pose2d currentPose = RobotContainer.POSE_ESTIMATOR.getCurrentPose();
         final double currentYPosition = currentPose.getY();
         final Rotation2d currentAngle = currentPose.getRotation();
         final double yOutput = constants.getProfiledYAxisController().calculate(currentYPosition);
-        final double thetaOutput = constants.getRotationController().calculate(currentAngle.getDegrees());
+        final double thetaOutput = constants.getProfiledRotationController().calculate(currentAngle.getDegrees());
         profiledTargetPose = new Pose2d(
                 currentPose.getX(),
                 constants.getProfiledYAxisController().getSetpoint().position,
-                Rotation2d.fromDegrees(constants.getRotationController().getSetpoint().position)
+                Rotation2d.fromDegrees(constants.getProfiledRotationController().getSetpoint().position)
         );
 
         fieldRelativeDrive(
@@ -206,9 +233,9 @@ public class Swerve extends SubsystemBase {
     /**
      * Drives the swerve with the given powers, relative to the robot's frame of reference.
      *
-     * @param xPower     the target x power
-     * @param yPower     the target y power
-     * @param thetaPower the target theta power
+     * @param xPower     the x power
+     * @param yPower     the y power
+     * @param thetaPower the theta power
      * @param rateLimit  whether the swerve should be rate limited
      */
     void selfRelativeDrive(double xPower, double yPower, double thetaPower, boolean rateLimit) {
@@ -243,9 +270,9 @@ public class Swerve extends SubsystemBase {
     /**
      * Drives the swerve with the given powers, relative to the field's frame of reference.
      *
-     * @param xPower     the target x power
-     * @param yPower     the target y power
-     * @param thetaPower the target theta power
+     * @param xPower     the x power
+     * @param yPower     the y power
+     * @param thetaPower the theta power
      * @param rateLimit  whether the swerve should be rate limited
      */
     void fieldRelativeDrive(double xPower, double yPower, double thetaPower, boolean rateLimit) {
@@ -261,9 +288,9 @@ public class Swerve extends SubsystemBase {
     /**
      * Drives the swerve with the given powers, relative to the field's frame of reference.
      *
-     * @param xPower     the target x power
-     * @param yPower     the target y power
-     * @param thetaPower the target theta power
+     * @param xPower     the x power
+     * @param yPower     the y power
+     * @param thetaPower the theta power
      * @param rateLimit  whether the swerve should be rate limited
      */
     void fieldRelativeDrive(double xPower, double yPower, double thetaPower, boolean rateLimit, Rotation2d robotAngle) {
@@ -279,27 +306,39 @@ public class Swerve extends SubsystemBase {
     /**
      * Drives the swerve with the given powers and a target angle, relative to the field's frame of reference.
      *
-     * @param xPower    the target x power
-     * @param yPower    the target y power
+     * @param xPower    the x power
+     * @param yPower    the y power
      * @param angle     the target angle
      * @param rateLimit whether the swerve should be rate limited
      */
-    void fieldRelativeDrive(double xPower, double yPower, Rotation2d angle, boolean rateLimit) {
-        constants.getRotationController().setGoal(angle.getDegrees());
+    void fieldRelativeDrive(double xPower, double yPower, Rotation2d angle, boolean rateLimit, Rotation2d robotAngle) {
+        constants.getProfiledRotationController().setGoal(angle.getDegrees());
         final Rotation2d currentAngle = RobotContainer.POSE_ESTIMATOR.getCurrentPose().getRotation();
         profiledTargetPose = new Pose2d(
                 RobotContainer.POSE_ESTIMATOR.getCurrentPose().getTranslation(),
-                Rotation2d.fromDegrees(constants.getRotationController().getSetpoint().position)
+                Rotation2d.fromDegrees(constants.getProfiledRotationController().getSetpoint().position)
         );
         fieldRelativeDrive(
                 getDriveTranslation(xPower, yPower),
                 Rotation2d.fromDegrees(
-                        constants.getRotationController().calculate(currentAngle.getDegrees())
+                        constants.getProfiledRotationController().calculate(currentAngle.getDegrees())
                 ),
                 rateLimit,
                 rateLimit,
-                RobotContainer.POSE_ESTIMATOR.getCurrentPose().getRotation()
+                robotAngle
         );
+    }
+
+    /**
+     * Drives the swerve with the given powers and a target angle, relative to the field's frame of reference.
+     *
+     * @param xPower    the x power
+     * @param yPower    the y power
+     * @param angle     the target angle
+     * @param rateLimit whether the swerve should be rate limited
+     */
+    void fieldRelativeDrive(double xPower, double yPower, Rotation2d angle, boolean rateLimit) {
+        fieldRelativeDrive(xPower, yPower, angle, rateLimit, RobotContainer.POSE_ESTIMATOR.getCurrentPose().getRotation());
     }
 
     /**
@@ -327,7 +366,7 @@ public class Swerve extends SubsystemBase {
      * Resets the rotation controller of the swerve.
      */
     void resetRotationController() {
-        constants.getRotationController().reset(RobotContainer.POSE_ESTIMATOR.getCurrentPose().getRotation().getDegrees());
+        constants.getProfiledRotationController().reset(RobotContainer.POSE_ESTIMATOR.getCurrentPose().getRotation().getDegrees());
     }
 
     /**
@@ -381,7 +420,15 @@ public class Swerve extends SubsystemBase {
     }
 
     private Rotation2d getDriveRotation(double rotPower) {
-        return new Rotation2d(rotPower * constants.getMaxRotationalSpeedRadiansPerSecond());
+        if (rotPower == 0) {
+            if (lastAngle == null)
+                return new Rotation2d();
+            return Rotation2d.fromDegrees(constants.getRotationController().calculate(RobotContainer.POSE_ESTIMATOR.getCurrentPose().getRotation().getDegrees(), lastAngle.getDegrees()));
+        }
+
+        updateLastAngleNotifier.startSingle(0.3);
+        lastAngle = null;
+        return new Rotation2d(rotPower * rotPower * Math.signum(rotPower) * constants.getMaxRotationalSpeedRadiansPerSecond());
     }
 
     private Translation2d getDriveTranslation(double x, double y) {
@@ -392,31 +439,34 @@ public class Swerve extends SubsystemBase {
     }
 
     private Translation2d rateLimit(Translation2d toLimit, boolean rateLimitX, boolean rateLimitY) {
+        final double x = rateLimitX ? constants.getXSlewRateLimiter().calculate(toLimit.getX()) : toLimit.getX();
+        final double y = rateLimitY ? constants.getYSlewRateLimiter().calculate(toLimit.getY()) : toLimit.getY();
         return new Translation2d(
-                rateLimitX ? constants.getXSlewRateLimiter().calculate(toLimit.getX()) : toLimit.getX(),
-                rateLimitY ? constants.getYSlewRateLimiter().calculate(toLimit.getY()) : toLimit.getY()
+                toLimit.getX() == 0 ? x : toLimit.getX(),
+                toLimit.getY() == 0 ? y : toLimit.getY()
         );
     }
 
     private void updateNetworkTables() {
-        Logger.getInstance().recordOutput("Swerve/Velocity/rot", getCurrentVelocity().omegaRadiansPerSecond);
-        Logger.getInstance().recordOutput("Swerve/Velocity/x", getCurrentVelocity().vxMetersPerSecond);
-        Logger.getInstance().recordOutput("Swerve/Velocity/y", getCurrentVelocity().vyMetersPerSecond);
-        Logger.getInstance().recordOutput("Swerve/currentCommand", getCurrentCommand() == null ? "null" : getCurrentCommand().getName());
-        Logger.getInstance().recordOutput("Swerve/currentStates", getModuleStates());
-        Logger.getInstance().recordOutput("Swerve/targetStates", getTargetStates());
+        logger.recordOutput("Swerve/Velocity/rot", getCurrentVelocity().omegaRadiansPerSecond);
+        logger.recordOutput("Swerve/Velocity/x", getCurrentVelocity().vxMetersPerSecond);
+        logger.recordOutput("Swerve/Velocity/y", getCurrentVelocity().vyMetersPerSecond);
+        logger.recordOutput("Swerve/currentCommand", getCurrentCommand() == null ? "null" : getCurrentCommand().getName());
+        logger.recordOutput("Swerve/currentStates", getModuleStates());
+        logger.recordOutput("Swerve/targetStates", getTargetStates());
 
         if (RobotContainer.POSE_ESTIMATOR == null)
             return;
         if (profiledTargetPose == null) {
-            Logger.getInstance().recordOutput("targetPose", RobotContainer.POSE_ESTIMATOR.getCurrentPose());
+            logger.recordOutput("targetPose", RobotContainer.POSE_ESTIMATOR.getCurrentPose());
         } else {
-            Logger.getInstance().recordOutput("targetPose", profiledTargetPose);
+            logger.recordOutput("targetPose", profiledTargetPose);
             profiledTargetPose = null;
         }
     }
 
     private void selfRelativeDrive(ChassisSpeeds chassisSpeeds) {
+        logger.recordOutput("isStill", isStill(chassisSpeeds));
         if (isStill(chassisSpeeds)) {
             stop();
             return;
@@ -459,10 +509,10 @@ public class Swerve extends SubsystemBase {
 
     private SwerveConstants generateConstants() {
         switch (RobotConstants.ROBOT_TYPE) {
-//            case KABLAMA:
-//                return new TrihardSwerveConstants();
-            case TRIHARD:
+            case KABLAMA:
                 return new KablamaSwerveConstants();
+            case TRIHARD:
+                return new TrihardSwerveConstants();
             default:
                 return new SimulationSwerveConstants();
         }
@@ -486,8 +536,8 @@ public class Swerve extends SubsystemBase {
             return new SwerveIO();
 
         switch (RobotConstants.ROBOT_TYPE) {
-//            case KABLAMA:
-//                return new KablamaSwerveIO();
+            case KABLAMA:
+                return new KablamaSwerveIO();
             case TRIHARD:
                 return new TrihardSwerveIO();
             default:

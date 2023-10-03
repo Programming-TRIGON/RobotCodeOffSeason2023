@@ -4,6 +4,7 @@ import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.hardware.Pigeon2;
 import com.pathplanner.lib.auto.PIDConstants;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Rotation3d;
@@ -56,16 +57,20 @@ public class TrihardSwerveConstants extends SwerveConstants {
     );
     private static final TrapezoidProfile.Constraints
             ROTATION_CONSTRAINTS = new TrapezoidProfile.Constraints(
-                    720 / 4.0,
-                    720 / 4.0
+                    720,
+                    720
             ),
             TRANSLATION_CONSTRAINTS = new TrapezoidProfile.Constraints(
                     1.5,
                     2
             );
 
+    private static final PIDController ROTATION_PID_CONTROLLER = new PIDController(
+            5, 0, 0
+    );
+
     private static final ProfiledPIDController
-            ROTATION_CONTROLLER = new ProfiledPIDController(
+            PROFILED_PID_CONTROLLER = new ProfiledPIDController(
                     ROTATION_PID_CONSTANTS.kP,
                     ROTATION_PID_CONSTANTS.kI,
                     ROTATION_PID_CONSTANTS.kD,
@@ -86,8 +91,8 @@ public class TrihardSwerveConstants extends SwerveConstants {
     static StatusSignal<Double> YAW_SIGNAL, PITCH_SIGNAL, X_ACCELERATION_SIGNAL, Y_ACCELERATION_SIGNAL, Z_ACCELERATION_SIGNAL;
 
     static {
-        ROTATION_CONTROLLER.enableContinuousInput(-180, 180);
-        ROTATION_CONTROLLER.setIntegratorRange(-30, 30);
+        PROFILED_PID_CONTROLLER.enableContinuousInput(-180, 180);
+        PROFILED_PID_CONTROLLER.setIntegratorRange(-30, 30);
 
         if (!RobotConstants.IS_REPLAY)
             configureGyro();
@@ -166,13 +171,18 @@ public class TrihardSwerveConstants extends SwerveConstants {
     }
 
     @Override
+    protected PIDController getRotationController() {
+        return ROTATION_PID_CONTROLLER;
+    }
+
+    @Override
     protected ProfiledPIDController getProfiledYAxisController() {
         return PROFILED_Y_AXIS_CONTROLLER;
     }
 
     @Override
-    public ProfiledPIDController getRotationController() {
-        return ROTATION_CONTROLLER;
+    public ProfiledPIDController getProfiledRotationController() {
+        return PROFILED_PID_CONTROLLER;
     }
 
     @Override

@@ -24,12 +24,14 @@ import java.util.function.Supplier;
 public class SwerveCommands {
     private static final Swerve SWERVE = Swerve.getInstance();
     private static final PoseEstimator POSE_ESTIMATOR = RobotContainer.POSE_ESTIMATOR;
+    private static Rotation2d START_ANGLE = new Rotation2d();
 
     /**
      * @return a command that brakes the swerve modules and then coasts them, runs when disabled
      */
-    public static WrapperCommand getBrakeAndCoastCommand() {
-        return new InstantCommand(() -> SWERVE.setBrake(true))
+    public static CommandBase getBrakeAndCoastCommand() {
+        return new WaitCommand(0.2)
+                .andThen(new InstantCommand(() -> SWERVE.setBrake(true)))
                 .andThen(new WaitCommand(SWERVE.getConstants().getBrakeTimeSeconds()))
                 .andThen(new InstantCommand(() -> SWERVE.setBrake(false)))
                 .ignoringDisable(true);
@@ -68,9 +70,7 @@ public class SwerveCommands {
      * @return the command
      */
     public static SequentialCommandGroup getFollowPathGroupCommand(List<PathPlannerTrajectory> pathGroup, Map<String, Command> eventMap, boolean useAllianceColor) {
-        final Command initializeDriveAndShowTargetCommand = new InstantCommand(() -> {
-            initializeDrive(true);
-        });
+        final Command initializeDriveAndShowTargetCommand = new InstantCommand(() -> initializeDrive(true));
         final SwerveAutoBuilder swerveAutoBuilder = new SwerveAutoBuilder(
                 POSE_ESTIMATOR::getCurrentPose,
                 (pose) -> {
@@ -364,17 +364,14 @@ public class SwerveCommands {
         );
     }
 
-    private static Pose2d getHolonomicPose(PathPlannerTrajectory.PathPlannerState state) {
-        return new Pose2d(state.poseMeters.getTranslation(), state.holonomicRotation);
-    }
-
     private static void initializeDrive(boolean closedLoop) {
         SWERVE.setBrake(true);
         SWERVE.setClosedLoop(closedLoop);
+        SWERVE.lastAngle = POSE_ESTIMATOR.getCurrentPose().getRotation();
     }
 
     private static void stopDrive() {
-        SWERVE.stop();
-        SWERVE.setBrake(false);
+//        SWERVE.stop();
+//        SWERVE.setBrake(false);
     }
 }

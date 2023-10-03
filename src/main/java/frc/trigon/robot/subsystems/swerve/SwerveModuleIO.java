@@ -12,6 +12,7 @@ public class SwerveModuleIO {
     private boolean driveMotorClosedLoop = false;
     private double targetVelocity;
     private Rotation2d targetAngle = new Rotation2d();
+    private final Logger logger = Logger.getInstance();
 
     public SwerveModuleIO(String name) {
         this.name = name;
@@ -31,7 +32,7 @@ public class SwerveModuleIO {
      */
     public void periodic() {
         updateInputs(swerveModuleInputs);
-        Logger.getInstance().processInputs(getLoggingPath(), swerveModuleInputs);
+        logger.processInputs(getLoggingPath(), swerveModuleInputs);
 
         updateNetworkTables();
     }
@@ -75,8 +76,8 @@ public class SwerveModuleIO {
     }
 
     private void updateNetworkTables() {
-        Logger.getInstance().recordOutput(getLoggingPath() + "/targetState", getTargetState());
-        Logger.getInstance().recordOutput(getLoggingPath() + "/currentState", getCurrentState());
+        logger.recordOutput(getLoggingPath() + "/targetState", getTargetState());
+        logger.recordOutput(getLoggingPath() + "/currentState", getCurrentState());
     }
 
     /**
@@ -148,11 +149,13 @@ public class SwerveModuleIO {
     @AutoLog
     public static class SwerveModuleInputs {
         public double steerAngleDegrees = 0;
-        public double steerAppliedVoltage = 0;
+        public double steerCurrent = 0;
+//        public double steerAppliedOutput = 0;
+
         public double driveVelocityRevolutionsPerSecond = 0;
         public double driveVelocityMetersPerSecond = 0;
         public double driveDistanceMeters = 0;
         public double drivePositionRevolutions = 0;
-        public double driveAppliedVoltage = 0;
+//        public double driveAppliedVoltage = 0;
     }
 }

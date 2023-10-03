@@ -6,7 +6,8 @@ public class CollectorConstants {
         COLLECT(1),
         FAST_COLLECT(1),
         EJECT(-1),
-        FAST_EJECT(-1);
+        FAST_EJECT(-1),
+        HOLD(0.2);
 
         CollectorState(double power) {
             this.power = power;

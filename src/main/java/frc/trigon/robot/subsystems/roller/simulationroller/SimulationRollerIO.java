@@ -19,20 +19,20 @@ public class SimulationRollerIO extends RollerIO {
         collectionMotorSimulation.update(RobotConstants.PERIODIC_TIME_SECONDS);
 
         inputs.angleMotorCurrent = angleMotorSimulation.getCurrentDrawAmps();
-        inputs.angleMotorAppliedVoltage = angleMotorInputVoltage;
+//        inputs.angleMotorAppliedVoltage = angleMotorInputVoltage;
         inputs.angleMotorPower = Conversions.voltageToCompensatedPower(angleMotorInputVoltage, SimulationRollerConstants.VOLTAGE_COMPENSATION_SATURATION);
         inputs.angleMotorForwardLimitSwitchPressed = angleMotorSimulation.hasHitUpperLimit();
-        inputs.angleMotorBackwardLimitSwitchPressed = angleMotorSimulation.hasHitLowerLimit();
+        inputs.angleMotorReverseLimitSwitchPressed = angleMotorSimulation.hasHitLowerLimit();
 
         inputs.collectionMotorCurrent = collectionMotorSimulation.getCurrentDrawAmps();
-        inputs.collectionMotorAppliedVoltage = collectionMotorInputVoltage;
+//        inputs.collectionMotorAppliedVoltage = collectionMotorInputVoltage;
         inputs.collectionMotorPower = Conversions.voltageToCompensatedPower(collectionMotorInputVoltage, SimulationRollerConstants.VOLTAGE_COMPENSATION_SATURATION);
     }
 
     @Override
     protected void setTargetAnglePower(double power) {
         final double voltage = Conversions.compensatedPowerToVoltage(power, SimulationRollerConstants.VOLTAGE_COMPENSATION_SATURATION);
-        setAngleMotorSimulationVoltage(voltage);
+        setAngleMotorSimulationVoltage(-voltage);
     }
 
     @Override

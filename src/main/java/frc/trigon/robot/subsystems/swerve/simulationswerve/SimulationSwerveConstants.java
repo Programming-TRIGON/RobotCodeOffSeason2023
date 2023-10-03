@@ -1,6 +1,7 @@
 package frc.trigon.robot.subsystems.swerve.simulationswerve;
 
 import com.pathplanner.lib.auto.PIDConstants;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -51,8 +52,12 @@ public class SimulationSwerveConstants extends SwerveConstants {
                     3
             );
 
+    private static final PIDController ROTATION_PID_CONTROLLER = new PIDController(
+            12, 0, 0
+    );
+
     private static final ProfiledPIDController
-            ROTATION_CONTROLLER = new ProfiledPIDController(
+            PROFILED_PID_CONTROLLER = new ProfiledPIDController(
                     ROTATION_PID_CONSTANTS.kP,
                     ROTATION_PID_CONSTANTS.kI,
                     ROTATION_PID_CONSTANTS.kD,
@@ -71,8 +76,8 @@ public class SimulationSwerveConstants extends SwerveConstants {
             ROTATION_VELOCITY_TOLERANCE = 0.05;
 
     static {
-        ROTATION_CONTROLLER.enableContinuousInput(-180, 180);
-        ROTATION_CONTROLLER.setIntegratorRange(-30, 30);
+        PROFILED_PID_CONTROLLER.enableContinuousInput(-180, 180);
+        PROFILED_PID_CONTROLLER.setIntegratorRange(-30, 30);
     }
 
     @Override
@@ -126,13 +131,18 @@ public class SimulationSwerveConstants extends SwerveConstants {
     }
 
     @Override
+    protected PIDController getRotationController() {
+        return ROTATION_PID_CONTROLLER;
+    }
+
+    @Override
     protected ProfiledPIDController getProfiledYAxisController() {
         return PROFILED_Y_AXIS_CONTROLLER;
     }
 
     @Override
-    public ProfiledPIDController getRotationController() {
-        return ROTATION_CONTROLLER;
+    public ProfiledPIDController getProfiledRotationController() {
+        return PROFILED_PID_CONTROLLER;
     }
 
     @Override

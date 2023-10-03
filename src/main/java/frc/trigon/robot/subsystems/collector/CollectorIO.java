@@ -5,8 +5,8 @@ import org.littletonrobotics.junction.AutoLog;
 public class CollectorIO {
     @AutoLog
     public static class CollectorInputs {
-        public double statorCurrent = 0;
-        public double appliedVoltage = 0;
+        public double current = 0;
+//        public double appliedVoltage = 0;
         public double power = 0;
     }
 
